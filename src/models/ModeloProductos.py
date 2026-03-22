@@ -1,4 +1,4 @@
-from database.db_mysql import mysql
+from src.database.db_mysql import mysql
 
 class ModeloProducto:
     @classmethod
