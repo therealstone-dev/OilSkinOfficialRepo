@@ -1,29 +1,11 @@
-// No tocar hasta el refactor
 {
-  "devDependencies": {
-    "@tailwindcss/cli": "^4.2.2",
-    "tailwindcss": "^4.2.2"
-  },
-  "name": "oilskin---official-repo",
-  "version": "1.0.0",
-  "main": "index.js",
-  "dependencies": {
-    "detect-libc": "^2.1.2",
-    "enhanced-resolve": "^5.20.1",
-    "graceful-fs": "^4.2.11",
-    "jiti": "^2.6.1",
-    "lightningcss": "^1.32.0",
-    "lightningcss-win32-x64-msvc": "^1.32.0",
-    "magic-string": "^0.30.21",
-    "nanoid": "^3.3.11",
-    "picocolors": "^1.1.1",
-    "postcss": "^8.5.8",
-    "source-map-js": "^1.2.1",
-    "tapable": "^2.3.0"
-  },
   "scripts": {
-    "build": "tailwindcss -i ./src/static/src_css/input.css -o ./src/static/css/style.css",
-    "watch": "tailwindcss -i ./src/static/src_css/input.css -o ./src/static/css/style.css --watch"
+    "build": "tailwindcss -i ./src/static/src_css/input.css -o ./src/static/css/style.css --minify",
+    "watch": "tailwindcss -i ./src/static/src_css/input.css -o ./src/static/css/style.css --watch",
+    "dev": "npm run watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^4.2.2"
   },
   "repository": {
     "type": "git",

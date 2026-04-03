@@ -1,26 +1,8 @@
 from src.database.db_mysql import mysql
 
 class ModeloCategoria:
-    # Metodos especificos
     @classmethod
-    # proximo refactor usando id_categoria
-    def get_description_by_name(cls, category_name):
-        """
-        Busca la descripcion de una categoria especifica por su nombre
-        """
-        try:
-            cur = mysql.connection.cursor()
-            sql = "SELECT descripcion FROM categoria WHERE nombre = %s"
-            cur.execute(sql, (category_name,))
-            result = cur.fetchone()
-            cur.close()
-            return result['descripcion'] if result else "Sin descripción disponible."
-        except Exception as ex:
-            print(f"Error en ModeloCategoria: {ex}")
-            return None
-
-    @classmethod
-    # proximo a ser borrado alv
+    # Obtiene la descripcion de una categoria en base al id
     def get_description_by_id(cls, category_id):
         """
         Busca la descripcion de una categoria especifica por su ID
@@ -33,7 +15,7 @@ class ModeloCategoria:
             cur.close()
             return result['descripcion'] if result else "Sin descripción disponible."
         except Exception as ex:
-            print(f"❌ Error en ModeloCategoria: {ex}")
+            print(f"Error en ModeloCategoria: {ex}")
             return None
 
     @classmethod
@@ -54,15 +36,15 @@ class ModeloCategoria:
     @classmethod
     def get_all_categories(cls):
         """
-        Obtiene todas las categorias
+        Obtiene todas las categorias con id y nombre
         """
         try:
             cur = mysql.connection.cursor()
-            sql = "SELECT nombre FROM categoria"
+            sql = "SELECT id_categoria, nombre_categoria FROM categoria ORDER BY id_categoria"
             cur.execute(sql)
             result = cur.fetchall()
             cur.close()
-            return result
+            return result if result else []
         except Exception as ex:
-            print(f"Error en ModeloCategoria: {ex}")
-            return None
+            print(f"Error en get_all_categories: {ex}")
+            return []

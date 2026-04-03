@@ -4,6 +4,7 @@
 from flask import Blueprint, render_template
 from src.models.ModeloProductos import ModeloProducto
 from src.models.ModeloCategoria import ModeloCategoria
+from src.utils.nav_helper import get_nav_data
 
 # Blueprint para manejar las rutas
 main = Blueprint('product_blueprint', __name__)
@@ -12,15 +13,14 @@ main = Blueprint('product_blueprint', __name__)
 @main.route('/')
 def index():
     try:
-        return render_template('index.jinja')
-    # ↓ Esta mierda es lo peor que pude haber hecho ↓
+        return render_template('index.jinja',categorias=get_nav_data())
     except Exception as Error:
         return render_template('error_page.jinja', mensaje=f"Pagina No Encontrada, {Error}")
 
 @main.route('/sobre_nosotros')
 def about():
     try:
-        return render_template('sobre_nosotros.jinja')
+        return render_template('sobre_nosotros.jinja',categorias=get_nav_data())
     except Exception as Error:
         return render_template('error_page.jinja', mensaje=f"Pagina No Encontrada, {Error}")
 
@@ -41,6 +41,6 @@ def show_category(category_id):
         descripcion = ModeloCategoria.get_description_by_id(category_id)
         category_name = ModeloCategoria.get_name_by_id(category_id)
         
-        return render_template('category.jinja', productos=productos, descripcion=descripcion, category_name=category_name)
+        return render_template('category.jinja', productos=productos, descripcion=descripcion, category_name=category_name,categorias=get_nav_data())
     except Exception as ex:
         return render_template('error_page.jinja', mensaje=f"Error al cargar categoría: {ex}")    

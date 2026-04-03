@@ -31,14 +31,10 @@
                 <div id="dropdownMenu"
                     class="hidden group-hover:block absolute left-0 w-48 rounded-md shadow-lg bg-black border border-slate-700 z-[110]">
                     <div class="py-1">
-                        <a href="{{ url_for('product_blueprint.show_category', category_id=1) }}"
-                            class="block px-4 py-2 text-sm text-white hover:bg-slate-900">Computadores</a>
-                        <a href="{{ url_for('product_blueprint.show_category', category_id=2) }}"
-                            class="block px-4 py-2 text-sm text-white hover:bg-slate-900">Periféricos</a>
-                        <a href="{{ url_for('product_blueprint.show_category', category_id=3) }}"
-                            class="block px-4 py-2 text-sm text-white hover:bg-slate-900">Mobiliario</a>
-                        <a href="{{ url_for('product_blueprint.show_category', category_id=4) }}"
-                            class="block px-4 py-2 text-sm text-white hover:bg-slate-900">Audio</a>
+                        {% for categoria in categorias %}
+                        <a href="{{ url_for('product_blueprint.show_category', category_id=categoria.id_categoria) }}"
+                            class="block px-4 py-2 text-sm text-white hover:bg-slate-900">{{ categoria.nombre_categoria }}</a>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
@@ -59,12 +55,10 @@
         <a href="{{ url_for('product_blueprint.index') }}" class="text-lg border-b border-slate-800 pb-2">Inicio</a>
         <a href="{{ url_for('product_blueprint.about') }}" class="text-lg border-b border-slate-800 pb-2">Sobre Nosotros</a>
         <div class="flex flex-col gap-2">
-
             <span class="text-slate-400 text-sm uppercase tracking-widest">Categorías</span>
-            <a href="{{ url_for('product_blueprint.show_category', category_id=1) }}" class="pl-4">Computadores</a>
-            <a href="{{ url_for('product_blueprint.show_category', category_id=2) }}" class="pl-4">Periféricos</a>
-            <a href="{{ url_for('product_blueprint.show_category', category_id=3) }}" class="pl-4">Mobiliario</a>
-            <a href="{{ url_for('product_blueprint.show_category', category_id=4) }}" class="pl-4">Audio</a>
+            {% for categoria in categorias_menu %}
+            <a href="{{ url_for('product_blueprint.show_category', category_id=categoria.id_categoria) }}" class="pl-4">{{ categoria.nombre_categoria }}</a>
+            {% endfor %}
         </div>
         <div class="flex flex-col gap-3 mt-4">
             <a href="#" class="text-center bg-[#CEB06E] text-black py-2 rounded-xl font-bold">Inicia Sesión</a>
