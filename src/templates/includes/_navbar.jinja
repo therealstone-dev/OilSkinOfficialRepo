@@ -14,8 +14,8 @@
 
     <div class="hidden lg:flex flex-1 justify-center">
         <div class="flex flex-row gap-8 items-center text-white text-md font-medium">
-            <a href="{{ url_for('product_blueprint.index') }}" class="transition duration-300 ease-in-out hover:text-[#CEB06E]">Inicio</a>
-            <a href="{{ url_for('product_blueprint.about') }}"
+            <a href="{{ url_for('main_blueprint.index') }}" class="transition duration-300 ease-in-out hover:text-[#CEB06E]">Inicio</a>
+            <a href="{{ url_for('main_blueprint.about') }}"
                 class="whitespace-nowrap transition duration-300 ease-in-out hover:text-[#CEB06E]">Sobre
                 Nosotros</a>
 
@@ -32,7 +32,7 @@
                     class="hidden group-hover:block absolute left-0 w-48 rounded-md shadow-lg bg-black border border-slate-700 z-[110]">
                     <div class="py-1">
                         {% for categoria in categorias %}
-                        <a href="{{ url_for('product_blueprint.show_category', category_id=categoria.id_categoria) }}"
+                        <a href="{{ url_for('main_blueprint.show_category', category_id=categoria.id_categoria) }}"
                             class="block px-4 py-2 text-sm text-white hover:bg-slate-900">{{ categoria.nombre_categoria }}</a>
                         {% endfor %}
                     </div>
@@ -43,26 +43,26 @@
     </div>
 
     <div class="hidden lg:flex flex-1 justify-end gap-5 text-white text-md font-medium">
-        <a href="{{ url_for('product_blueprint.register') }}"
+        <a href="{{ url_for('main_blueprint.register') }}"
             class="border border-slate-600 px-4 py-2 rounded-2xl transition hover:text-[#CEB06E] hover:border-[#CEB06E]">Regístrate</a>
-        <a href="{{ url_for('product_blueprint.login') }}"
+        <a href="{{ url_for('main_blueprint.login') }}"
             class="border border-slate-600 px-4 py-2 rounded-2xl transition hover:text-[#CEB06E] hover:border-[#CEB06E]">Inicia
             Sesión</a>
     </div>
 
     <div id="mobileMenu"
         class="hidden absolute top-full left-0 w-full bg-black/95 flex-col p-6 gap-4 text-white lg:hidden border-t border-slate-800">
-        <a href="{{ url_for('product_blueprint.index') }}" class="text-lg border-b border-slate-800 pb-2">Inicio</a>
-        <a href="{{ url_for('product_blueprint.about') }}" class="text-lg border-b border-slate-800 pb-2">Sobre Nosotros</a>
+        <a href="{{ url_for('main_blueprint.index') }}" class="text-lg border-b border-slate-800 pb-2">Inicio</a>
+        <a href="{{ url_for('main_blueprint.about') }}" class="text-lg border-b border-slate-800 pb-2">Sobre Nosotros</a>
         <div class="flex flex-col gap-2">
             <span class="text-slate-400 text-sm uppercase tracking-widest">Categorías</span>
             {% for categoria in categorias_menu %}
-            <a href="{{ url_for('product_blueprint.show_category', category_id=categoria.id_categoria) }}" class="pl-4">{{ categoria.nombre_categoria }}</a>
+            <a href="{{ url_for('main_blueprint.show_category', category_id=categoria.id_categoria) }}" class="pl-4">{{ categoria.nombre_categoria }}</a>
             {% endfor %}
         </div>
         <div class="flex flex-col gap-3 mt-4">
-            <a href="{{ url_for('product_blueprint.login') }}" class="text-center bg-[#CEB06E] text-black py-2 rounded-xl font-bold">Inicia Sesión</a>
-            <a href="{{ url_for('product_blueprint.register') }}" class="text-center border border-slate-600 py-2 rounded-xl">Regístrate</a>
+            <a href="{{ url_for('main_blueprint.login') }}" class="text-center bg-[#CEB06E] text-black py-2 rounded-xl font-bold">Inicia Sesión</a>
+            <a href="{{ url_for('main_blueprint.register') }}" class="text-center border border-slate-600 py-2 rounded-xl">Regístrate</a>
         </div>
     </div>
 </nav>

@@ -7,7 +7,7 @@ from src.models.ModeloCategoria import ModeloCategoria
 from src.utils.nav_helper import get_nav_data
 
 # Blueprint para manejar las rutas
-main = Blueprint('product_blueprint', __name__)
+main = Blueprint('main_blueprint', __name__)
 
 @main.app_errorhandler(404)
 def handle_not_found(error):

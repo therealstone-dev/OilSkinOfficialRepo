@@ -52,7 +52,7 @@
                     <p class="mt-2 text-sm text-gray-400 italic line-clamp-2 h-10">{{ p.descripcion }}</p>
                     <div class="mt-4 flex items-center justify-between gap-3">
                         <span class="text-lg font-bold text-[#CEB06E]">${{ "%.2f"|format(p.precio) }}</span>
-                        <a href="{{ url_for('product_blueprint.get_product', id=p.id_producto) }}"
+                        <a href="{{ url_for('main_blueprint.get_product', id=p.id_producto) }}"
                            class="rounded-full bg-[#CEB06E] hover:bg-white px-4 py-2 text-sm font-bold text-black transition-all duration-200 hover:scale-110">
                             Añadir
                         </a>
