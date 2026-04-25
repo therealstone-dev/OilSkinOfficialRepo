@@ -32,7 +32,7 @@
                     class="hidden group-hover:block absolute left-0 w-48 rounded-md shadow-lg bg-black border border-slate-700 z-[110]">
                     <div class="py-1">
                         {% for categoria in categorias %}
-                        <a href="{{ url_for('main_blueprint.show_category', category_id=categoria.id_categoria) }}"
+                        <a href="{{ url_for('main_blueprint.show_category', category_name=categoria.nombre_categoria) }}"
                             class="block px-4 py-2 text-sm text-white hover:bg-slate-900">{{ categoria.nombre_categoria }}</a>
                         {% endfor %}
                     </div>
@@ -57,7 +57,7 @@
         <div class="flex flex-col gap-2">
             <span class="text-slate-400 text-sm uppercase tracking-widest">Categorías</span>
             {% for categoria in categorias_menu %}
-            <a href="{{ url_for('main_blueprint.show_category', category_id=categoria.id_categoria) }}" class="pl-4">{{ categoria.nombre_categoria }}</a>
+            <a href="{{ url_for('main_blueprint.show_category', category_name=categoria.nombre_categoria) }}" class="pl-4">{{ categoria.nombre_categoria }}</a>
             {% endfor %}
         </div>
         <div class="flex flex-col gap-3 mt-4">

@@ -37,11 +37,18 @@ def get_product(id):
         return render_template('detalle.jinja', producto=producto)
     return render_template('error_page.jinja', mensaje=f"Producto no Encontrado")
 
-# Lo mismo que arriba
-@main.route('/categoria/<int:category_id>')
-def show_category(category_id):
-    productos = ModeloProducto.get_by_category_id(category_id)
-    descripcion = ModeloCategoria.get_description_by_id(category_id)
-    category_name = ModeloCategoria.get_name_by_id(category_id)
+# Ruta de categoría por nombre
+@main.route('/categoria/<string:category_name>')
+def show_category(category_name):
+    categoria = ModeloCategoria.get_by_name(category_name)
     
-    return render_template('category.jinja', productos=productos, descripcion=descripcion, category_name=category_name,categorias=get_nav_data())    
+    if categoria:
+        productos = ModeloProducto.get_by_category_id(categoria['id_categoria'])
+        
+        return render_template('category.jinja', 
+                               productos=productos, 
+                               descripcion=categoria['descripcion'], 
+                               category_name=categoria['nombre_categoria'],
+                               categorias=get_nav_data())
+    else:
+        return render_template('error_page.jinja', mensaje="Categoría no encontrada")

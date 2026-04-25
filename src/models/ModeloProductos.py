@@ -38,7 +38,6 @@ class ModeloProducto:
             cur.execute(sql, (category_id,))
             productos = cur.fetchall()
             cur.close()
-            print(f"Productos encontrados para categoría {category_id}: {len(productos)}")
             return productos
         except Exception as ex:
             print(f"Error en get_by_category_id: {ex}")

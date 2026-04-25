@@ -48,3 +48,18 @@ class ModeloCategoria:
         except Exception as ex:
             print(f"Error en get_all_categories: {ex}")
             return []
+    @classmethod
+    def get_by_name(cls, category_name):
+        """
+        Obtiene todos los datos de una categoría buscando por su nombre
+        """
+        try:
+            cur = mysql.connection.cursor()
+            sql = "SELECT id_categoria, nombre_categoria, descripcion FROM categoria WHERE nombre_categoria = %s"
+            cur.execute(sql, (category_name,))
+            result = cur.fetchone()
+            cur.close()
+            return result
+        except Exception as ex:
+            print(f"Error en ModeloCategoria.get_by_name: {ex}")
+            return None
