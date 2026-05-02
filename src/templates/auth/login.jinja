@@ -5,9 +5,9 @@
 {% block content %}
 
 <main>
-        <div class="flex flex-row justify-center items-stretch p-[2.5rem]">
-            <div class="bg-slate-800/50 w-1/3 p-8 shadow-lg">
-                <h1 class="text-center text-white text-2xl mb-4">Iniciar Sesión</h1>
+        <div class="flex flex-col lg:flex-row justify-center items-stretch lg:p-[2.5rem] p-4">
+            <div class="bg-slate-800/50 lg:w-1/3 p-8 lg:rounded-none rounded-t-xl shadow-lg">
+                <h1 class="text-white font-bold text-2xl mb-4">Iniciar sesión en tu cuenta</h1>
                 <form action="#" class="flex flex-col gap-y-2">
                     <label for="email" class="text-white">Correo electrónico</label>
                     <input type="email" name="email" id="email" placeholder="abcdfghi@jklmn.com"
@@ -15,17 +15,17 @@
                     <label for="password" class="text-white">Contraseña</label>
                     <input type="password" name="password" id="password" placeholder="********"
                         class="h-10 bg-white rounded-md px-3" required aria-required="true">
-                    <a href="#" class="text-sky-400">Olvidaste la clave?</a>
+                    <a href="#" class="text-sky-400 lg:hover:underline">Olvidaste la clave?</a>
                     <button class="bg-green-500 text-white rounded-md py-2 mt-4">Iniciar Sesión</button>
                 </form>
             </div>
-            <div class="bg-linear-to-t from-slate-700 to-slate-900 p-8 shadow-lg flex flex-col gap-3 text-center justify-center">
+            <div class="bg-linear-to-t lg:rounded-none rounded-b-xl from-slate-700 to-slate-900 p-8 shadow-lg flex flex-col gap-3 text-center justify-center">
                 <h1 class="text-white text-2xl font-medium">¡Bienvenido de Vuelta!</h1>
-                <p class="text-white">
-                    Hola viejo, que bueno verte de vuelta, espero no <br>
+                <p class="text-white leading-relaxed">
+                    Hola viejo, que bueno verte de vuelta, espero no 
                     estes muerto, ahora inicia sesiom y mira novedades
                 </p>
-                <div onclick="location.href='registro.html'" class="cursor-pointer text-white flex flex-row gap-1 justify-center items-center mx-auto p-4 bg-gray-800/90 rounded-3xl">
+                <div onclick="location.href='{{ url_for('auth_blueprint.register') }}'" class="cursor-pointer text-white flex flex-row gap-1 justify-center items-center mx-auto p-4 bg-gray-800/90 rounded-3xl">
                     <h2>¿No tienes cuenta? <span class="text-blue-500">Regístrate Aqui</span></h2>
                 </div>
             </div>

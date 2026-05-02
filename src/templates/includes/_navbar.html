@@ -43,9 +43,9 @@
     </div>
 
     <div class="hidden lg:flex flex-1 justify-end gap-5 text-white text-md font-medium">
-        <a href="{{ url_for('main_blueprint.register') }}"
+        <a href="{{ url_for('auth_blueprint.register') }}"
             class="border border-slate-600 px-4 py-2 rounded-2xl transition hover:text-[#CEB06E] hover:border-[#CEB06E]">Regístrate</a>
-        <a href="{{ url_for('main_blueprint.login') }}"
+        <a href="{{ url_for('auth_blueprint.login') }}"
             class="border border-slate-600 px-4 py-2 rounded-2xl transition hover:text-[#CEB06E] hover:border-[#CEB06E]">Inicia
             Sesión</a>
     </div>
@@ -56,13 +56,13 @@
         <a href="{{ url_for('main_blueprint.about') }}" class="text-lg border-b border-slate-800 pb-2">Sobre Nosotros</a>
         <div class="flex flex-col gap-2">
             <span class="text-slate-400 text-sm uppercase tracking-widest">Categorías</span>
-            {% for categoria in categorias_menu %}
-            <a href="{{ url_for('main_blueprint.show_category', category_name=categoria.nombre_categoria) }}" class="pl-4">{{ categoria.nombre_categoria }}</a>
+            {% for categoria in categorias %}
+            <a href="{{ url_for('main_blueprint.show_category', category_name=categoria.nombre_categoria) }}" class="pl-4 transition duration-300 ease-in-out hover:text-[#CEB06E]">{{ categoria.nombre_categoria }}</a>
             {% endfor %}
         </div>
         <div class="flex flex-col gap-3 mt-4">
-            <a href="{{ url_for('main_blueprint.login') }}" class="text-center bg-[#CEB06E] text-black py-2 rounded-xl font-bold">Inicia Sesión</a>
-            <a href="{{ url_for('main_blueprint.register') }}" class="text-center border border-slate-600 py-2 rounded-xl">Regístrate</a>
+            <a href="{{ url_for('auth_blueprint.login') }}" class="text-center bg-[#CEB06E] text-black py-2 rounded-xl font-bold">Inicia Sesión</a>
+            <a href="{{ url_for('auth_blueprint.register') }}" class="text-center border border-slate-600 py-2 rounded-xl">Regístrate</a>
         </div>
     </div>
 </nav>

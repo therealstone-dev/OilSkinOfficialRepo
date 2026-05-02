@@ -10,12 +10,12 @@
 
 <body class="min-h-screen" style="background-image: linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)), url('{{ url_for('static', filename='img/fondo_2.png') }}'); background-size: cover; background-repeat: no-repeat; background-position: center;">
 
-    {% include 'includes/_navbar.jinja' %}
+    {% include 'includes/_navbar.html' %}
 
     {% block content %}
     {% endblock %}
 
-    {% include 'includes/_footer.jinja' %}
+    {% include 'includes/_footer.html' %}
 
 </body>
 

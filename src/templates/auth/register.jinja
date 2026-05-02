@@ -5,9 +5,9 @@
 {% block content %}
 
 <main>
-        <div class="flex flex-row justify-center items-stretch p-[2.5rem]">
+        <div class="flex flex-col lg:flex-row justify-center items-stretch p-[2.5rem]">
             <div class="bg-slate-800/50 p-8 shadow-lg">
-                <h1 class="text-center text-white text-2xl mb-4">Registro de Usuario</h1>
+                <h1 class="text-white text-2xl mb-4 font-bold">Registro de Usuario</h1>
                 <form action="#" class="grid grid-cols-2 gap-4 items-center">
                     <div class="flex flex-col">
                         <label for="email" class="text-white">Nombre</label>
@@ -57,7 +57,7 @@
                     Hola viejo, que bueno verte de vuelta, espero no <br>
                     estes muerto, ahora inicia sesiom y mira novedades
                 </p>
-                <div onclick="location.href='login.html'"
+                <div onclick="location.href='{{ url_for('auth_blueprint.login') }}'"
                     class="cursor-pointer text-white flex flex-row gap-1 justify-center items-center mx-auto p-4 bg-gray-800/90 rounded-3xl">
                     <h2>Ya tienes cuenta? <span class="text-blue-500">Inicia sesión aquí</span></h2>
                 </div>
