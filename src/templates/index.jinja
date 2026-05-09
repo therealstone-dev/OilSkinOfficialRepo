@@ -6,33 +6,34 @@
 
 <header
     style="background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('{{ url_for('static', filename='img/fondo_2.png') }}'); background-size: cover; background-repeat: no-repeat; background-position: center;">
-    <div class="flex flex-col lg:flex-row justify-center items-center gap-8 py-12 px-4">
+    <div class="d-flex flex-column flex-lg-row justify-content-center align-items-center gap-4 py-5 px-3">
         <img src="{{ url_for('static', filename='img/logo.png') }}" alt="OIL SKIN Logo"
-            class="w-40 h-40 lg:w-100 lg:h-100 rounded-full object-cover">
-        <div class="flex flex-col gap-6 text-center lg:text-left">
-            <h1 class="text-5xl lg:text-7xl font-bold text-white">OIL SKIN</h1>
-            <p class="text-lg lg:text-xl text-gray-200 leading-relaxed max-w-lg">Lorem ipsum dolor sit amet
+            style="width: 160px; height: 160px;" class="rounded-pill object-cover">
+        <div class="d-flex flex-column gap-3 text-center text-lg-start">
+            <h1 class="display-3 fw-bold text-white">OIL SKIN</h1>
+            <p class="text-muted lh-lg" style="max-width: 350px;">Lorem ipsum dolor sit amet
                 consectetur
                 adipisicing elit. Aliquid numquam asperiores eligendi cupiditate delectus at debitis dignissimos
                 minima
                 aperiam aliquam quas ratione saepe quasi, necessitatibus iste? Molestias id odio accusantium?</p>
             <a href="#"
-                class="text-center bg-[#CEB06E] hover:bg-[#b89d5a] text-black font-bold py-3 px-8 rounded-full transition duration-300">¡Explora
+                class="btn text-center text-black fw-bold py-3 px-5 rounded-pill transition" style="background-color: #CEB06E;">¡Explora
                 nuestros productos!</a>
         </div>
     </div>
 </header>
 <main
     style="background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('{{ url_for('static', filename='img/palmas.png') }}'); background-size: cover; background-repeat: no-repeat; background-position: center;">
-    <section class="bg-[#0a0a0a] py-20 px-6">
+    <section style="background-color: #0a0a0a;" class="py-5 px-3">
         <article>
-            <div class="max-w-6xl mx-auto">
+            <div class="container-lg">
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 text-center">
+                <div class="row g-4 text-center">
 
-                    <div class="flex flex-col items-center space-y-4 group">
+                    <div class="col-12 col-md-6 col-lg-3 d-flex flex-column align-items-center gap-3">
                         <div
-                            class="p-4 rounded-full border border-yellow-600/30 bg-yellow-600/5 group-hover:scale-110 transition-transform duration-300">
+                            class="p-3 rounded-circle border"
+                            style="border-color: rgba(217, 119, 6, 0.3); background-color: rgba(217, 119, 6, 0.05);">
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
                                 fill="none" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round"
                                 stroke-linejoin="round">
@@ -41,15 +42,16 @@
                                 <path d="M7 21h10" />
                             </svg>
                         </div>
-                        <h3 class="text-xl font-semibold text-white">100% Orgánico</h3>
-                        <p class="text-gray-400 text-sm leading-relaxed">
+                        <h3 class="fs-5 fw-semibold text-white">100% Orgánico</h3>
+                        <p class="text-muted small lh-sm">
                             Ingredientes naturales seleccionados de cultivos sostenibles, sin químicos agresivos.
                         </p>
                     </div>
 
-                    <div class="flex flex-col items-center space-y-4 group">
+                    <div class="col-12 col-md-6 col-lg-3 d-flex flex-column align-items-center gap-3">
                         <div
-                            class="p-4 rounded-full border border-yellow-600/30 bg-yellow-600/5 group-hover:scale-110 transition-transform duration-300">
+                            class="p-3 rounded-circle border"
+                            style="border-color: rgba(217, 119, 6, 0.3); background-color: rgba(217, 119, 6, 0.05);">
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
                                 fill="none" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round"
                                 stroke-linejoin="round">
@@ -57,15 +59,16 @@
                                     d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z" />
                             </svg>
                         </div>
-                        <h3 class="text-xl font-semibold text-white">Nutrición Intensa</h3>
-                        <p class="text-gray-400 text-sm leading-relaxed">
+                        <h3 class="fs-5 fw-semibold text-white">Nutrición Intensa</h3>
+                        <p class="text-muted small lh-sm">
                             Restaura la barrera natural de tu piel con una hidratación que dura todo el día.
                         </p>
                     </div>
 
-                    <div class="flex flex-col items-center space-y-4 group">
+                    <div class="col-12 col-md-6 col-lg-3 d-flex flex-column align-items-center gap-3">
                         <div
-                            class="p-4 rounded-full border border-yellow-600/30 bg-yellow-600/5 group-hover:scale-110 transition-transform duration-300">
+                            class="p-3 rounded-circle border"
+                            style="border-color: rgba(217, 119, 6, 0.3); background-color: rgba(217, 119, 6, 0.05);">
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
                                 fill="none" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round"
                                 stroke-linejoin="round">
@@ -73,93 +76,91 @@
                                     d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
                             </svg>
                         </div>
-                        <h3 class="text-xl font-semibold text-white">Efecto Glow</h3>
-                        <p class="text-gray-400 text-sm leading-relaxed">
+                        <h3 class="fs-5 fw-semibold text-white">Efecto Glow</h3>
+                        <p class="text-muted small lh-sm">
                             Luce una piel radiante y rejuvenecida gracias a nuestra fórmula de absorción rápida.
                         </p>
                     </div>
 
-                    <div class="flex flex-col items-center space-y-4 group">
+                    <div class="col-12 col-md-6 col-lg-3 d-flex flex-column align-items-center gap-3">
                         <div
-                            class="p-4 rounded-full border border-yellow-600/30 bg-yellow-600/5 group-hover:scale-110 transition-transform duration-300">
+                            class="p-3 rounded-circle border"
+                            style="border-color: rgba(217, 119, 6, 0.3); background-color: rgba(217, 119, 6, 0.05);">
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
                                 fill="none" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round"
                                 stroke-linejoin="round">
                                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
                             </svg>
                         </div>
-                        <h3 class="text-xl font-semibold text-white">Dermatológicamente Testeado</h3>
-                        <p class="text-gray-400 text-sm leading-relaxed">
+                        <h3 class="fs-5 fw-semibold text-white">Dermatológicamente Testeado</h3>
+                        <p class="text-muted small lh-sm">
                             Fórmulas seguras para todo tipo de piel, incluso las más sensibles.
                         </p>
                     </div>
                 </div>
             </div>
         </article>
-        <h1 class="text-white text-center my-9 lg:text-6xl text-4xl font-bold underline">Nuestra Empresa</h1>
-        <article class="w-full px-6">
-            <div class="flex flex-col items-center py-12 gap-4">
+        <h1 class="text-white text-center my-5 display-2 fw-bold text-decoration-underline">Nuestra Empresa</h1>
+        <article class="w-100 px-3">
+            <div class="d-flex flex-column align-items-center py-5 gap-3">
 
 
                 <div
-                    class="flex flex-row justify-between items-center bg-white/10 p-10 lg:p-16 rounded-2xl w-full max-w-6xl backdrop-blur-sm border border-white/5">
+                    class="d-flex flex-row justify-content-between align-items-center py-5 px-5 rounded-3 w-100" style="background-color: rgba(255,255,255,0.1); max-width: 60rem; border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(10px);">
 
-                    <div class="flex flex-col items-center flex-shrink-0">
-                        <div class="p-1 rounded-full bg-gradient-to-b from-yellow-500/50 to-transparent">
-                            <img class="lg:h-56 lg:w-56 h-32 w-32 rounded-full shadow-2xl object-cover"
-                                src="{{ url_for('static', filename='img/publicidad.jpg') }}">
+                    <div class="d-flex flex-column align-items-center flex-shrink-0">
+                        <div class="p-2 rounded-circle" style="background: linear-gradient(to bottom, rgba(234, 179, 8, 0.5), transparent);">
+                            <img class="rounded-circle shadow-lg" style="width: 13rem; height: 13rem; object-fit: cover; display: none;" width="180" height="180"
+                                src="{{ url_for('static', filename='img/publicidad.jpg') }}" alt="Ingredientes">
                         </div>
-                        <h2 class="text-xl lg:text-2xl text-center text-white font-bold mt-6 leading-tight">
-                            Ingredientes <span class="text-yellow-500">Naturales</span>
+                        <h2 class="fs-5 text-center text-white fw-bold mt-4 lh-sm">
+                            Ingredientes <span class="text-warning">Naturales</span>
                         </h2>
                     </div>
 
-                    <div class="flex-1 ml-12 lg:ml-20">
-                        <p
-                            class="text-white text-xl lg:text-3xl font-light leading-relaxed border-l-2 border-yellow-600/30 pl-8">
-                            Aceites <span class="font-bold text-yellow-500">100% orgánicos</span>, seleccionados
+                    <div class="flex-grow-1 ms-5">
+                        <p class="text-white fs-5 lh-lg" style="border-left: 2px solid rgba(217, 119, 6, 0.3); padding-left: 2rem;">
+                            Aceites <span class="fw-bold text-warning">100% orgánicos</span>, seleccionados
                             artesanalmente para garantizar pureza total sin químicos agresivos.
                         </p>
                     </div>
 
                 </div>
                 <div
-                    class="flex flex-row justify-between items-center bg-white/10 p-10 lg:p-16 rounded-2xl w-full max-w-6xl backdrop-blur-sm border border-white/5">
+                    class="d-flex flex-row justify-content-between align-items-center py-5 px-5 rounded-3 w-100" style="background-color: rgba(255,255,255,0.1); max-width: 60rem; border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(10px);">
 
-                    <div class="flex-1 mr-12 lg:mr-20">
-                        <p
-                            class="text-white text-xl lg:text-3xl font-light leading-relaxed border-r-2 border-yellow-600/30 pr-12">
-                            Aceites de <span class="font-bold text-yellow-500">Nutrición intensa</span>, que restauran la barrera cutánea y protegen tu piel.
+                    <div class="flex-grow-1 me-5">
+                        <p class="text-white fs-5 lh-lg" style="border-right: 2px solid rgba(217, 119, 6, 0.3); padding-right: 3rem;">
+                            Aceites de <span class="fw-bold text-warning">Nutrición intensa</span>, que restauran la barrera cutánea y protegen tu piel.
                         </p>
                     </div>
 
-                    <div class="flex flex-col items-center flex-shrink-0">
-                        <div class="p-1 rounded-full bg-gradient-to-b from-yellow-500/50 to-transparent">
-                            <img class="lg:h-56 lg:w-56 h-32 w-32 rounded-full shadow-2xl object-cover"
-                                src="{{ url_for('static', filename='img/publicidad.jpg') }}">
+                    <div class="d-flex flex-column align-items-center flex-shrink-0">
+                        <div class="p-2 rounded-circle" style="background: linear-gradient(to bottom, rgba(234, 179, 8, 0.5), transparent);">
+                            <img class="rounded-circle shadow-lg" style="width: 13rem; height: 13rem; object-fit: cover; display: none;" width="180" height="180"
+                                src="{{ url_for('static', filename='img/publicidad.jpg') }}" alt="Cuidado">
                         </div>
-                        <h2 class="text-xl lg:text-2xl text-center text-white font-bold mt-6 leading-tight">
-                            Cuidado <span class="text-yellow-500">Profundo</span>
+                        <h2 class="fs-5 text-center text-white fw-bold mt-4 lh-sm">
+                            Cuidado <span class="text-warning">Profundo</span>
                         </h2>
                     </div>
 
                 </div>
                 <div
-                    class="flex flex-row justify-between items-center bg-white/10 p-10 lg:p-16 rounded-2xl w-full max-w-6xl backdrop-blur-sm border border-white/5">
+                    class="d-flex flex-row justify-content-between align-items-center py-5 px-5 rounded-3 w-100" style="background-color: rgba(255,255,255,0.1); max-width: 60rem; border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(10px);">
 
-                    <div class="flex flex-col items-center flex-shrink-0">
-                        <div class="p-1 rounded-full bg-gradient-to-b from-yellow-500/50 to-transparent">
-                            <img class="lg:h-56 lg:w-56 h-32 w-32 rounded-full shadow-2xl object-cover"
-                                src="{{ url_for('static', filename='img/publicidad.jpg') }}">
+                    <div class="d-flex flex-column align-items-center flex-shrink-0">
+                        <div class="p-2 rounded-circle" style="background: linear-gradient(to bottom, rgba(234, 179, 8, 0.5), transparent);">
+                            <img class="rounded-circle shadow-lg" style="width: 13rem; height: 13rem; object-fit: cover; display: none;" width="180" height="180"
+                                src="{{ url_for('static', filename='img/publicidad.jpg') }}" alt="Resultados">
                         </div>
-                        <h2 class="text-xl lg:text-2xl text-center text-white font-bold mt-6 leading-tight">
-                            Resultados <span class="text-yellow-500">Visibles</span>
+                        <h2 class="fs-5 text-center text-white fw-bold mt-4 lh-sm">
+                            Resultados <span class="text-warning">Visibles</span>
                         </h2>
                     </div>
 
-                    <div class="flex-1 ml-12 lg:ml-20">
-                        <p
-                            class="text-white text-xl lg:text-3xl font-light leading-relaxed border-l-2 border-yellow-600/30 pl-8">
+                    <div class="flex-grow-1 ms-5">
+                        <p class="text-white fs-5 lh-lg" style="border-left: 2px solid rgba(217, 119, 6, 0.3); padding-left: 2rem;">
                             Piel más suave, firme y luminosa en semanas. Observa resultados duraderos y en poco tiempo.
                         </p>
                     </div>

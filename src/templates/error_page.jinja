@@ -3,28 +3,28 @@
 {% block title %}Error - OilSkin{% endblock %}
 
 {% block content %}
-<main class="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center px-4">
-    <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
-        <div class="mb-6">
-            <svg class="w-16 h-16 mx-auto text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<main class="min-vh-100 d-flex align-items-center justify-content-center px-3" style="background: linear-gradient(to bottom right, rgba(254, 240, 243), rgba(254, 228, 208));">
+    <div class="card border-0 shadow-lg p-5" style="max-width: 500px; width: 100%;">
+        <div class="mb-4">
+            <svg class="d-block mx-auto text-danger" width="64" height="64" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
         </div>
 
         <!-- Mensaje de error -->
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">¡Oops!</h1>
-        <p class="text-gray-600 text-lg mb-6">
+        <h1 class="fs-3 fw-bold text-muted mb-2 text-center">¡Oops!</h1>
+        <p class="fs-6 text-muted mb-4 text-center">
                 Algo salió mal. Por favor intenta nuevamente. ({{ mensaje }})
         </p>
 
         <!-- Botones de acción -->
-        <div class="flex flex-col gap-3">
+        <div class="d-flex flex-column gap-2">
             <a href="{{ url_for('main_blueprint.index') }}" 
-               class="bg-[#CEB06E] hover:bg-[#b89d5a] text-black font-bold py-3 px-6 rounded-lg transition duration-200 inline-block">
+               class="btn text-black fw-bold py-3 px-4 rounded-2" style="background-color: #CEB06E;">
                 Volver al Inicio
             </a>
             <a href="javascript:history.back()" 
-               class="border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-bold py-3 px-6 rounded-lg transition duration-200 inline-block">
+               class="btn border-2 text-muted fw-bold py-3 px-4 rounded-2">
                 Atrás
             </a>
         </div>

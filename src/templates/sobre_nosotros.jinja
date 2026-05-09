@@ -5,42 +5,42 @@
 {% block content %}
 <header
     style="background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('{{ url_for('static', filename='img/publicidad.jpg') }}'); background-size: cover; background-repeat: no-repeat; background-position: center;">
-    <div class="flex flex-row justify-center shadow-xl items-center gap-8 py-8">
+    <div class="d-flex flex-row justify-content-center shadow-lg align-items-center gap-4 py-4">
         <img src="{{ url_for('static', filename='img/logo.png') }}" alt="OIL SKIN Logo"
-            class="h-24 w-24 rounded-full object-cover">
+            class="rounded-circle" style="width: 96px; height: 96px; object-fit: cover;">
     </div>
 </header>
-<main class="bg-gray-300 rounded">
+<main class="bg-secondary rounded">
 
-    <div class="bg-white rounded-2xl m-8">
-        <section class="max-w-7xl mx-auto px-4 py-12 font-sans text-gray-800">
-            <h1 class="text-4xl md:text-[3.5rem] font-bold text-center mb-10 tracking-tight">
-                OIL SKIN: <span class="text-slate-600">Esencia Natural</span>, Resultados Reales
+    <div class="bg-white rounded-5 m-4">
+        <section class="mx-auto px-3 py-5 text-body">
+            <h1 class="display-5 fw-bold text-center mb-5 tracking-tight">
+                OIL SKIN: <span class="text-secondary">Esencia Natural</span>, Resultados Reales
             </h1>
 
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 items-start">
+            <div class="row g-4 align-items-start">
                 <div
-                    class="lg:col-span-1 text-white space-y-6 bg-slate-600 p-6 rounded-2xl border border-gray-100 hover:cursor-pointer hover:shadow-lg hover:-translate-y-1 shadow-md transition-all duration-300 ease-in-out">
+                    class="col-12 col-md-4 text-white d-flex flex-column gap-3 p-4 rounded-5 border" style="background-color: #495057;">
                     <div>
-                        <h2 class="text-3xl font-bold text-gray-1000 mb-4">Descubre LUMINEA</h2>
-                        <p class="leading-relaxed mb-4">
-                            Nuestro <span class="italic text-emerald-500 font-medium">Tónico Facial LUMINEA</span> es
+                        <h2 class="fs-4 fw-bold mb-3">Descubre LUMINEA</h2>
+                        <p class="lh-lg mb-3">
+                            Nuestro <span class="fst-italic text-success fw-medium">Tónico Facial LUMINEA</span> es
                             más que un
                             paso en tu rutina: es una experiencia de revitalización inmediata.
                         </p>
                     </div>
 
-                    <div class="space-y-4">
-                        <h3 class="text-xl font-bold uppercase tracking-wide text-gray-1000">¿Por qué es extraordinario?
+                    <div class="gap-3">
+                        <h3 class="fs-6 fw-bold text-uppercase tracking-wide">¿Por qué es extraordinario?
                         </h3>
-                        <ul class="space-y-3">
-                            <li class="flex items-start gap-3">
-                                <span class="text-emerald-500 mt-1">✓</span>
+                        <ul class="list-unstyled gap-3">
+                            <li class="d-flex gap-2">
+                                <span class="text-success">✓</span>
                                 <p><strong>Vitalidad Instantánea:</strong> Tonifica y refresca en segundos.</p>
                             </li>
-                            <li class="flex items-start gap-3">
-                                <span class="text-emerald-500 mt-1">✓</span>
+                            <li class="d-flex gap-2">
+                                <span class="text-success">✓</span>
                                 <p><strong>Hidratación Inteligente:</strong> Sin sensación grasa ni pesada.</p>
                             </li>
                         </ul>
@@ -48,16 +48,16 @@
                 </div>
 
                 <div
-                    class="space-y-4 bg-gray-50 p-6 rounded-2xl border border-gray-100 hover:cursor-pointer hover:shadow-lg hover:-translate-y-1 shadow-md transition-all duration-300 ease-in-out">
-                    <h2 class="text-2xl font-semibold text-emerald-800">Nuestra Esencia</h2>
-                    <p class="leading-relaxed text-gray-600">
-                        En <span class="font-bold">OIL SKIN</span>, redefinimos el cuidado personal desde el corazón de
+                    class="col-12 col-md-4 d-flex flex-column gap-3 p-4 rounded-5 border" style="background-color: #f8f9fa;">
+                    <h2 class="fs-5 fw-semibold text-success">Nuestra Esencia</h2>
+                    <p class="lh-lg text-muted">
+                        En <span class="fw-bold">OIL SKIN</span>, redefinimos el cuidado personal desde el corazón de
                         Bogotá,
                         Colombia. Somos una marca comprometida con la cosmética de alta gama, fusionando la pureza
                         natural con
                         procesos sostenibles.
                     </p>
-                    <p class="leading-relaxed text-gray-600 border-t pt-4">
+                    <p class="lh-lg text-muted border-top pt-3">
                         Gestionamos cada detalle para llevar a todo el país soluciones de belleza conscientes, éticas y
                         altamente
                         efectivas.
@@ -66,17 +66,17 @@
 
 
                 <div
-                    class="bg-slate-600 text-white p-8 rounded-2xl shadow-xl hover:cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-in-out">
-                    <h2 class="text-2xl font-bold mb-4">Nuestra Misión</h2>
-                    <p class="leading-relaxed opacity-90 mb-6">
+                    class="col-12 col-md-4 text-white p-4 rounded-5 shadow" style="background-color: #495057;">
+                    <h2 class="fs-5 fw-bold mb-3">Nuestra Misión</h2>
+                    <p class="lh-lg" style="opacity: 0.9; margin-bottom: 1.5rem;">
                         Nuestra razón de ser es tu bienestar. Creamos fórmulas eficaces que regeneran la piel de forma
                         natural,
                         respetando siempre el equilibrio del medio ambiente para mantenerlo hasta los años venideros y
                         ofrecer
                         productos.
                     </p>
-                    <div class="border-l-4 border-emerald-400 pl-4">
-                        <p class="text-sm italic">"Cosmética honesta, sostenible y diseñada para resaltar tu mejor
+                    <div class="border-start ps-3" style="border-color: rgba(52, 211, 153, 0.5) !important;">
+                        <p class="small fst-italic">"Cosmética honesta, sostenible y diseñada para resaltar tu mejor
                             versión."</p>
                     </div>
                 </div>
@@ -84,18 +84,18 @@
             </div>
         </section>
     </div>
-    <div class="flex flex-row justify-center items-center gap-10 py-12">
-        <h1 class="text-4xl md:text-5xl font-bold text-gray-800">Equipo de Trabajo</h1>
+    <div class="d-flex flex-row justify-content-center align-items-center gap-5 py-5">
+        <h1 class="fs-2 fw-bold text-muted">Equipo de Trabajo</h1>
     </div>
-    <div class="bg-white rounded-2xl m-8">
-        <h1 class="text-5xl text-center pt-4">La familia</h1>
-        <div class="flex flex-wrap justify-center p-8 gap-10">
+    <div class="bg-white rounded-5 m-4">
+        <h1 class="fs-2 text-center pt-3">La familia</h1>
+        <div class="d-flex flex-wrap justify-content-center p-4 gap-5">
             <div
-                class="flex flex-col items-center rounded-xl p-8 shadow-md transition-all duration-300 ease-in-out hover:bg-gray-100 hover:rounded-2xl hover:shadow-lg hover:-translate-y-1 cursor-pointer">
+                class="d-flex flex-column align-items-center rounded-3 p-4 shadow transition cursor-pointer" style="transition: all 0.3s ease;">
                 <img src="{{ url_for('static', filename='img/team-program-1.jpg') }}"
-                    class="w-64 h-64 rounded-lg object-cover mb-4" alt="David Lombana">
-                <p class="text-center text-2xl font-medium text-gray-700 leading-snug">David Lombana</p>
-                <p class="text-center text-lg text-gray-400">Analista Principal</p>
+                    class="rounded-3" style="width: 256px; height: 256px; object-fit: cover; margin-bottom: 1rem;" alt="David Lombana">
+                <p class="text-center fs-5 fw-medium text-muted">David Lombana</p>
+                <p class="text-center text-muted">Analista Principal</p>
             </div>
             <div
                 class="flex flex-col items-center rounded-xl p-8 shadow-md transition-all duration-300 ease-in-out hover:bg-gray-100 hover:rounded-2xl hover:shadow-lg hover:-translate-y-1 cursor-pointer">
