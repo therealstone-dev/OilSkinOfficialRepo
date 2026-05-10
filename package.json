@@ -18,5 +18,8 @@
     "url": "https://github.com/gracogamer3113-hash/oilskin-repo/issues"
   },
   "homepage": "https://github.com/gracogamer3113-hash/oilskin-repo#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "flowbite": "^4.0.1"
+  }
 }
