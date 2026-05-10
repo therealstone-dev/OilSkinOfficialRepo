@@ -1,71 +1,76 @@
-{% extends 'layout.jinja' %}
+{% extends 'components/boostrap/layout_boostrap.jinja' %}
 
 {% block title %}{{ category_name }} - OilSkin{% endblock %}
 
 {% block content %}
-<main class="min-h-screen w-full"
-    style="margin: 0; padding: 0; width: 100vw; background-image: linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)), url('{{ url_for('static', filename='img/fondo_2.png') }}'); background-size: cover; background-repeat: no-repeat; background-position: center; background-attachment: fixed;">
 
-    <style>
-        main {
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-    </style>
+<main class="min-vh-100 w-100"
+      style="background: linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)), url('{{ url_for('static', filename='img/fondo_2.png') }}') center/cover no-repeat fixed;">
 
-    <section class="w-full px-6 md:px-8 pt-12 pb-8 text-center">
-        <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">
-            {{ category_name }}
-        </h1>
-        <p class="text-gray-300 text-lg leading-relaxed">
-            {{ descripcion }}
-        </p>
-        <div class="mt-6 flex justify-center gap-4 flex-wrap">
+    <!-- HEADER -->
+    <section class="container text-center py-5 text-white">
+        <h1 class="display-5 fw-bold mb-3">{{ category_name }}</h1>
+        <p class="text-light">{{ descripcion }}</p>
+
+        <div class="d-flex justify-content-center gap-2 flex-wrap mt-3">
             {% if productos %}
-            <span class="bg-white/10 text-xs font-medium text-gray-300 px-3 py-1 rounded-full border border-white/20">
+            <span class="badge bg-light text-dark">
                 {{ productos|length }} Productos encontrados
             </span>
             {% endif %}
-            <span class="bg-white/10 text-xs font-medium text-gray-300 px-3 py-1 rounded-full border border-white/20">
-                100% Orgánico
-            </span>
-            <span class="bg-white/10 text-xs font-medium text-gray-300 px-3 py-1 rounded-full border border-white/20">
-                Piel Renovada
-            </span>
+            <span class="badge bg-secondary">100% Orgánico</span>
+            <span class="badge bg-secondary">Piel Renovada</span>
         </div>
     </section>
 
+    <!-- PRODUCTOS -->
     {% if productos %}
-    <div class="w-full px-6 md:px-8 pb-16">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+    <div class="container pb-5">
+        <div class="row g-4 justify-content-center">
+
             {% for p in productos %}
-            <div class="group relative overflow-hidden rounded-2xl border-2 border-white/10 bg-black/40 p-6 transition-all duration-300 hover:border-[#CEB06E]/40 hover:bg-black/60 hover:-translate-y-2 cursor-pointer">
-                <div class="flex justify-center mb-4">
-                    <img 
-                        src="{{ url_for('static', filename='img/logo.png') }}" 
-                        alt="{{ p.nombre_producto }}" 
-                        class="h-40 w-40 rounded-full border-4 border-[#CEB06E]/20 object-cover transition-transform duration-300 group-hover:scale-110"
-                    >
-                </div>
-                <div class="text-center">
-                    <h2 class="text-xl font-bold text-white line-clamp-2">{{ p.nombre_producto }}</h2>
-                    <p class="mt-2 text-sm text-gray-400 italic line-clamp-2 h-10">{{ p.descripcion }}</p>
-                    <div class="mt-4 flex items-center justify-between gap-3">
-                        <span class="text-lg font-bold text-[#CEB06E]">${{ "%.2f"|format(p.precio) }}</span>
-                        <a href="{{ url_for('main_blueprint.get_product', id=p.id_producto) }}"
-                           class="rounded-full bg-[#CEB06E] hover:bg-white px-4 py-2 text-sm font-bold text-black transition-all duration-200 hover:scale-110">
-                            Añadir
-                        </a>
+            <div class="col-sm-6 col-lg-3">
+                <div class="card h-100 text-center bg-dark text-white border-0 shadow">
+
+                    <div class="pt-4">
+                        <img src="{{ url_for('static', filename='img/logo.png') }}"
+                             class="rounded-circle border"
+                             style="width:120px; height:120px; object-fit:cover;">
                     </div>
+
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="fw-bold">{{ p.nombre_producto }}</h5>
+
+                        <p class="text-secondary small flex-grow-1">
+                            {{ p.descripcion }}
+                        </p>
+
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="fw-bold text-warning">
+                                ${{ "%.2f"|format(p.precio) }}
+                            </span>
+
+                            <a href="{{ url_for('main_blueprint.get_product', id=p.id_producto) }}"
+                               class="btn btn-sm fw-bold"
+                               style="background:#CEB06E; color:black;">
+                                Ver
+                            </a>
+                        </div>
+                    </div>
+
                 </div>
             </div>
             {% endfor %}
+
         </div>
     </div>
+
     {% else %}
-    <div class="w-full px-6 md:px-8 py-12 text-center">
-        <p class="text-gray-300 text-lg">No hay productos disponibles en esta categoría.</p>
+    <div class="container text-center py-5 text-white">
+        <p>No hay productos disponibles en esta categoría.</p>
     </div>
     {% endif %}
+
 </main>
+
 {% endblock %}
