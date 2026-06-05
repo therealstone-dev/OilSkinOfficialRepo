@@ -27,4 +27,4 @@ def init_db(app):
         raise
 
 def get_connection():
-    return mysql.connection.cursor()
+    return mysql.connection.cursor() # type: ignore
