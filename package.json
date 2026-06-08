@@ -5,6 +5,7 @@
     "dev": "npm run watch"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.3.0",
     "tailwindcss": "^4.2.2"
   },
   "repository": {
@@ -18,5 +19,8 @@
     "url": "https://github.com/gracogamer3113-hash/oilskin-repo/issues"
   },
   "homepage": "https://github.com/gracogamer3113-hash/oilskin-repo#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "flowbite": "^4.0.1"
+  }
 }
