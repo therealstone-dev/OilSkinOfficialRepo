@@ -21,10 +21,17 @@ def init_db(app):
             app.config['MYSQL_CUSTOM_OPTIONS'] = {"ssl": {"enabled": True}}
         
         mysql.init_app(app)
-        print("✓ Conexión a Aiven MySQL OK")
+        print("Conexión a Aiven MySQL OK")
     except Exception as error:
-        print(f"✗ Error MySQL: {error}")
+        print(f"Error MySQL: {error}")
         raise
 
 def get_connection():
-    return mysql.connection.cursor() # type: ignore
+    conn = mysql.connect
+    if conn is None:
+        raise RuntimeError('No se pudo establecer la conexión MySQL')
+    return conn
+
+def get_cursor():
+    conn = get_connection()
+    return conn, conn.cursor()

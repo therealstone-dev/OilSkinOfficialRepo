@@ -8,43 +8,34 @@
         <div class="flex flex-col lg:flex-row justify-center items-stretch p-[2.5rem]">
             <div class="bg-slate-800/50 p-8 shadow-lg">
                 <h1 class="text-white text-2xl mb-4 font-bold">Registro de Usuario</h1>
-                <form action="#" class="grid grid-cols-2 gap-4 items-center">
-                    <div class="flex flex-col">
-                        <label for="email" class="text-white">Nombre</label>
-                        <input type="text" name="nombre" id="nombre" placeholder="Tu nombre"
-                            class="h-10 bg-white rounded-md px-3" required aria-required="true">
-                    </div>
-                    <div class="flex flex-col">
-                        <label for="apellido" class="text-white">Apellido</label>
-                        <input type="text" name="apellido" id="apellido" placeholder="Tu apellido"
-                            class="h-10 bg-white rounded-md px-3" required aria-required="true">
+                <form action="{{ url_for('auth_blueprint.register') }}" method="post" class="grid grid-cols-2 gap-4 items-center">
+                    {{ form.csrf_token }}
+                    <div class="flex flex-col col-span-2">
+                        <label for="nombre" class="text-white">Nombre</label>
+                        {{ form.nombre(class_='h-10 bg-white rounded-md px-3', placeholder='Tu nombre') }}
                     </div>
                     <div class="flex flex-col">
                         <label for="email" class="text-white">Correo electrónico</label>
-                        <input type="email" name="email" id="email" placeholder="Tu correo electrónico"
-                            class="h-10 bg-white rounded-md px-3" required aria-required="true">
+                        {{ form.email(class_='h-10 bg-white rounded-md px-3', placeholder='Tu correo electrónico') }}
                     </div>
                     <div class="flex flex-col">
                         <label for="direccion" class="text-white">Direccion</label>
-                        <input type="text" name="direccion" id="direccion" placeholder="Tu dirección"
-                            class="h-10 bg-white rounded-md px-3" required aria-required="true">
+                        {{ form.direccion(class_='h-10 bg-white rounded-md px-3', placeholder='Tu dirección') }}
                     </div>
                     <div class="flex flex-col">
                         <label for="celular" class="text-white">Número de Celular</label>
-                        <input type="number" name="celular" id="celular" placeholder="Tu número de celular"
-                            class="h-10 bg-white rounded-md px-3" required aria-required="true">
+                        {{ form.celular(class_='h-10 bg-white rounded-md px-3', placeholder='Tu número de celular') }}
                     </div>
                     <div class="flex flex-col">
                         <label for="telefono" class="text-white">Número de Telefono</label>
-                        <input type="number" name="telefono" id="telefono" placeholder="Tu número de telefono"
-                            class="h-10 bg-white rounded-md px-3" aria-required="true">
+                        {{ form.telefono(class_='h-10 bg-white rounded-md px-3', placeholder='Tu número de telefono') }}
                     </div>
                     <div class="flex flex-col col-span-2 items-center">
                         <label for="password" class="text-white">Contraseña</label>
-                        <input type="password" name="password" id="password" placeholder="********"
-                            class="h-10 bg-white rounded-md px-3" required aria-required="true">
+                        {{ form.password(class_='h-10 bg-white rounded-md px-3', placeholder='********') }}
+                        {{ form.confirm(class_='h-10 bg-white rounded-md px-3 mt-2', placeholder='Confirmar contraseña') }}
                     </div>
-                    <button
+                    <button type="submit"
                         class="col-span-2 bg-slate-600 hover:bg-green-600 text-white font-bold py-2 rounded-md mt-2 transition-colors">
                         Crear Cuenta
                     </button>
