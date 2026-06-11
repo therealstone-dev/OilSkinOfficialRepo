@@ -1,5 +1,6 @@
 from flask import Flask
 from pathlib import Path
+from decouple import config
 from src.database.db_mysql import init_db
 from src.routes import main_routes
 
@@ -16,6 +17,10 @@ def create_app():
         static_folder=str(STATIC_DIR),
         static_url_path='/static'
     )
+
+    app.secret_key = config('SECRET_KEY', default='CAMBIAR_ESTO_POR_UN_VALOR_SEGURO')
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
     init_db(app)
     app.register_blueprint(main_routes.main, url_prefix='/')

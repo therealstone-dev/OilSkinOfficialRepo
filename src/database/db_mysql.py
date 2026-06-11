@@ -1,6 +1,9 @@
 import os
 from decouple import config
+from flask import current_app
 from flask_mysqldb import MySQL
+import MySQLdb
+from MySQLdb import cursors
 
 mysql = MySQL()
 
@@ -27,4 +30,22 @@ def init_db(app):
         raise
 
 def get_connection():
+<<<<<<< Updated upstream
     return mysql.connection.cursor()
+=======
+    kwargs = {
+        'host': current_app.config['MYSQL_HOST'],
+        'user': current_app.config['MYSQL_USER'],
+        'passwd': current_app.config['MYSQL_PASSWORD'],
+        'db': current_app.config['MYSQL_DB'],
+        'port': current_app.config['MYSQL_PORT'],
+    }
+
+    if current_app.config.get('MYSQL_CURSORCLASS'):
+        kwargs['cursorclass'] = getattr(cursors, current_app.config['MYSQL_CURSORCLASS'])
+
+    if current_app.config.get('MYSQL_CUSTOM_OPTIONS'):
+        kwargs.update(current_app.config['MYSQL_CUSTOM_OPTIONS'])
+
+    return MySQLdb.connect(**kwargs)
+>>>>>>> Stashed changes

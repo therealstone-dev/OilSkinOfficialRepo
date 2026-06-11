@@ -1,4 +1,4 @@
-from src.database.db_mysql import mysql
+from src.database.db_mysql import get_connection
 
 class ModeloCategoria:
     @classmethod
@@ -8,11 +8,13 @@ class ModeloCategoria:
         Busca la descripcion de una categoria especifica por su ID
         """
         try:
-            cur = mysql.connection.cursor()
+            conn = get_connection()
+            cur = conn.cursor()
             sql = "SELECT descripcion FROM categoria WHERE id_categoria = %s"
             cur.execute(sql, (category_id,))
             result = cur.fetchone()
             cur.close()
+            conn.close()
             return result['descripcion'] if result else "Sin descripción disponible."
         except Exception as ex:
             print(f"Error en ModeloCategoria: {ex}")
@@ -24,11 +26,13 @@ class ModeloCategoria:
         Busca el nombre de una categoria especifica por su ID
         """
         try:
-            cur = mysql.connection.cursor()
+            conn = get_connection()
+            cur = conn.cursor()
             sql = "SELECT nombre_categoria FROM categoria WHERE id_categoria = %s"
             cur.execute(sql, (category_id,))
             result = cur.fetchone()
             cur.close()
+            conn.close()
             return result['nombre_categoria'] if result else "Categoría"
         except Exception as ex:
             print(f"Error en ModeloCategoria: {ex}")
@@ -39,11 +43,13 @@ class ModeloCategoria:
         Obtiene todas las categorias con id y nombre
         """
         try:
-            cur = mysql.connection.cursor()
+            conn = get_connection()
+            cur = conn.cursor()
             sql = "SELECT id_categoria, nombre_categoria FROM categoria ORDER BY id_categoria"
             cur.execute(sql)
             result = cur.fetchall()
             cur.close()
+            conn.close()
             return result if result else []
         except Exception as ex:
             print(f"Error en get_all_categories: {ex}")
@@ -54,11 +60,13 @@ class ModeloCategoria:
         Obtiene todos los datos de una categoría buscando por su nombre
         """
         try:
-            cur = mysql.connection.cursor()
+            conn = get_connection()
+            cur = conn.cursor()
             sql = "SELECT id_categoria, nombre_categoria, descripcion FROM categoria WHERE nombre_categoria = %s"
             cur.execute(sql, (category_name,))
             result = cur.fetchone()
             cur.close()
+            conn.close()
             return result
         except Exception as ex:
             print(f"Error en ModeloCategoria.get_by_name: {ex}")

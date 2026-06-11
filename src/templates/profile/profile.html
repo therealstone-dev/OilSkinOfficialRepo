@@ -1,0 +1,141 @@
+{% extends 'components/tailwind/layout_profile.jinja' %}
+{% from 'components/tailwind/elements/ui.jinja' import sidebar %}
+
+{% block title %}Perfil - OilSkin{% endblock %}
+
+{% block content %}
+
+<body class="min-h-screen bg-gray-200 overflow-x-hidden">
+  {{ sidebar(items) }}
+  <main class="ml-0 sm:ml-64 bg-white min-h-screen p-8 transition-all duration-300">
+    <div class="w-full">
+      <header class="flex flex-row justify-between items-center w-full gap-4 mb-6 md:mb-10">
+        <div class="min-w-0 flex-1">
+          <h1 class="text-xl md:text-2xl font-bold truncate text-gray-800">
+            Bienvenido, <span class="text-gray-400 font-normal">La Piedra</span>
+          </h1>
+          <p class="text-xs md:text-sm text-gray-400">Lunes, 9 Marzo 2026</p>
+        </div>
+
+        <div class="flex flex-row items-center gap-3 md:gap-4 shrink-0">
+          <button class="relative group">
+            <i
+              class="fa-regular fa-bell bg-gray-100 p-3 md:p-4 rounded-xl text-lg text-blue-600 group-hover:bg-blue-50 transition-colors"></i>
+            <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+          </button>
+          <img src="img/image.png" class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-white shadow-sm"
+            alt="Profile">
+        </div>
+      </header>
+      <div class="w-full bg-white mt-10">
+
+        <div
+          class="relative p-6 md:p-12 rounded-t-xl bg-gray-200 bg-cover bg-no-repeat bg-center min-h-30 md:min-h-37.5">
+          <button
+            class="absolute bottom-2 right-2 bg-gray-800/60 hover:bg-gray-800/80 backdrop-blur-sm text-white text-xs md:text-sm px-3 py-1.5 rounded transition-colors">
+            Editar imagen de portada
+          </button>
+        </div>
+        <div class="bg-gray-100 mb-6 rounded-b-xl">
+          <div class="flex flex-col sm:flex-row p-6 md:p-8 gap-4 items-center text-center sm:text-left">
+            <img src="img/image.png" class="w-16 h-16 rounded-full shadow" alt="Avatar">
+            <div class="min-w-0">
+              <h2 class="text-xl font-bold text-gray-800 truncate">{{ user.nombre }}</h2>
+              <h2 class="text-gray-500 text-sm md:text-base break-all">{{ user.email }}</h2>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-6 w-full">
+          <!-- Columna 1 -->
+          <div class="flex flex-col gap-5">
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium text-gray-600">Nombre</label>
+              <input
+                class="w-full bg-gray-50 border border-gray-200 rounded-lg py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                type="text" placeholder="Tu Primer Nombre">
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium text-gray-600">Apellido</label>
+              <input
+                class="w-full bg-gray-50 border border-gray-200 rounded-lg py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                type="text" placeholder="Tu Primer Apellido">
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium text-gray-600">Lenguajes</label>
+              <select
+                class="w-full bg-gray-50 border border-gray-200 rounded-lg py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option selected>Español</option>
+                <option>Ingles</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Columna 2 -->
+          <div class="flex flex-col gap-5">
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium text-gray-600">Nombre de Usuario</label>
+              <input
+                class="w-full bg-gray-50 border border-gray-200 rounded-lg py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                type="text" placeholder="Tu Usuario">
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium text-gray-600">País de Residencia</label>
+              <select
+                class="w-full bg-gray-50 border border-gray-200 rounded-lg py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option>Pais 1</option>
+                <option>Pais 2</option>
+                <option>Pais 3</option>
+              </select>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium text-gray-600">Género</label>
+              <select
+                class="w-full bg-gray-50 border border-gray-200 rounded-lg py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option>Hombre</option>
+                <option>Mujer</option>
+                <option>Otro</option>
+                <option>Prefiero no Decirlo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="w-full mt-10 bg-white">
+          <h2 class="text-xl font-bold text-gray-800">Mis direcciones de Email</h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <!-- Email 1 -->
+            <div class="flex flex-row items-center p-3 bg-gray-50 rounded-xl border border-gray-100 min-w-0">
+              <i class="fa-solid fa-envelope bg-blue-100 p-3 rounded-full text-blue-600 shrink-0"></i>
+              <div class="flex flex-col ml-3 min-w-0">
+                <h2 class="font-medium text-gray-800 truncate text-sm md:text-base">angrybirdrojo@gmail.com</h2>
+                <h2 class="text-xs md:text-sm text-gray-500">Dirección Principal</h2>
+              </div>
+            </div>
+
+            <!-- Email 2 -->
+            <div class="flex flex-row items-center p-3 bg-gray-50 rounded-xl border border-gray-100 min-w-0">
+              <i class="fa-solid fa-envelope bg-blue-100 p-3 rounded-full text-blue-600 shrink-0"></i>
+              <div class="flex flex-col ml-3 min-w-0">
+                <h2 class="font-medium text-gray-800 truncate text-sm md:text-base">angrybirdrojo2@gmail.com</h2>
+                <h2 class="text-xs md:text-sm text-gray-500">Dirección Secundaria</h2>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <a class="inline-block bg-blue-50 text-blue-600 hover:bg-blue-100 text-sm font-medium px-4 py-3 rounded-xl transition-colors"
+              href="">
+              + Agregar dirección de Email
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+{% endblock %}
