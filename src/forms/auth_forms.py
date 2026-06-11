@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
+from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, ValidationError
 from src.models.ModeloUsuario import ModeloUsuario
 
 class LoginForm(FlaskForm):
@@ -21,4 +21,4 @@ class RegisterForm(FlaskForm):
     def validate_email(self, field):
         existing = ModeloUsuario.get_by_email(field.data)
         if existing:
-            raise ValueError('El correo ya está registrado')
+            raise ValidationError('El correo ya está registrado')

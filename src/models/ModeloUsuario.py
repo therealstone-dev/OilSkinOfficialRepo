@@ -31,9 +31,9 @@ class ModeloUsuario:
             return None
 
     @classmethod
-    def create(cls, nombre, email, password, direccion, celular, telefono=None, id_rol=2):
+    def create(cls, nombre, email, password, direccion, celular, telefono=None, id_rol=1):
         """
-        Crea un nuevo usuario. Por defecto asigna id_rol=2 (cliente). Ajusta si tu DB usa otro id.
+        Crea un nuevo usuario. Por defecto asigna id_rol=1 (cliente). Ajusta si tu DB usa otro id.
         """
         try:
             hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())

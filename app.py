@@ -1,3 +1,4 @@
+from datetime import timedelta
 from flask import Flask
 from pathlib import Path
 from decouple import config
@@ -23,6 +24,9 @@ def create_app():
     # Seguridad: clave secreta para sesiones y CSRF
     app.secret_key = config('SECRET_KEY', default='dev-secret-key')
     app.config['WTF_CSRF_ENABLED'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.permanent_session_lifetime = timedelta(days=7)
 
     app.register_blueprint(main_routes.main, url_prefix='/')
     app.register_blueprint(auth_routes.auth, url_prefix='/auth')

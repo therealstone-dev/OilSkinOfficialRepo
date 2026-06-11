@@ -21,8 +21,10 @@ def login():
         ok, user = ModeloUsuario.verify_password(email, password)
         if ok:
             # Guardar datos en sesión
+            session.permanent = True
             session['user_id'] = user.get('id_usuario') if isinstance(user, dict) else user[0]
             session['user_name'] = user.get('nombre') if isinstance(user, dict) else user[1]
+            session['user_email'] = user.get('email') if isinstance(user, dict) else user[6]
             flash('Inicio de sesión exitoso', 'success')
             return redirect(url_for('user_blueprint.profile'))
         else:
