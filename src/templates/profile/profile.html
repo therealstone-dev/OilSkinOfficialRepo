@@ -5,14 +5,13 @@
 
 {% block content %}
 
-<body class="min-h-screen bg-gray-200 overflow-x-hidden">
   {{ sidebar(items) }}
   <main class="ml-0 sm:ml-64 bg-white min-h-screen p-8 transition-all duration-300">
     <div class="w-full">
       <header class="flex flex-row justify-between items-center w-full gap-4 mb-6 md:mb-10">
         <div class="min-w-0 flex-1">
           <h1 class="text-xl md:text-2xl font-bold truncate text-gray-800">
-            Bienvenido, <span class="text-gray-400 font-normal">La Piedra</span>
+                Bienvenido, <span class="text-gray-400 font-normal">{{ user.nombre }}</span>
           </h1>
           <p class="text-xs md:text-sm text-gray-400">Lunes, 9 Marzo 2026</p>
         </div>
@@ -40,8 +39,8 @@
           <div class="flex flex-col sm:flex-row p-6 md:p-8 gap-4 items-center text-center sm:text-left">
             <img src="img/image.png" class="w-16 h-16 rounded-full shadow" alt="Avatar">
             <div class="min-w-0">
-              <h2 class="text-xl font-bold text-gray-800 truncate">Angry Bird Rojo</h2>
-              <h2 class="text-gray-500 text-sm md:text-base break-all">angrybirdrojo@gmail.com</h2>
+              <h2 class="text-xl font-bold text-gray-800 truncate">{{ user.nombre }}</h2>
+              <h2 class="text-gray-500 text-sm md:text-base break-all">{{ user.email }}</h2>
             </div>
           </div>
         </div>
