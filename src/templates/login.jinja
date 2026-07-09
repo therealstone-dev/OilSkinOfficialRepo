@@ -8,7 +8,13 @@
         <div class="flex flex-row justify-center items-stretch p-[2.5rem]">
             <div class="bg-slate-800/50 w-1/3 p-8 shadow-lg">
                 <h1 class="text-center text-white text-2xl mb-4">Iniciar Sesión</h1>
-                <form action="#" class="flex flex-col gap-y-2">
+                <form method="post" action="{{ url_for('main_blueprint.procesar_formulario') }}" class="flex flex-col gap-y-2">
+                    {% if error %}
+                        <p class="text-red-400">{{ error }}</p>
+                    {% endif %}
+                    {% if success %}
+                        <p class="text-green-400">{{ success }}</p>
+                    {% endif %}
                     <label for="email" class="text-white">Correo electrónico</label>
                     <input type="email" name="email" id="email" placeholder="abcdfghi@jklmn.com"
                         class="h-10 bg-white rounded-md px-3" required aria-required="true">
@@ -23,7 +29,7 @@
                 <h1 class="text-white text-2xl font-medium">¡Bienvenido de Vuelta!</h1>
                 <p class="text-white">
                     Hola viejo, que bueno verte de vuelta, espero no <br>
-                    estes muerto, ahora inicia sesiom y mira novedades
+                    estes muerto, ahora inicia sesión y mira novedades
                 </p>
                 <div onclick="location.href='registro.html'" class="cursor-pointer text-white flex flex-row gap-1 justify-center items-center mx-auto p-4 bg-gray-800/90 rounded-3xl">
                     <h2>¿No tienes cuenta? <span class="text-blue-500">Regístrate Aqui</span></h2>

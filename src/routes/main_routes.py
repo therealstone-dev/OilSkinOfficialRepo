@@ -1,7 +1,7 @@
 # Todo lo que esta aqui merece un refactor urgente
 # Tambien modular todo esto de forma correcta
 
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request
 from src.models.ModeloProductos import ModeloProducto
 from src.models.ModeloCategoria import ModeloCategoria
 from src.utils.nav_helper import get_nav_data
@@ -52,3 +52,14 @@ def show_category(category_name):
                                categorias=get_nav_data())
     else:
         return render_template('error_page.jinja', mensaje="Categoría no encontrada")
+    
+@main.route('/formulario')
+def formulario():
+    return render_template('login.jinja', categorias=get_nav_data())
+
+@main.route('/procesar_formulario', methods=['POST'])
+def procesar_formulario():
+    email = request.form.get('email')
+    password = request.form.get('password')
+
+    return f"Email: {email}, Password: {password}"
