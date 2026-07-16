@@ -26,7 +26,7 @@ def create_app():
     app.config['WTF_CSRF_ENABLED'] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
     app.config['SESSION_COOKIE_HTTPONLY'] = True
-    app.permanent_session_lifetime = timedelta(days=7)
+    app.permanent_session_lifetime = timedelta(days=7) 
 
     app.register_blueprint(main_routes.main, url_prefix='/')
     app.register_blueprint(auth_routes.auth, url_prefix='/auth')

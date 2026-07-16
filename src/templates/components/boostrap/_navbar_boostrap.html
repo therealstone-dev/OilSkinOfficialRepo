@@ -51,7 +51,14 @@
             </ul>
 
             <!-- DERECHA -->
-            <div class="d-flex flex-column flex-lg-row gap-2">
+            <div class="d-flex flex-column flex-lg-row gap-2 align-items-center">
+
+                <a href="{{ url_for('main_blueprint.carrito') }}" class="btn btn-outline-light rounded-pill px-3 position-relative">
+                    🛒 Carrito
+                    {% if cart_items is defined and cart_items > 0 %}
+                        <span class="badge bg-warning text-dark ms-2">{{ cart_items }}</span>
+                    {% endif %}
+                </a>
 
                 <a href="{{ url_for('auth_blueprint.register') }}"
                    class="btn btn-outline-light rounded-pill px-3">
