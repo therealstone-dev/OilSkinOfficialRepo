@@ -2,6 +2,7 @@
 # Tambien modular todo esto de forma correcta
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from src.database.db_mysql import get_connection
 from src.models.ModeloCarrito import ModeloCarrito
 from src.models.ModeloProductos import ModeloProducto
 from src.models.ModeloCategoria import ModeloCategoria
@@ -117,36 +118,50 @@ def checkout():
         return redirect(url_for('main_blueprint.carrito'))
 
     if request.method == 'POST':
-        try:
-            conn = ModeloProducto._get_connection() if hasattr(ModeloProducto, '_get_connection') else None
-        except Exception:
-            conn = None
+        metodo_pago = request.form.get('metodo_pago', 'efectivo')
+        direccion_entrega = request.form.get('direccion_entrega', '').strip()
+        ciudad = request.form.get('ciudad', '').strip()
+        telefono_contacto = request.form.get('telefono_contacto', '').strip()
 
-        if conn is None:
-            flash('No se pudo procesar el pedido en este momento', 'danger')
-            return redirect(url_for('main_blueprint.carrito'))
+        if not direccion_entrega or not ciudad or not telefono_contacto:
+            flash('Completa los datos de entrega', 'danger')
+            return redirect(url_for('main_blueprint.checkout'))
 
         try:
-            with conn.cursor() as cur:
+            conn = get_connection()
+            cur = conn.cursor()
+
+            cur.execute(
+                "INSERT INTO pedido (estado_pedido, subtotal, id_usuario) VALUES (%s, %s, %s)",
+                ('pendiente', ModeloCarrito.total_precio(), session.get('user_id', 1)),
+            )
+            pedido_id = cur.lastrowid
+
+            for item in carrito:
                 cur.execute(
-                    "INSERT INTO pedido (estado_pedido, subtotal, id_usuario) VALUES (%s, %s, %s)",
-                    ('pendiente', ModeloCarrito.total_precio(), session.get('user_id', 1)),
+                    "INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad, precio_unitario, subtotal) VALUES (%s, %s, %s, %s, %s)",
+                    (pedido_id, item['id_producto'], item['cantidad'], item['precio_unitario'], item['subtotal']),
                 )
-                pedido_id = cur.lastrowid
 
-                for item in carrito:
-                    cur.execute(
-                        "INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad, precio_unitario, subtotal) VALUES (%s, %s, %s, %s, %s)",
-                        (pedido_id, item['id_producto'], item['cantidad'], item['precio_unitario'], item['subtotal']),
-                    )
+            cur.execute(
+                "INSERT INTO domicilio (id_pedido, direccion_entrega, ciudad, telefono_contacto, costo_envio, estado_envio) VALUES (%s, %s, %s, %s, %s, %s)",
+                (pedido_id, direccion_entrega, ciudad, telefono_contacto, 0.00, 'pendiente'),
+            )
 
-                conn.commit()
+            cur.execute(
+                "INSERT INTO factura (id_pedido, subtotal, total, metodo_pago) VALUES (%s, %s, %s, %s)",
+                (pedido_id, ModeloCarrito.total_precio(), ModeloCarrito.total_precio(), metodo_pago),
+            )
+
+            conn.commit()
+            cur.close()
+            conn.close()
         except Exception as ex:
-            conn.rollback()
+            if 'conn' in locals():
+                conn.rollback()
+                conn.close()
             flash(f'Error al procesar el pedido: {ex}', 'danger')
             return redirect(url_for('main_blueprint.carrito'))
-        finally:
-            conn.close()
 
         ModeloCarrito.vaciar()
         flash('Compra realizada con éxito', 'success')

@@ -1,0 +1,64 @@
+{% extends 'components/boostrap/layout_boostrap.jinja' %}
+{% block title %}Checkout - OilSkin{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">Checkout</h1>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="mb-3">Resumen de tu compra</h4>
+                    {% for item in carrito %}
+                        <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                            <div>
+                                <strong>{{ item.nombre_producto }}</strong><br>
+                                <small class="text-muted">Cantidad: {{ item.cantidad }}</small>
+                            </div>
+                            <div>${{ "%.2f"|format(item.subtotal) }}</div>
+                        </div>
+                    {% endfor %}
+                    <div class="d-flex justify-content-between mt-3 fw-bold">
+                        <span>Total</span>
+                        <span>${{ "%.2f"|format(total_precio) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="mb-3">Confirmar pedido</h4>
+                    <form method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Método de pago</label>
+                            <select class="form-select" name="metodo_pago" required>
+                                <option value="efectivo">PSE</option>
+                                <option value="transferencia">Tarjeta</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Dirección de entrega</label>
+                            <input type="text" class="form-control" name="direccion_entrega" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ciudad</label>
+                            <input type="text" class="form-control" name="ciudad" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Teléfono de contacto</label>
+                            <input type="text" class="form-control" name="telefono_contacto" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nombre de la persona que recibe el producto</label>
+                            <input type="text" class="form-control" name="nombre" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Confirmar compra</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
