@@ -25,8 +25,12 @@ def login():
             session['user_id'] = user.get('id_usuario') if isinstance(user, dict) else user[0]
             session['user_name'] = user.get('nombre') if isinstance(user, dict) else user[1]
             session['user_email'] = user.get('email') if isinstance(user, dict) else user[6]
+            session['id_rol'] = user.get('id_rol') if isinstance(user, dict) else (user[8] if len(user) > 8 else 1)
             flash('Inicio de sesión exitoso', 'success')
+            if session['id_rol'] == 2:
+                return redirect(url_for('admin_blueprint.dashboard'))
             return redirect(url_for('user_blueprint.profile'))
+
         else:
             flash('Credenciales inválidas', 'danger')
     return render_template('login.jinja', categorias=get_nav_data(), form=form)

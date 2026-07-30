@@ -76,8 +76,13 @@ def ver_factura(id_factura):
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
-        'SELECT f.id_factura, f.id_pedido, f.fecha_factura, f.subtotal, f.total, f.metodo_pago, p.estado_pedido, p.id_usuario '
-        'FROM factura f JOIN pedido p ON p.id_pedido = f.id_pedido WHERE f.id_factura = %s',
+        'SELECT f.id_factura, f.id_pedido, f.fecha_factura, f.subtotal, f.total, f.metodo_pago, p.estado_pedido, p.id_usuario, '
+        'u.nombre AS cliente_nombre, u.email AS cliente_email, u.celular AS cliente_celular, d.direccion_entrega, d.ciudad '
+        'FROM factura f '
+        'JOIN pedido p ON p.id_pedido = f.id_pedido '
+        'LEFT JOIN usuario u ON u.id_usuario = p.id_usuario '
+        'LEFT JOIN domicilio d ON d.id_pedido = p.id_pedido '
+        'WHERE f.id_factura = %s',
         (id_factura,),
     )
     factura = cur.fetchone()
@@ -113,8 +118,13 @@ def descargar_factura_pdf(id_factura):
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
-        'SELECT f.id_factura, f.id_pedido, f.fecha_factura, f.subtotal, f.total, f.metodo_pago, p.estado_pedido, p.id_usuario '
-        'FROM factura f JOIN pedido p ON p.id_pedido = f.id_pedido WHERE f.id_factura = %s',
+        'SELECT f.id_factura, f.id_pedido, f.fecha_factura, f.subtotal, f.total, f.metodo_pago, p.estado_pedido, p.id_usuario, '
+        'u.nombre AS cliente_nombre, u.email AS cliente_email, u.celular AS cliente_celular, d.direccion_entrega, d.ciudad '
+        'FROM factura f '
+        'JOIN pedido p ON p.id_pedido = f.id_pedido '
+        'LEFT JOIN usuario u ON u.id_usuario = p.id_usuario '
+        'LEFT JOIN domicilio d ON d.id_pedido = p.id_pedido '
+        'WHERE f.id_factura = %s',
         (id_factura,),
     )
     factura = cur.fetchone()
@@ -131,16 +141,21 @@ def descargar_factura_pdf(id_factura):
     if not factura:
         return _render_with_cart('error_page.jinja', mensaje='Factura no encontrada')
 
+    fecha_fmt = factura['fecha_factura'].strftime('%d/%m/%Y %H:%M') if hasattr(factura['fecha_factura'], 'strftime') else str(factura['fecha_factura'])
+
     factura_pdf = {
+        'id_factura': factura['id_factura'],
         'numero_factura': f'FAC-2026-{factura["id_factura"]:06d}',
         'estado_factura': factura['estado_pedido'],
-        'fecha_factura': factura['fecha_factura'],
-        'fecha_vencimiento': factura['fecha_factura'],
-        'subtotal': factura['subtotal'],
-        'impuesto': 0.00,
-        'descuento': 0.00,
-        'total': factura['total'],
+        'fecha_factura': fecha_fmt,
+        'subtotal': float(factura['subtotal']),
+        'total': float(factura['total']),
         'metodo_pago': factura['metodo_pago'],
+        'cliente_nombre': factura.get('cliente_nombre') or 'Cliente General',
+        'cliente_email': factura.get('cliente_email') or '',
+        'cliente_celular': factura.get('cliente_celular') or '',
+        'direccion_entrega': factura.get('direccion_entrega') or '',
+        'ciudad': factura.get('ciudad') or '',
     }
 
     pdf_bytes = FacturacionService.construir_pdf_factura(
@@ -148,14 +163,15 @@ def descargar_factura_pdf(id_factura):
         items=[{
             'descripcion': item['descripcion'],
             'cantidad': item['cantidad'],
-            'precio_unitario': item['precio_unitario'],
-            'total_linea': item['subtotal'],
+            'precio_unitario': float(item['precio_unitario']),
+            'total_linea': float(item['subtotal']),
         } for item in items],
         base_url=request.host_url.rstrip('/'),
     )
     return Response(pdf_bytes, mimetype='application/pdf', headers={
         'Content-Disposition': f'attachment; filename={factura_pdf["numero_factura"]}.pdf'
     })
+
 
 @main.route('/carrito/agregar', methods=['POST'])
 def agregar_al_carrito():
