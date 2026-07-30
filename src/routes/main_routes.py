@@ -304,12 +304,12 @@ def checkout():
             return redirect(url_for('main_blueprint.carrito'))
 
         ModeloCarrito.vaciar()
-        flash('Compra realizada con éxito', 'success')
-        return redirect(url_for('main_blueprint.ver_factura', id_factura=factura['id_factura']))
+        flash('Compra realizada con éxito. Tu pedido ha sido registrado en tu panel.', 'success')
+        return redirect(url_for('user_blueprint.user_history'))
 
     return _render_with_cart(
         'checkout.jinja',
         carrito=carrito,
         total_items=ModeloCarrito.total_items(),
         total_precio=ModeloCarrito.total_precio(),
-    )
+    )

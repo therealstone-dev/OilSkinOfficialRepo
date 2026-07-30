@@ -94,4 +94,21 @@ class ModeloUsuario:
             return True, "Perfil actualizado con éxito."
         except Exception as ex:
             print(f"Error en update_profile: {ex}")
-            return False, f"Error al actualizar perfil: {ex}"
+            return False, f"Error al actualizar perfil: {ex}"
+
+    @classmethod
+    def update_images(cls, id_usuario, foto_perfil=None, foto_portada=None):
+        try:
+            conn = get_connection()
+            cur = conn.cursor()
+            sql = ("UPDATE usuario SET foto_perfil = COALESCE(%s, foto_perfil), "
+                   "foto_portada = COALESCE(%s, foto_portada) WHERE id_usuario = %s")
+            cur.execute(sql, (foto_perfil, foto_portada, id_usuario))
+            conn.commit()
+            cur.close()
+            conn.close()
+            return True, "Imágenes de perfil actualizadas correctamente."
+        except Exception as ex:
+            print(f"Error en update_images: {ex}")
+            return False, f"Error al actualizar imágenes: {ex}"
+

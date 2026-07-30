@@ -60,6 +60,14 @@
                     {% endif %}
                 </a>
 
+                {% if session.get('user_id') %}
+                <a href="{{ url_for('user_blueprint.profile') }}" class="btn btn-outline-warning rounded-pill px-3 fw-bold">
+                    👤 Mi Perfil
+                </a>
+                <a href="{{ url_for('auth_blueprint.logout') }}" class="btn btn-outline-danger rounded-pill px-3">
+                    Cerrar Sesión
+                </a>
+                {% else %}
                 <a href="{{ url_for('auth_blueprint.register') }}"
                    class="btn btn-outline-light rounded-pill px-3">
                     Regístrate
@@ -69,8 +77,9 @@
                    class="btn btn-outline-light rounded-pill px-3">
                     Inicia Sesión
                 </a>
-
+                {% endif %}
             </div>
+
 
         </div>
     </div>

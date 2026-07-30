@@ -5,104 +5,156 @@
 
 {% block content %}
 
-  {{ sidebar(items) }}
-  <main class="ml-0 sm:ml-64 bg-white min-h-screen p-8 transition-all duration-300">
-    <div class="w-full">
-      <header class="flex flex-row justify-between items-center w-full gap-4 mb-6 md:mb-10">
-        <div class="min-w-0 flex-1">
-          <h1 class="text-xl md:text-2xl font-bold truncate text-gray-800">
-            Bienvenido, <span class="text-blue-600 font-semibold">{{ user.nombre if user else session.get('user_name', '') }}</span>
-          </h1>
-          <p class="text-xs md:text-sm text-gray-400">Perfil de Usuario y Configuración de Cuenta</p>
-        </div>
+{{ sidebar(items) }}
+<main class="ml-0 sm:ml-64 bg-white min-h-screen p-4 md:p-8 transition-all duration-300">
+  <div class="w-full">
+    <header class="flex flex-row justify-between items-center w-full gap-4 mb-6 md:mb-10">
+      <div class="min-w-0 flex-1">
+        <h1 class="text-xl md:text-2xl font-bold truncate text-gray-800">
+          Bienvenido, <span class="text-blue-600 font-semibold">{{ user.nombre if user else session.get('user_name', '') }}</span>
+        </h1>
+        <p class="text-xs md:text-sm text-gray-400">Perfil de Usuario y Configuración de Cuenta</p>
+      </div>
 
-        <div class="flex flex-row items-center gap-3 md:gap-4 shrink-0">
-          <button class="relative group">
-            <i class="fa-regular fa-bell bg-gray-100 p-3 md:p-4 rounded-xl text-lg text-blue-600 group-hover:bg-blue-50 transition-colors"></i>
-            <span class="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full border-2 border-white"></span>
-          </button>
+      <div class="flex flex-row items-center gap-3 md:gap-4 shrink-0">
+        <button class="relative group">
+          <i class="fa-regular fa-bell bg-gray-100 p-3 md:p-4 rounded-xl text-lg text-blue-600 group-hover:bg-blue-50 transition-colors"></i>
+          <span class="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full border-2 border-white"></span>
+        </button>
+        {% if user and user.foto_perfil %}
+          <img src="{{ user.foto_perfil }}" class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-blue-600 shadow-sm" alt="Avatar">
+        {% else %}
           <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
             {{ (user.nombre[0] if user and user.nombre else 'U') | upper }}
           </div>
-        </div>
-      </header>
-
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          <div class="mb-6 space-y-3">
-            {% for category, message in messages %}
-              <div class="p-4 rounded-xl text-sm font-medium border {% if category == 'success' %}bg-green-50 text-green-700 border-green-200{% elif category == 'danger' %}bg-red-50 text-red-700 border-red-200{% else %}bg-blue-50 text-blue-700 border-blue-200{% endif %}">
-                {{ message }}
-              </div>
-            {% endfor %}
-          </div>
         {% endif %}
-      {% endwith %}
+      </div>
+    </header>
 
-      <div class="w-full bg-white mt-6">
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 md:p-8 rounded-t-2xl text-white flex flex-col sm:flex-row gap-6 items-center shadow-sm">
-          <div class="w-20 h-20 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-3xl font-extrabold border-2 border-white/50">
-            {{ (user.nombre[0] if user and user.nombre else 'U') | upper }}
-          </div>
-          <div class="min-w-0 text-center sm:text-left">
-            <h2 class="text-2xl font-bold truncate">{{ user.nombre if user else '' }}</h2>
-            <p class="text-blue-100 text-sm break-all"><i class="fa-regular fa-envelope mr-1.5"></i>{{ user.email if user else '' }}</p>
-            <p class="text-blue-200 text-xs mt-1"><i class="fa-solid fa-location-dot mr-1.5"></i>{{ user.direccion if user else 'Sin dirección asignada' }}</p>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="mb-6 space-y-3">
+          {% for category, message in messages %}
+            <div class="p-4 rounded-xl text-sm font-medium border {% if category == 'success' %}bg-green-50 text-green-700 border-green-200{% elif category == 'danger' %}bg-red-50 text-red-700 border-red-200{% else %}bg-blue-50 text-blue-700 border-blue-200{% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Banner de Perfil e Imagen del Usuario -->
+    <div class="w-full bg-white mt-6 rounded-2xl overflow-hidden shadow-sm border border-gray-200">
+      <div class="relative min-h-48 md:min-h-56 bg-cover bg-center flex items-end p-6"
+           style="background-image: url('{{ user.foto_portada if user and user.foto_portada else url_for('static', filename='img/fondo_2.png') }}');">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+
+        <button onclick="document.getElementById('imageUpdateModal').classList.toggle('hidden')"
+          class="absolute top-4 right-4 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-xs md:text-sm px-4 py-2 rounded-xl transition-all shadow-md flex items-center gap-2">
+          <i class="fa-solid fa-camera"></i> Personalizar Banner y Avatar
+        </button>
+
+        <div class="relative z-10 flex flex-col sm:flex-row gap-5 items-center sm:items-end w-full">
+          {% if user and user.foto_perfil %}
+            <img src="{{ user.foto_perfil }}" class="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-4 border-white shadow-lg shrink-0" alt="Avatar">
+          {% else %}
+            <div class="w-24 h-24 md:w-28 md:h-28 rounded-full bg-blue-600 text-white flex items-center justify-center text-4xl font-extrabold border-4 border-white shadow-lg shrink-0">
+              {{ (user.nombre[0] if user and user.nombre else 'U') | upper }}
+            </div>
+          {% endif %}
+
+          <div class="text-white text-center sm:text-left min-w-0">
+            <h2 class="text-2xl md:text-3xl font-extrabold truncate drop-shadow">{{ user.nombre if user else '' }}</h2>
+            <p class="text-blue-200 text-sm drop-shadow"><i class="fa-regular fa-envelope mr-1.5"></i>{{ user.email if user else '' }}</p>
           </div>
         </div>
+      </div>
 
-        <form method="POST" action="{{ url_for('user_blueprint.update_profile') }}" class="p-6 md:p-8 bg-gray-50 border border-t-0 border-gray-100 rounded-b-2xl shadow-sm">
-          <h2 class="text-xl font-bold text-gray-800 mb-6">Información Personal y de Contacto</h2>
-          
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
-            <!-- Nombre Completo -->
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-semibold text-gray-700">Nombre Completo <span class="text-red-500">*</span></label>
-              <input name="nombre" value="{{ user.nombre if user else '' }}" required
-                class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                type="text" placeholder="Tu nombre completo">
+      <!-- Panel Desplegable para Actualizar Banner y Foto -->
+      <div id="imageUpdateModal" class="hidden p-6 bg-blue-50 border-t border-blue-100">
+        <form method="POST" action="{{ url_for('user_blueprint.update_profile_images') }}" class="flex flex-col gap-4">
+          <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider">Actualizar URLs de Imágenes de Perfil</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs font-semibold text-gray-600 mb-1 block">URL de la Foto de Perfil (Avatar)</label>
+              <input type="url" name="foto_perfil" value="{{ user.foto_perfil if user and user.foto_perfil else '' }}"
+                class="w-full bg-white border border-gray-300 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="https://ejemplo.com/mi-avatar.jpg">
             </div>
-
-            <!-- Email -->
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-semibold text-gray-700">Correo Electrónico <span class="text-red-500">*</span></label>
-              <input name="email" value="{{ user.email if user else '' }}" required
-                class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                type="email" placeholder="correo@ejemplo.com">
-            </div>
-
-            <!-- Celular -->
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-semibold text-gray-700">Número de Celular <span class="text-red-500">*</span></label>
-              <input name="celular" value="{{ user.celular if user else '' }}" required
-                class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                type="text" placeholder="Ej: 3001234567">
-            </div>
-
-            <!-- Teléfono Fijo -->
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-semibold text-gray-700">Teléfono Fijo (Opcional)</label>
-              <input name="telefono" value="{{ user.telefono if user and user.telefono else '' }}"
-                class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                type="text" placeholder="Ej: 6017654321">
-            </div>
-
-            <!-- Dirección de Residencia -->
-            <div class="flex flex-col gap-2 lg:col-span-2">
-              <label class="text-sm font-semibold text-gray-700">Dirección de Entrega / Residencia <span class="text-red-500">*</span></label>
-              <input name="direccion" value="{{ user.direccion if user else '' }}" required
-                class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                type="text" placeholder="Calle 10 # 2-34, Ciudad">
+            <div>
+              <label class="text-xs font-semibold text-gray-600 mb-1 block">URL de la Imagen de Portada (Banner)</label>
+              <input type="url" name="foto_portada" value="{{ user.foto_portada if user and user.foto_portada else '' }}"
+                class="w-full bg-white border border-gray-300 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="https://ejemplo.com/mi-banner.jpg">
             </div>
           </div>
-
-          <div class="mt-8 flex justify-end">
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg shadow-blue-200 transition-all hover:-translate-y-0.5">
-              <i class="fa-solid fa-floppy-disk mr-2"></i>Guardar Cambios
+          <div class="flex justify-end gap-3 mt-2">
+            <button type="button" onclick="document.getElementById('imageUpdateModal').classList.add('hidden')"
+              class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl text-xs font-bold transition-all">
+              Cancelar
+            </button>
+            <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md transition-all">
+              Guardar Imágenes
             </button>
           </div>
         </form>
       </div>
+
+      <!-- Formulario de Datos Personales -->
+      <form method="POST" action="{{ url_for('user_blueprint.update_profile') }}"
+        class="p-6 md:p-8 bg-gray-50 border-t border-gray-200">
+        <h2 class="text-xl font-bold text-gray-800 mb-6">Información Personal y de Contacto</h2>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
+          <!-- Nombre Completo -->
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-semibold text-gray-700">Nombre Completo <span class="text-red-500">*</span></label>
+            <input name="nombre" value="{{ user.nombre if user else '' }}" required
+              class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              type="text" placeholder="Tu nombre completo">
+          </div>
+
+          <!-- Email -->
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-semibold text-gray-700">Correo Electrónico <span class="text-red-500">*</span></label>
+            <input name="email" value="{{ user.email if user else '' }}" required
+              class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              type="email" placeholder="correo@ejemplo.com">
+          </div>
+
+          <!-- Celular -->
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-semibold text-gray-700">Número de Celular <span class="text-red-500">*</span></label>
+            <input name="celular" value="{{ user.celular if user else '' }}" required
+              class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              type="text" placeholder="Ej: 3001234567">
+          </div>
+
+          <!-- Teléfono Fijo -->
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-semibold text-gray-700">Teléfono Fijo (Opcional)</label>
+            <input name="telefono" value="{{ user.telefono if user and user.telefono else '' }}"
+              class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              type="text" placeholder="Ej: 6017654321">
+          </div>
+
+          <!-- Dirección de Residencia -->
+          <div class="flex flex-col gap-2 lg:col-span-2">
+            <label class="text-sm font-semibold text-gray-700">Dirección de Entrega / Residencia <span class="text-red-500">*</span></label>
+            <input name="direccion" value="{{ user.direccion if user else '' }}" required
+              class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              type="text" placeholder="Calle 10 # 2-34, Ciudad">
+          </div>
+        </div>
+
+        <div class="mt-8 flex justify-end">
+          <button type="submit"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg shadow-blue-200 transition-all hover:-translate-y-0.5">
+            <i class="fa-solid fa-floppy-disk mr-2"></i>Guardar Cambios
+          </button>
+        </div>
+      </form>
     </div>
-  </main>
+  </div>
+</main>
 {% endblock %}

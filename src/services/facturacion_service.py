@@ -137,7 +137,8 @@ class FacturacionService:
         qr_bytes.seek(0)
         story.append(Spacer(1, 0.2 * inch))
         story.append(Paragraph('Verifique esta factura escaneando el código QR.', styles['BodyText']))
-        story.append(Image(ImageReader(qr_bytes), width=1.8 * inch, height=1.8 * inch))
+        story.append(Image(qr_bytes, width=1.8 * inch, height=1.8 * inch))
+
 
         doc.build(story)
         return buffer.getvalue()
