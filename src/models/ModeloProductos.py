@@ -62,3 +62,23 @@ class ModeloProducto:
         cur.close()
         conn.close()
         return categories
+    
+    @classmethod
+    def decrement_stock(cls, cur, id_producto, cantidad):
+        sql = (
+            'UPDATE producto '
+            'SET stock = stock - %s '
+            'WHERE id_producto = %s AND stock >= %s'
+        )
+        cur.execute(sql, (cantidad, id_producto, cantidad))
+        return cur.rowcount == 1
+
+    @classmethod
+    def get_stock(cls, id_producto):
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute('SELECT stock FROM producto WHERE id_producto = %s', (id_producto,))
+        result = cur.fetchone()
+        cur.close()
+        conn.close()
+        return result['stock'] if result else None

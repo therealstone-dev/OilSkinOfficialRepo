@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <title>Factura</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 32px; color: #222; }
+      .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+      .box { border: 1px solid #ddd; padding: 12px; margin-bottom: 12px; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { border-bottom: 1px solid #ddd; padding: 8px; text-align: left; }
+      .total { text-align: right; font-weight: bold; }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div>
+        <h2>Factura {{ factura.numero_factura }}</h2>
+        <p>Estado: {{ factura.estado_factura }}</p>
+      </div>
+      <div>
+        <p>Fecha: {{ factura.fecha_factura }}</p>
+        <p>Vence: {{ factura.fecha_vencimiento }}</p>
+      </div>
+    </div>
+
+    <div class="box">
+      <p><strong>Pedido:</strong> {{ factura.id_pedido }}</p>
+      <p><strong>Método de pago:</strong> {{ factura.metodo_pago }}</p>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Cantidad</th>
+          <th>Precio unitario</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td>{{ item.descripcion }}</td>
+          <td>{{ item.cantidad }}</td>
+          <td>{{ item.precio_unitario }}</td>
+          <td>{{ item.total_linea }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="box total">
+      <p>Subtotal: {{ factura.subtotal }}</p>
+      <p>Impuesto: {{ factura.impuesto }}</p>
+      <p>Descuento: {{ factura.descuento }}</p>
+      <p>Total: {{ factura.total }}</p>
+    </div>
+
+    <div class="box">
+      <p>Verificación: <a href="{{ url_for('main_blueprint.ver_factura', numero_factura=factura.numero_factura, _external=True) }}">{{ url_for('main_blueprint.ver_factura', numero_factura=factura.numero_factura, _external=True) }}</a></p>
+    </div>
+  </body>
+</html>

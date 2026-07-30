@@ -1,21 +1,86 @@
-INSERT INTO producto (nombre_producto, descripcion, precio, stock, id_categoria) VALUES 
--- CATEGORÍA 1: CUIDADO CORPORAL
-('Crema Corporal Palma Real', 'Crema hidratante de 400ml con vitamina E extraída de aceite de palma.', 28500.00, 45, 1),
-('Jabón de Palma y Coco', 'Barra artesanal de 100g para limpieza profunda sin resecar la piel.', 8500.00, 120, 1),
-('Tónico Luminea', 'Tonifica y refresca la piel del rostro en segundos.', 80000, 10, 2),
-
--- CATEGORÍA 2: CUIDADO FACIAL
-('Sérum Facial Nocturno', 'Concentrado regenerador con antioxidantes naturales de palma roja.', 45000.00, 25, 2),
-('Bálsamo Labial Humectante', 'Protector labial 100% natural con cera de palma y karité.', 12500.00, 150, 2),
-('Limpiador Oleoso 100ml', 'Aceite ligero para remover maquillaje resistente al agua.', 38000.00, 40, 2),
-
--- CATEGORÍA 3: ACCESORIOS Y COMPLEMENTOS
-('Discos de Algodón x80', 'Algodón suave premium para aplicación de tónicos y desmaquillantes.', 9500.00, 200, 3),
-('Frasco Atomizador 60ml', 'Spray vacío de viaje, ideal para lociones o mezclas caseras.', 4500.00, 85, 3),
-('Espátula Cosmética', 'Mini espátula de acrílico para evitar contaminar las cremas con las manos.', 3200.00, 100, 3),
-('Toalla Facial Microfibra', 'Toalla ultra suave para secado delicado del rostro.', 15000.00, 60, 3);
-
-/*INSERT INTO categoria (nombre_categoria, descripcion) VALUES 
-('Cuidado Corporal', 'Productos hidratantes y nutritivos para la piel a base de extractos de palma.'),
-('Cuidado Facial', 'Fórmulas delicadas y tratamientos intensivos para la salud del rostro.'),
-('Accesorios y Complementos', 'Herramientas de aplicación y utilidades como algodones, atomizadores y envases.');*/
+CREATE TABLE rol (
+  id_rol INT PRIMARY KEY AUTO_INCREMENT,
+  nombre_rol VARCHAR(50) NOT NULL,
+  permisos VARCHAR(255) NOT NULL
+)ENGINE=InnoDB;
+CREATE TABLE categoria (
+  id_categoria INT PRIMARY KEY AUTO_INCREMENT,
+  nombre_categoria VARCHAR(50) NOT NULL,
+  descripcion TEXT NOT NULL
+)ENGINE=InnoDB;
+CREATE TABLE usuario (
+  id_usuario INT PRIMARY KEY AUTO_INCREMENT,
+  nombre VARCHAR(50) NOT NULL,
+  contrasena VARCHAR(256) NOT NULL,
+  direccion VARCHAR(50) NOT NULL,
+  telefono VARCHAR(15),
+  celular VARCHAR(15) NOT NULL,
+  email VARCHAR(80) NOT NULL UNIQUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  id_rol INT NOT NULL,
+  FOREIGN KEY (id_rol) REFERENCES rol(id_rol)
+)ENGINE=InnoDB;
+CREATE TABLE producto (
+  id_producto INT PRIMARY KEY AUTO_INCREMENT,
+  nombre_producto VARCHAR(150) NOT NULL,
+  descripcion TEXT,
+  precio DECIMAL(10,2) NOT NULL,
+  stock INT NOT NULL,
+  id_categoria INT NOT NULL,
+  FOREIGN KEY (id_categoria) REFERENCES categoria(id_categoria)
+)ENGINE=InnoDB;
+CREATE TABLE pedido (
+  id_pedido INT PRIMARY KEY AUTO_INCREMENT,
+  fecha_pedido DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  estado_pedido ENUM('pendiente', 'pagado', 'cancelado') DEFAULT 'pendiente',
+  subtotal DECIMAL(10,2) NOT NULL,
+  id_usuario INT NOT NULL,
+  FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
+)ENGINE=InnoDB;
+CREATE TABLE factura (
+  id_factura INT PRIMARY KEY AUTO_INCREMENT,
+  id_pedido INT NOT NULL UNIQUE,
+  numero_factura VARCHAR(30) NOT NULL UNIQUE,
+  fecha_factura DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  fecha_vencimiento DATETIME NOT NULL,
+  estado_factura ENUM('borrador', 'emitida', 'pagada', 'anulada', 'vencida') NOT NULL DEFAULT 'borrador',
+  subtotal DECIMAL(10,2) NOT NULL,
+  impuesto DECIMAL(10,2) NOT NULL,
+  descuento DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  total DECIMAL(10,2) NOT NULL,
+  metodo_pago ENUM('efectivo', 'transferencia', 'tarjeta') NOT NULL,
+  FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido)
+)ENGINE=InnoDB;
+CREATE TABLE detalle_factura (
+  id_detalle_factura INT PRIMARY KEY AUTO_INCREMENT,
+  id_factura INT NOT NULL,
+  id_producto INT NOT NULL,
+  descripcion VARCHAR(255) NOT NULL,
+  cantidad INT NOT NULL,
+  precio_unitario DECIMAL(10,2) NOT NULL,
+  porcentaje_impuesto DECIMAL(5,2) NOT NULL,
+  subtotal DECIMAL(10,2) NOT NULL,
+  total_linea DECIMAL(10,2) NOT NULL,
+  FOREIGN KEY (id_factura) REFERENCES factura(id_factura),
+  FOREIGN KEY (id_producto) REFERENCES producto(id_producto)
+)ENGINE=InnoDB;
+CREATE TABLE domicilio (
+  id_domicilio INT PRIMARY KEY AUTO_INCREMENT,
+  id_pedido INT NOT NULL,
+  direccion_entrega VARCHAR(50) NOT NULL,
+  ciudad VARCHAR(50) NOT NULL,
+  telefono_contacto VARCHAR(15) NOT NULL,
+  costo_envio DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  estado_envio ENUM('pendiente','en camino','entregado','cancelado') NOT NULL,
+  FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido)
+)ENGINE=InnoDB;
+CREATE TABLE detalle_pedido (
+  id_detalle INT PRIMARY KEY AUTO_INCREMENT,
+  id_pedido INT NOT NULL,
+  id_producto INT NOT NULL,
+  cantidad INT NOT NULL,
+  precio_unitario DECIMAL(10,2) NOT NULL,
+  subtotal DECIMAL(10,2) NOT NULL,
+  FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido),
+  FOREIGN KEY (id_producto) REFERENCES producto(id_producto)
+)ENGINE=InnoDB;

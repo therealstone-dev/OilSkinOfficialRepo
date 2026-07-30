@@ -1,11 +1,18 @@
 # Todo lo que esta aqui merece un refactor urgente
 # Tambien modular todo esto de forma correcta
 
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+import base64
+import io
+from datetime import datetime
+from flask import Blueprint, flash, redirect, render_template, request, session, url_for, Response
+import traceback
+import qrcode
 from src.database.db_mysql import get_connection
 from src.models.ModeloCarrito import ModeloCarrito
 from src.models.ModeloProductos import ModeloProducto
 from src.models.ModeloCategoria import ModeloCategoria
+from src.services.facturacion_service import FacturacionService
+from src.models.ModeloUsuario import ModeloUsuario
 from src.utils.nav_helper import get_nav_data
 
 
@@ -64,6 +71,91 @@ def carrito():
         total_precio=ModeloCarrito.total_precio(),
     )
 
+@main.route('/factura/<int:id_factura>')
+def ver_factura(id_factura):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        'SELECT f.id_factura, f.id_pedido, f.fecha_factura, f.subtotal, f.total, f.metodo_pago, p.estado_pedido, p.id_usuario '
+        'FROM factura f JOIN pedido p ON p.id_pedido = f.id_pedido WHERE f.id_factura = %s',
+        (id_factura,),
+    )
+    factura = cur.fetchone()
+    items = []
+    if factura:
+        cur.execute(
+            'SELECT dp.id_producto, p.nombre_producto AS descripcion, dp.cantidad, dp.precio_unitario, dp.subtotal '
+            'FROM detalle_pedido dp JOIN producto p ON p.id_producto = dp.id_producto WHERE dp.id_pedido = %s',
+            (factura['id_pedido'],),
+        )
+        items = cur.fetchall()
+    cur.close()
+    conn.close()
+    if not factura:
+        return _render_with_cart('error_page.jinja', mensaje='Factura no encontrada')
+
+    qr_payload = request.host_url.rstrip('/') + url_for('main_blueprint.ver_factura', id_factura=factura['id_factura'])
+    qr_buffer = io.BytesIO()
+    qrcode.make(qr_payload).save(qr_buffer, format='PNG')
+    qr_base64 = base64.b64encode(qr_buffer.getvalue()).decode('ascii')
+
+    return render_template(
+        'ver_factura.html',
+        factura=factura,
+        items=items,
+        qr_image_data=qr_base64,
+        categorias=get_nav_data(),
+    )
+
+
+@main.route('/factura/<int:id_factura>/pdf')
+def descargar_factura_pdf(id_factura):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        'SELECT f.id_factura, f.id_pedido, f.fecha_factura, f.subtotal, f.total, f.metodo_pago, p.estado_pedido, p.id_usuario '
+        'FROM factura f JOIN pedido p ON p.id_pedido = f.id_pedido WHERE f.id_factura = %s',
+        (id_factura,),
+    )
+    factura = cur.fetchone()
+    items = []
+    if factura:
+        cur.execute(
+            'SELECT dp.id_producto, p.nombre_producto AS descripcion, dp.cantidad, dp.precio_unitario, dp.subtotal '
+            'FROM detalle_pedido dp JOIN producto p ON p.id_producto = dp.id_producto WHERE dp.id_pedido = %s',
+            (factura['id_pedido'],),
+        )
+        items = cur.fetchall()
+    cur.close()
+    conn.close()
+    if not factura:
+        return _render_with_cart('error_page.jinja', mensaje='Factura no encontrada')
+
+    factura_pdf = {
+        'numero_factura': f'FAC-2026-{factura["id_factura"]:06d}',
+        'estado_factura': factura['estado_pedido'],
+        'fecha_factura': factura['fecha_factura'],
+        'fecha_vencimiento': factura['fecha_factura'],
+        'subtotal': factura['subtotal'],
+        'impuesto': 0.00,
+        'descuento': 0.00,
+        'total': factura['total'],
+        'metodo_pago': factura['metodo_pago'],
+    }
+
+    pdf_bytes = FacturacionService.construir_pdf_factura(
+        factura=factura_pdf,
+        items=[{
+            'descripcion': item['descripcion'],
+            'cantidad': item['cantidad'],
+            'precio_unitario': item['precio_unitario'],
+            'total_linea': item['subtotal'],
+        } for item in items],
+        base_url=request.host_url.rstrip('/'),
+    )
+    return Response(pdf_bytes, mimetype='application/pdf', headers={
+        'Content-Disposition': f'attachment; filename={factura_pdf["numero_factura"]}.pdf'
+    })
 
 @main.route('/carrito/agregar', methods=['POST'])
 def agregar_al_carrito():
@@ -128,12 +220,39 @@ def checkout():
             return redirect(url_for('main_blueprint.checkout'))
 
         try:
+            usuario_id = session.get('user_id')
+            if usuario_id is None:
+                usuario_id = 1
+            elif not ModeloUsuario.get_by_id(usuario_id):
+                usuario_id = 1
+
+            usuario_existente = ModeloUsuario.get_by_id(usuario_id)
+            if not usuario_existente:
+                conn = get_connection()
+                cur = conn.cursor()
+                cur.execute('SELECT id_rol FROM rol LIMIT 1')
+                rol = cur.fetchone()
+                if rol:
+                    cur.execute(
+                        'INSERT INTO usuario (nombre, contrasena, direccion, telefono, celular, email, id_rol) VALUES (%s, %s, %s, %s, %s, %s, %s)',
+                        ('Cliente base', 'temp', 'Sin dirección', '0000000000', '0000000000', f'cliente-{usuario_id}-{int(datetime.now().timestamp())}@example.com', rol['id_rol']),
+                    )
+                    conn.commit()
+                    usuario_id = cur.lastrowid
+                else:
+                    usuario_id = None
+                cur.close()
+                conn.close()
+
+            if usuario_id is None:
+                raise RuntimeError('No existe un usuario válido para asociar el pedido')
+
             conn = get_connection()
             cur = conn.cursor()
 
             cur.execute(
                 "INSERT INTO pedido (estado_pedido, subtotal, id_usuario) VALUES (%s, %s, %s)",
-                ('pendiente', ModeloCarrito.total_precio(), session.get('user_id', 1)),
+                ('pendiente', ModeloCarrito.total_precio(), usuario_id),
             )
             pedido_id = cur.lastrowid
 
@@ -148,9 +267,22 @@ def checkout():
                 (pedido_id, direccion_entrega, ciudad, telefono_contacto, 0.00, 'pendiente'),
             )
 
-            cur.execute(
-                "INSERT INTO factura (id_pedido, subtotal, total, metodo_pago) VALUES (%s, %s, %s, %s)",
-                (pedido_id, ModeloCarrito.total_precio(), ModeloCarrito.total_precio(), metodo_pago),
+            factura = FacturacionService.crear_desde_pedido(
+                id_pedido=pedido_id,
+                id_usuario=usuario_id,
+                metodo_pago=metodo_pago,
+                items=[
+                    {
+                        'id_producto': item['id_producto'],
+                        'descripcion': item['nombre_producto'],
+                        'cantidad': item['cantidad'],
+                        'precio_unitario': item['precio_unitario'],
+                    }
+                    for item in carrito
+                ],
+                descuento=0.00,
+                conn=conn,
+                cur=cur,
             )
 
             conn.commit()
@@ -158,14 +290,22 @@ def checkout():
             conn.close()
         except Exception as ex:
             if 'conn' in locals():
-                conn.rollback()
-                conn.close()
+                try:
+                    conn.rollback()
+                except Exception:
+                    pass
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+            print('Error al procesar el pedido')
+            traceback.print_exc()
             flash(f'Error al procesar el pedido: {ex}', 'danger')
             return redirect(url_for('main_blueprint.carrito'))
 
         ModeloCarrito.vaciar()
         flash('Compra realizada con éxito', 'success')
-        return redirect(url_for('main_blueprint.index'))
+        return redirect(url_for('main_blueprint.ver_factura', id_factura=factura['id_factura']))
 
     return _render_with_cart(
         'checkout.jinja',

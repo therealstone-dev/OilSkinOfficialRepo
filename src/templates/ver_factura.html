@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <title>Factura</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 24px; color: #222; }
+      .card { border: 1px solid #ddd; padding: 16px; border-radius: 8px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { border-bottom: 1px solid #ddd; padding: 8px; text-align: left; }
+      .qr { margin-top: 16px; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Factura</h1>
+      <p><strong>ID:</strong> {{ factura.id_factura }}</p>
+      <p><strong>Pedido:</strong> {{ factura.id_pedido }}</p>
+      <p><strong>Fecha:</strong> {{ factura.fecha_factura }}</p>
+      <p><strong>Método de pago:</strong> {{ factura.metodo_pago }}</p>
+      <p><strong>Subtotal:</strong> {{ factura.subtotal }}</p>
+      <p><strong>Total:</strong> {{ factura.total }}</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Precio unitario</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+          <tr>
+            <td>{{ item.descripcion }}</td>
+            <td>{{ item.cantidad }}</td>
+            <td>{{ item.precio_unitario }}</td>
+            <td>{{ item.subtotal }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div class="qr">
+        <h3>Código QR de verificación</h3>
+        <img src="data:image/png;base64,{{ qr_image_data }}" alt="QR de la factura" />
+      </div>
+    </div>
+  </body>
+</html>
