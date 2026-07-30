@@ -1,275 +1,171 @@
 {% extends 'components/tailwind/layout_profile.jinja' %}
 {% from 'components/tailwind/elements/ui.jinja' import sidebar %}
 
-{% block title %}Perfil - OilSkin{% endblock %}
+{% block title %}Pedidos Realizados - OilSkin{% endblock %}
 
 {% block content %}
-
 <body class="min-h-screen bg-gray-200 overflow-x-hidden">
   {{ sidebar(items) }}
-    <main class="ml-14 lg:ml-64 p-8 transition-all duration-300 flex-1">
-      <header class="flex flex-row justify-between items-start w-full gap-4 mb-10">
+    <main class="ml-0 sm:ml-64 p-4 md:p-8 transition-all duration-300 flex-1 bg-white min-h-screen">
+      <header class="flex flex-row justify-between items-start w-full gap-4 mb-8">
         <div class="min-w-0 flex-1">
           <h1 class="text-xl md:text-2xl font-bold truncate text-gray-800">
-            Bienvenido, <span class="text-gray-400 font-normal">La Piedra</span>
+            Bienvenido, <span class="text-blue-600 font-semibold">{{ user.nombre if user else session.get('user_name', '') }}</span>
           </h1>
-          <p class="text-xs md:text-sm text-gray-400">Lunes, 9 Marzo 2026</p>
+          <p class="text-xs md:text-sm text-gray-400">Historial completo de compras y facturas de tu cuenta</p>
         </div>
 
         <div class="flex flex-row items-center gap-3 md:gap-4 shrink-0">
           <button class="relative group">
-            <i
-              class="fa-regular fa-bell bg-gray-100 p-3 md:p-4 rounded-xl text-lg text-blue-600 group-hover:bg-blue-50 transition-colors"></i>
-            <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+            <i class="fa-regular fa-bell bg-gray-100 p-3 md:p-4 rounded-xl text-lg text-blue-600 group-hover:bg-blue-50 transition-colors"></i>
+            <span class="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full border-2 border-white"></span>
           </button>
-          <img src="img/image.png" class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-white shadow-sm"
-            alt="Profile">
+          <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+            {{ (user.nombre[0] if user and user.nombre else 'U') | upper }}
+          </div>
         </div>
       </header>
-      <div class="w-full bg-white mt-10">
-        <div class="flex flex-col gap-10">
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="mb-6 space-y-3">
+            {% for category, message in messages %}
+              <div class="p-4 rounded-xl text-sm font-medium border {% if category == 'success' %}bg-green-50 text-green-700 border-green-200{% elif category == 'danger' %}bg-red-50 text-red-700 border-red-200{% else %}bg-blue-50 text-blue-700 border-blue-200{% endif %}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <div class="w-full bg-white mt-4">
+        <div class="flex flex-col gap-8">
           <div>
-            <h2 class="text-3xl font-bold">Pedidos Realizados</h2>
+            <h2 class="text-3xl font-bold text-gray-800">Historial de Pedidos</h2>
           </div>
-          <div id="contenedor-principa">
-            <div class="flex flex-col gap-3 md:flex-row md:justify-between md:gap-2 p-4 rounded-t-2xl bg-gray-100">
-              <div>
-                <h2 class="text-sm font-medium text-blue-500">PEDIDY #OS-98234</h2>
-                <h2 class="font-bold text-lg">Realizado el 9 de Marzo, 2026</h2>
-              </div>
-              <div class="flex flex-row items-center gap-3">
-                <div class="flex flex-row items-center bg-yellow-100 p-2 rounded-xl gap-3">
-                  <i class="fa-solid fa-truck-fast text-yellow-700"></i>
-                  <h2 class="text-yellow-700 font-bold">En camino</h2>
-                </div>
-                <i class="fa-solid fa-circle-info text-gray-400 text-xl"></i>
-              </div>
+
+          {% if not pedidos or pedidos|length == 0 %}
+            <div class="bg-gray-50 rounded-2xl border border-gray-100 p-12 text-center shadow-sm">
+              <i class="fa-solid fa-receipt text-5xl text-gray-300 mb-4"></i>
+              <h3 class="text-xl font-bold text-gray-700 mb-2">Aún no has realizado pedidos</h3>
+              <p class="text-gray-500 mb-6 text-sm">Cuando realices compras en OilSkin, tus pedidos y facturas aparecerán en esta sección.</p>
+              <a href="{{ url_for('main_blueprint.index') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-md">
+                Ir a la Tienda
+              </a>
             </div>
-            <div
-              class="flex flex-col md:flex-row justify-between bg-gray-50 border-b-2 border-gray-50 rounded-b-2xl shadow-xl">
-              <div class="flex flex-col gap-6 p-6">
-                <div class="flex flex-row gap-3 items-center">
-                  <img class="h-24 w-24" src="img/image.png" alt="">
+          {% else %}
+            {% for pedido in pedidos %}
+              <div class="flex flex-col border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+                <!-- Header del pedido -->
+                <div class="flex flex-col gap-3 md:flex-row md:justify-between md:items-center p-5 bg-gray-100 border-b border-gray-200">
                   <div>
-                    <h2 class="text-xl font-bold">Angry Bird Rojo</h2>
-                    <h2 class="text-sm text-gray-500">Linea de cuidado intenso</h2>
+                    <h2 class="text-sm font-semibold text-blue-600 uppercase tracking-wider">PEDIDO #OS-{{ "%05d"|format(pedido.id_pedido) }}</h2>
+                    <h2 class="font-bold text-lg text-gray-800">
+                      Realizado el {{ pedido.fecha_pedido.strftime('%d de %B, %Y') if pedido.fecha_pedido else '' }}
+                    </h2>
                   </div>
-                  <div class="ml-auto text-right">
-                    <h2 class="text-xl font-bold">$50.000</h2>
-                    <h2 class="text-sm ">x1 item(s)</h2>
-                  </div>
-                </div>
-                <div class="flex flex-row gap-3 items-center">
-                  <img class="h-24 w-24" src="img/image.png" alt="">
-                  <div>
-                    <h2 class="text-xl font-bold">Angry Bird Rojo</h2>
-                    <h2 class="text-sm text-gray-500">Linea de cuidado intenso</h2>
-                  </div>
-                  <div class="ml-auto text-right">
-                    <h2 class="text-xl font-bold">$50.000</h2>
-                    <h2 class="text-sm ">x1 item(s)</h2>
-                  </div>
-                </div>
-              </div>
-              <div class="block lg:hidden border-t border-gray-100  my-2"></div>
-              <div class="flex flex-col gap-3 p-6 max-w-100">
-                <div>
-                  <h2 class="font-bold text-gray-500">DIRECCION DE ENTREGA</h2>
-                  <p class="text-gray-700">
-                    Calle 10 #2-34, APTO 402 <br>
-                    Bogota, Colombia
-                  </p>
-                </div>
-                <div>
-                  <h2 class="font-bold text-gray-500">RESUMEN DEL PAGO</h2>
-                  <div class="flex flex-row justify-between text-gray-700">
-                    <h2>Subtotal:</h2>
-                    <h2>$100.000</h2>
-                  </div>
-                  <div class="flex flex-row justify-between text-gray-700">
-                    <h2>Envío:</h2>
-                    <h2 class="font-medium text-green-600">Gratis</h2>
+
+                  <div class="flex flex-row items-center gap-3">
+                    {% set estado = (pedido.estado_envio or pedido.estado_pedido or 'pendiente') | lower %}
+                    {% if estado in ['entregado', 'pagado', 'completado'] %}
+                      <div class="flex flex-row items-center bg-green-100 px-3 py-1.5 rounded-xl gap-2 text-green-800 font-bold text-sm">
+                        <i class="fa-solid fa-box-open"></i>
+                        <span>{{ estado | capitalize }}</span>
+                      </div>
+                    {% elif estado in ['en camino'] %}
+                      <div class="flex flex-row items-center bg-yellow-100 px-3 py-1.5 rounded-xl gap-2 text-yellow-800 font-bold text-sm">
+                        <i class="fa-solid fa-truck-fast"></i>
+                        <span>En camino</span>
+                      </div>
+                    {% elif estado in ['cancelado'] %}
+                      <div class="flex flex-row items-center bg-red-100 px-3 py-1.5 rounded-xl gap-2 text-red-800 font-bold text-sm">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                        <span>Cancelado</span>
+                      </div>
+                    {% else %}
+                      <div class="flex flex-row items-center bg-blue-100 px-3 py-1.5 rounded-xl gap-2 text-blue-800 font-bold text-sm">
+                        <i class="fa-solid fa-clock"></i>
+                        <span>Pendiente</span>
+                      </div>
+                    {% endif %}
                   </div>
                 </div>
-                <div
-                  class="flex justify-between text-lg font-bold text-blue-700 mt-2 pt-2 border-t border-dashed border-gray-200">
-                  <span>Total:</span>
-                  <span>$94.980</span>
-                </div>
-                <div class="mt-8 pt-6 border-t border-gray-100 flex flex-wrap gap-3">
-                  <button onclick="window.location.href='tracking.html'"
-                    class="flex-1 bg-blue-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-sm hover:shadow-blue-200 hover:cursor-pointer">
-                    Rastrear pedido
-                  </button>
-                  <button
-                    class="flex-1 bg-white text-gray-700 border-2 border-gray-200 px-6 py-2 rounded-xl font-bold hover:bg-gray-50 transition-all">
-                    Ver factura (PDF)
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div id="contenedor-principa-2">
-            <div class="flex flex-col gap-3 md:flex-row md:justify-between md:gap-2 p-4 rounded-t-2xl bg-gray-100">
-              <div>
-                <h2 class="text-sm font-medium text-blue-500">PEDIDY #OS-98235</h2>
-                <h2 class="font-bold text-lg">Realizado el 7 de Marzo, 2026</h2>
-              </div>
-              <div class="flex flex-row items-center gap-3">
-                <div class="flex flex-row items-center bg-green-100 p-2 rounded-xl gap-3">
-                  <i class="fa-solid fa-box-open text-green-800"></i>
-                  <h2 class="text-green-700 font-bold">Completado</h2>
-                </div>
-                <i class="fa-solid fa-circle-info text-gray-400 text-xl"></i>
-              </div>
-            </div>
-            <div
-              class="flex flex-col md:flex-row justify-between bg-gray-50 border-b-2 border-gray-50 rounded-b-2xl shadow-xl">
-              <div class="flex flex-col gap-6 p-6">
-                <div class="flex flex-row gap-3 items-center">
-                  <img class="h-24 w-24" src="img/image.png" alt="">
-                  <div>
-                    <h2 class="text-xl font-bold">Angry Bird Rojo</h2>
-                    <h2 class="text-sm text-gray-500">Linea de cuidado intenso</h2>
+
+                <!-- Detalle del pedido -->
+                <div class="flex flex-col md:flex-row justify-between bg-gray-50 p-6 gap-6">
+                  <!-- Productos -->
+                  <div class="flex flex-col gap-4 flex-1">
+                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Productos Comprados</h3>
+                    {% for item in pedido.items %}
+                      <div class="flex flex-row gap-4 items-center p-3 bg-white rounded-xl border border-gray-100">
+                        <div class="h-16 w-16 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center font-bold text-xl shrink-0">
+                          <i class="fa-solid fa-spray-can-sparkles"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <h4 class="text-base font-bold text-gray-800 truncate">{{ item.nombre_producto }}</h4>
+                          <p class="text-xs text-gray-500 truncate">{{ item.descripcion or 'Producto de cosmética OilSkin' }}</p>
+                        </div>
+                        <div class="text-right shrink-0">
+                          <p class="text-base font-bold text-gray-800">${{ "{:,.2f}".format(item.subtotal) }}</p>
+                          <p class="text-xs text-gray-500">cant: {{ item.cantidad }} x ${{ "{:,.2f}".format(item.precio_unitario) }}</p>
+                        </div>
+                      </div>
+                    {% endfor %}
                   </div>
-                  <div class="ml-auto text-right">
-                    <h2 class="text-xl font-bold">$50.000</h2>
-                    <h2 class="text-sm ">x1 item(s)</h2>
-                  </div>
-                </div>
-                <div class="flex flex-row gap-3 items-center">
-                  <img class="h-24 w-24" src="img/image.png" alt="">
-                  <div>
-                    <h2 class="text-xl font-bold">Angry Bird Rojo</h2>
-                    <h2 class="text-sm text-gray-500">Linea de cuidado intenso</h2>
-                  </div>
-                  <div class="ml-auto text-right">
-                    <h2 class="text-xl font-bold">$50.000</h2>
-                    <h2 class="text-sm ">x1 item(s)</h2>
-                  </div>
-                </div>
-              </div>
-              <div class="block lg:hidden border-t border-gray-100 my-2"></div>
-              <div class="flex flex-col gap-3 p-6 max-w-100 xl">
-                <div>
-                  <h2 class="font-bold text-gray-500">DIRECCION DE ENTREGA</h2>
-                  <p class="text-gray-700">
-                    Calle 10 #2-34, APTO 402 <br>
-                    Bogota, Colombia
-                  </p>
-                </div>
-                <div>
-                  <h2 class="font-bold text-gray-500">RESUMEN DEL PAGO</h2>
-                  <div class="flex flex-row justify-between text-gray-700">
-                    <h2>Subtotal:</h2>
-                    <h2>$100.000</h2>
-                  </div>
-                  <div class="flex flex-row justify-between text-gray-700">
-                    <h2>Envío:</h2>
-                    <h2 class="font-medium text-green-600">Gratis</h2>
-                  </div>
-                </div>
-                <div
-                  class="flex justify-between text-lg font-bold text-blue-700 mt-2 pt-2 border-t border-dashed border-gray-200">
-                  <span>Total:</span>
-                  <span>$94.980</span>
-                </div>
-                <div class="mt-8 pt-6 border-t border-gray-100 flex flex-wrap gap-3">
-                  <button
-                    class="flex-1 bg-blue-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-sm hover:shadow-blue-200">
-                    Solicitar Reembolso
-                  </button>
-                  <button
-                    class="flex-1 bg-white text-gray-700 border-2 border-gray-200 px-6 py-2 rounded-xl font-bold hover:bg-gray-50 transition-all">
-                    Ver factura (PDF)
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div id="contenedor-principa-3">
-            <div class="flex flex-col gap-3 md:flex-row md:justify-between md:gap-2 p-4 rounded-t-2xl bg-gray-100">
-              <div>
-                <h2 class="text-sm font-medium text-blue-500">PEDIDY #OS-98235</h2>
-                <h2 class="font-bold text-lg">Realizado el 7 de Marzo, 2026</h2>
-              </div>
-              <div class="flex flex-row items-center gap-3">
-                <div class="flex flex-row items-center bg-red-100 p-2 rounded-xl gap-3">
-                  <i class="fa-solid fa-house-crack text-red-700"></i>
-                  <h2 class="text-red-700 font-bold">Reembolsado</h2>
-                </div>
-                <i class="fa-solid fa-circle-info text-gray-400 text-xl"></i>
-              </div>
-            </div>
-            <div
-              class="flex flex-col md:flex-row justify-between bg-gray-50 border-b-2 border-gray-50 rounded-b-2xl shadow-xl">
-              <div class="flex flex-col gap-6 p-6">
-                <div class="flex flex-row gap-3 items-center">
-                  <img class="h-24 w-24" src="img/image.png" alt="">
-                  <div>
-                    <h2 class="text-xl font-bold">Angry Bird Rojo</h2>
-                    <h2 class="text-sm text-gray-500">Linea de cuidado intenso</h2>
-                  </div>
-                  <div class="ml-auto text-right">
-                    <h2 class="text-xl font-bold">$50.000</h2>
-                    <h2 class="text-sm ">x1 item(s)</h2>
-                  </div>
-                </div>
-                <div class="flex flex-row gap-3 items-center">
-                  <img class="h-24 w-24" src="img/image.png" alt="">
-                  <div>
-                    <h2 class="text-xl font-bold">Angry Bird Rojo</h2>
-                    <h2 class="text-sm text-gray-500">Linea de cuidado intenso</h2>
-                  </div>
-                  <div class="ml-auto text-right">
-                    <h2 class="text-xl font-bold">$50.000</h2>
-                    <h2 class="text-sm ">x1 item(s)</h2>
+
+                  <!-- Columna lateral: Dirección y Pago -->
+                  <div class="flex flex-col gap-4 w-full md:w-80 bg-white p-5 rounded-xl border border-gray-200">
+                    <div>
+                      <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Dirección de Entrega</h3>
+                      <p class="text-sm text-gray-700 font-medium">
+                        {{ pedido.direccion_entrega or user.direccion or 'Dirección no especificada' }} <br>
+                        <span class="text-gray-500">{{ pedido.ciudad or 'Colombia' }}</span>
+                      </p>
+                    </div>
+
+                    <div class="border-t border-gray-100 pt-3">
+                      <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Resumen de Facturación</h3>
+                      <div class="flex flex-row justify-between text-sm text-gray-600 mb-1">
+                        <span>Subtotal:</span>
+                        <span class="font-semibold text-gray-800">${{ "{:,.2f}".format(pedido.factura_subtotal or pedido.pedido_subtotal) }}</span>
+                      </div>
+                      <div class="flex flex-row justify-between text-sm text-gray-600 mb-1">
+                        <span>Costo Envío:</span>
+                        <span class="font-semibold text-green-600">
+                          {% if pedido.costo_envio and pedido.costo_envio > 0 %}
+                            ${{ "{:,.2f}".format(pedido.costo_envio) }}
+                          {% else %}
+                            Gratis
+                          {% endif %}
+                        </span>
+                      </div>
+                      <div class="flex justify-between text-base font-bold text-blue-700 mt-2 pt-2 border-t border-dashed border-gray-200">
+                        <span>Total:</span>
+                        <span>${{ "{:,.2f}".format(pedido.factura_total or pedido.pedido_subtotal) }} COP</span>
+                      </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-gray-100 flex flex-col gap-2">
+                      {% if pedido.id_factura %}
+                        <a href="{{ url_for('main_blueprint.descargar_factura_pdf', id_factura=pedido.id_factura) }}"
+                           class="w-full bg-blue-600 text-white text-center px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-blue-700 transition-all shadow-sm">
+                          <i class="fa-solid fa-file-pdf mr-2"></i>Descargar Factura (PDF)
+                        </a>
+                        <a href="{{ url_for('main_blueprint.ver_factura', id_factura=pedido.id_factura) }}"
+                           class="w-full bg-white text-gray-700 border border-gray-300 text-center px-4 py-2 rounded-xl font-semibold text-xs hover:bg-gray-50 transition-all">
+                          <i class="fa-solid fa-receipt mr-1.5"></i>Ver Detalles de Factura
+                        </a>
+                      {% else %}
+                        <span class="text-xs text-gray-400 text-center">Factura no generada</span>
+                      {% endif %}
+                    </div>
                   </div>
                 </div>
               </div>
-              <div class="block lg:hidden border-t border-gray-100 my-2"></div>
-              <div class="flex flex-col gap-3 p-6 max-w-100 xl">
-                <div>
-                  <h2 class="font-bold text-gray-500">DIRECCION DE ENTREGA</h2>
-                  <p class="text-gray-700">
-                    Calle 10 #2-34, APTO 402 <br>
-                    Bogota, Colombia
-                  </p>
-                </div>
-                <div>
-                  <h2 class="font-bold text-gray-500">RESUMEN DEL PAGO</h2>
-                  <div class="flex flex-row justify-between text-gray-700">
-                    <h2>Subtotal:</h2>
-                    <h2>$100.000</h2>
-                  </div>
-                  <div class="flex flex-row justify-between text-gray-700">
-                    <h2>Envío:</h2>
-                    <h2 class="font-medium text-green-600">Gratis</h2>
-                  </div>
-                </div>
-                <div
-                  class="flex justify-between text-lg font-bold text-blue-700 mt-2 pt-2 border-t border-dashed border-gray-200">
-                  <span>Total:</span>
-                  <span>$94.980</span>
-                </div>
-                <div class="mt-8 pt-6 border-t border-gray-100 flex flex-wrap gap-3">
-                  <button
-                    class="flex-1 bg-blue-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-sm hover:shadow-blue-200">
-                    Ver Resumen
-                  </button>
-                  <button
-                    class="flex-1 bg-white text-gray-700 border-2 border-gray-200 px-6 py-2 rounded-xl font-bold hover:bg-gray-50 transition-all">
-                    Ver factura (PDF)
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+            {% endfor %}
+          {% endif %}
         </div>
       </div>
     </main>
-  </div>
-  </div>
-
-</html>
+</body>
 {% endblock %}

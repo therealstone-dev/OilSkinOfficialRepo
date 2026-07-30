@@ -71,3 +71,27 @@ class ModeloUsuario:
         except Exception as ex:
             print(f"Error en verify_password: {ex}")
             return False, None
+
+    @classmethod
+    def update_profile(cls, id_usuario, nombre, email, direccion, celular, telefono=None):
+        try:
+            conn = get_connection()
+            cur = conn.cursor()
+            # Verificar si el email ya pertenece a otro usuario
+            cur.execute("SELECT id_usuario FROM usuario WHERE email = %s AND id_usuario != %s", (email, id_usuario))
+            existing = cur.fetchone()
+            if existing:
+                cur.close()
+                conn.close()
+                return False, "El correo electrónico ya está registrado por otro usuario."
+
+            sql = ("UPDATE usuario SET nombre = %s, email = %s, direccion = %s, "
+                   "celular = %s, telefono = %s WHERE id_usuario = %s")
+            cur.execute(sql, (nombre, email, direccion, celular, telefono, id_usuario))
+            conn.commit()
+            cur.close()
+            conn.close()
+            return True, "Perfil actualizado con éxito."
+        except Exception as ex:
+            print(f"Error en update_profile: {ex}")
+            return False, f"Error al actualizar perfil: {ex}"

@@ -1,102 +1,113 @@
 {% extends 'components/tailwind/layout_profile.jinja' %}
 {% from 'components/tailwind/elements/ui.jinja' import sidebar %}
 
-{% block title %}Perfil - OilSkin{% endblock %}
+{% block title %}Carrito de Compras - OilSkin{% endblock %}
 
 {% block content %}
 <body class="min-h-screen bg-gray-200 overflow-x-hidden font-sans">
   {{ sidebar(items) }}
-    <main class="ml-14 lg:ml-64 bg-white min-h-screen p-4 md:p-8 transition-all duration-300">
+    <main class="ml-0 sm:ml-64 bg-white min-h-screen p-4 md:p-8 transition-all duration-300">
       <header class="flex flex-row justify-between items-start w-full gap-4 mb-10">
         <div class="min-w-0 flex-1">
           <h1 class="text-xl md:text-2xl font-bold truncate text-gray-800">
-            Bienvenido, <span class="text-gray-400 font-normal">La Piedra</span>
+            Bienvenido, <span class="text-blue-600 font-semibold">{{ user.nombre if user else session.get('user_name', '') }}</span>
           </h1>
-          <p class="text-xs md:text-sm text-gray-400">Lunes, 9 Marzo 2026</p>
+          <p class="text-xs md:text-sm text-gray-400">Resumen de tu carrito de compras activo</p>
         </div>
 
         <div class="flex flex-row items-center gap-3 md:gap-4 shrink-0">
           <button class="relative group">
             <i class="fa-regular fa-bell bg-gray-100 p-3 md:p-4 rounded-xl text-lg text-blue-600 group-hover:bg-blue-50 transition-colors"></i>
-            <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+            <span class="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full border-2 border-white"></span>
           </button>
-          <img src="img/image.png" class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-white shadow-sm" alt="Profile">
+          <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+            {{ (user.nombre[0] if user and user.nombre else 'U') | upper }}
+          </div>
         </div>
       </header>
 
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="mb-6 space-y-3">
+            {% for category, message in messages %}
+              <div class="p-4 rounded-xl text-sm font-medium border {% if category == 'success' %}bg-green-50 text-green-700 border-green-200{% elif category == 'danger' %}bg-red-50 text-red-700 border-red-200{% else %}bg-blue-50 text-blue-700 border-blue-200{% endif %}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
       <section>
-        <h2 class="text-3xl font-bold mb-6 text-gray-800">Mi Carrito</h2>
+        <h2 class="text-3xl font-bold mb-6 text-gray-800">Mi Carrito Activo</h2>
         
-        <div class="bg-gray-50 flex flex-col w-full rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
-          
-          <div class="flex flex-col sm:flex-row gap-4 p-4 md:p-6 items-center">
-            <img class="w-24 h-24 rounded-xl object-cover shadow-sm bg-white" src="img/image.png" alt="Producto">
+        {% if not carrito or carrito|length == 0 %}
+          <div class="bg-gray-50 rounded-2xl border border-gray-100 p-12 text-center shadow-sm">
+            <i class="fa-solid fa-cart-flatbed text-5xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-700 mb-2">Tu carrito está vacío</h3>
+            <p class="text-gray-500 mb-6 text-sm">Explora nuestro catálogo de cosméticos y añade tus productos preferidos.</p>
+            <a href="{{ url_for('main_blueprint.index') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-md">
+              Ver Productos
+            </a>
+          </div>
+        {% else %}
+          <div class="bg-gray-50 flex flex-col w-full rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
             
-            <div class="flex flex-col flex-1 text-center sm:text-left">
-              <h2 class="text-xl font-bold text-gray-800">Angry Bird Rojo</h2>
-              <span class="text-sm text-gray-500 font-medium tracking-tight">#8127HH123</span>
-              <p class="mt-2 font-bold text-blue-600">$50.000 <span class="text-gray-400 font-normal text-xs">c/u</span></p>
-            </div>
+            {% for item in carrito %}
+              <div class="flex flex-col sm:flex-row gap-4 p-4 md:p-6 items-center border-b border-gray-200 last:border-b-0">
+                <div class="w-20 h-20 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-2xl font-bold shrink-0">
+                  <i class="fa-solid fa-box-open"></i>
+                </div>
+                
+                <div class="flex flex-col flex-1 text-center sm:text-left">
+                  <h2 class="text-xl font-bold text-gray-800">{{ item.nombre_producto }}</h2>
+                  <span class="text-sm text-gray-500 font-medium tracking-tight">ID: #PROD-{{ item.id_producto }}</span>
+                  <p class="mt-2 font-bold text-blue-600">${{ "{:,.2f}".format(item.precio_unitario) }} <span class="text-gray-400 font-normal text-xs">c/u</span></p>
+                </div>
 
-            <div class="flex flex-col items-center sm:items-end gap-3 ml-auto w-full sm:w-auto">
-              <button class="text-gray-300 hover:text-red-500 transition-colors">
-                <i class="fa-solid fa-trash-can text-xl"></i>
-              </button>
-              
-              <div class="flex flex-row items-center gap-4 bg-white p-1 rounded-full border border-gray-200 px-3">
-                <button class="w-8 h-8 flex items-center justify-center text-blue-500 border border-blue-500 rounded-full hover:bg-blue-500 hover:text-white transition-all">
-                  <i class="fa-solid fa-minus text-xs"></i>
-                </button>
-                <span class="text-xl font-bold w-4 text-center">2</span>
-                <button class="w-8 h-8 flex items-center justify-center text-blue-500 border border-blue-500 rounded-full hover:bg-blue-500 hover:text-white transition-all">
-                  <i class="fa-solid fa-plus text-xs"></i>
-                </button>
+                <div class="flex flex-col items-center sm:items-end gap-3 ml-auto w-full sm:w-auto">
+                  <a href="{{ url_for('user_blueprint.delete_cart_item', id_producto=item.id_producto) }}" 
+                     class="text-gray-400 hover:text-red-600 transition-colors" title="Eliminar producto">
+                    <i class="fa-solid fa-trash-can text-lg"></i>
+                  </a>
+                  
+                  <div class="flex flex-row items-center gap-3 bg-white p-1 rounded-full border border-gray-200 px-3">
+                    <form method="POST" action="{{ url_for('user_blueprint.update_cart_item') }}" class="inline">
+                      <input type="hidden" name="producto_id" value="{{ item.id_producto }}">
+                      <input type="hidden" name="cantidad" value="{{ item.cantidad - 1 }}">
+                      <button type="submit" class="w-7 h-7 flex items-center justify-center text-blue-600 border border-blue-600 rounded-full hover:bg-blue-600 hover:text-white transition-all">
+                        <i class="fa-solid fa-minus text-xs"></i>
+                      </button>
+                    </form>
+
+                    <span class="text-lg font-bold w-6 text-center text-gray-800">{{ item.cantidad }}</span>
+
+                    <form method="POST" action="{{ url_for('user_blueprint.update_cart_item') }}" class="inline">
+                      <input type="hidden" name="producto_id" value="{{ item.id_producto }}">
+                      <input type="hidden" name="cantidad" value="{{ item.cantidad + 1 }}">
+                      <button type="submit" class="w-7 h-7 flex items-center justify-center text-blue-600 border border-blue-600 rounded-full hover:bg-blue-600 hover:text-white transition-all">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                      </button>
+                    </form>
+                  </div>
+                  <h2 class="text-base font-bold text-gray-700 pt-1">Subtotal: <span class="text-blue-700">${{ "{:,.2f}".format(item.subtotal) }}</span></h2>
+                </div>
               </div>
-              <h2 class="text-lg font-bold text-gray-800 pt-1">Subtotal: <span class="text-blue-700">$100.000</span></h2>
-            </div>
+            {% endfor %}
+
           </div>
 
-          <hr class="mx-6 border-gray-200">
-
-          <div class="flex flex-col sm:flex-row gap-4 p-4 md:p-6 items-center">
-            <img class="w-24 h-24 rounded-xl object-cover shadow-sm bg-white" src="img/image.png" alt="Producto">
-            
-            <div class="flex flex-col flex-1 text-center sm:text-left">
-              <h2 class="text-xl font-bold text-gray-800">Crema de Lavanda</h2>
-              <span class="text-sm text-gray-500 font-medium tracking-tight">#9928LL100</span>
-              <p class="mt-2 font-bold text-blue-600">$45.000 <span class="text-gray-400 font-normal text-xs">c/u</span></p>
+          <div class="flex flex-col md:flex-row justify-between md:items-center mt-8 p-6 bg-blue-50 rounded-2xl gap-6 border border-blue-100 shadow-sm">
+            <div>
+              <p class="text-gray-600">Ítems en el carrito: <span class="font-bold text-gray-800">{{ total_items }}</span></p>
+              <h3 class="text-2xl font-bold text-gray-800">Total: <span class="text-blue-700">${{ "{:,.2f}".format(total_precio) }} COP</span></h3>
             </div>
-
-            <div class="flex flex-col items-center sm:items-end gap-3 ml-auto w-full sm:w-auto">
-              <button class="text-gray-300 hover:text-red-500 transition-colors">
-                <i class="fa-solid fa-trash-can text-xl"></i>
-              </button>
-              
-              <div class="flex flex-row items-center gap-4 bg-white p-1 rounded-full border border-gray-200 px-3">
-                <button class="w-8 h-8 flex items-center justify-center text-blue-500 border border-blue-500 rounded-full hover:bg-blue-500 hover:text-white transition-all">
-                  <i class="fa-solid fa-minus text-xs"></i>
-                </button>
-                <span class="text-xl font-bold w-4 text-center">1</span>
-                <button class="w-8 h-8 flex items-center justify-center text-blue-500 border border-blue-500 rounded-full hover:bg-blue-500 hover:text-white transition-all">
-                  <i class="fa-solid fa-plus text-xs"></i>
-                </button>
-              </div>
-              <h2 class="text-lg font-bold text-gray-800 pt-1">Subtotal: <span class="text-blue-700">$45.000</span></h2>
-            </div>
+            <a href="{{ url_for('main_blueprint.checkout') }}" class="w-full md:w-auto px-8 py-4 bg-blue-600 text-white font-bold rounded-xl text-center shadow-lg shadow-blue-200 hover:bg-blue-700 hover:-translate-y-0.5 transition-all">
+              Continuar con el Pedido <i class="fa-solid fa-arrow-right ml-2"></i>
+            </a>
           </div>
-        </div>
-
-        <div class="flex flex-col md:flex-row justify-between md:items-center mt-10 p-6 bg-blue-50 rounded-2xl gap-6 border border-blue-100">
-          <div>
-            <p class="text-gray-600">Items en el pedido: <span class="font-bold text-gray-800">3</span></p>
-            <h3 class="text-2xl font-bold text-gray-800">Total: <span class="text-blue-700">$145.000 COP</span></h3>
-          </div>
-          <a href="checkout.html" class="w-full md:w-auto px-10 py-4 bg-blue-600 text-white font-bold rounded-xl text-center shadow-lg shadow-blue-200 hover:bg-blue-700 hover:-translate-y-1 transition-all">
-            Continuar con el Pedido <i class="fa-solid fa-arrow-right ml-2"></i>
-          </a>
-        </div>
+        {% endif %}
       </section>
     </main>
-  </div>
 </body>
 {% endblock %}

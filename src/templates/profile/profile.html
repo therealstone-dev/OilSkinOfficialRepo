@@ -11,130 +11,98 @@
       <header class="flex flex-row justify-between items-center w-full gap-4 mb-6 md:mb-10">
         <div class="min-w-0 flex-1">
           <h1 class="text-xl md:text-2xl font-bold truncate text-gray-800">
-                Bienvenido, <span class="text-gray-400 font-normal">{{ user.nombre }}</span>
+            Bienvenido, <span class="text-blue-600 font-semibold">{{ user.nombre if user else session.get('user_name', '') }}</span>
           </h1>
-          <p class="text-xs md:text-sm text-gray-400">Lunes, 9 Marzo 2026</p>
+          <p class="text-xs md:text-sm text-gray-400">Perfil de Usuario y Configuración de Cuenta</p>
         </div>
 
         <div class="flex flex-row items-center gap-3 md:gap-4 shrink-0">
           <button class="relative group">
-            <i
-              class="fa-regular fa-bell bg-gray-100 p-3 md:p-4 rounded-xl text-lg text-blue-600 group-hover:bg-blue-50 transition-colors"></i>
-            <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+            <i class="fa-regular fa-bell bg-gray-100 p-3 md:p-4 rounded-xl text-lg text-blue-600 group-hover:bg-blue-50 transition-colors"></i>
+            <span class="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full border-2 border-white"></span>
           </button>
-          <img src="img/image.png" class="w-10 h-10 md:w-12 md:h-12 rounded-full border-2 border-white shadow-sm"
-            alt="Profile">
+          <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+            {{ (user.nombre[0] if user and user.nombre else 'U') | upper }}
+          </div>
         </div>
       </header>
-      <div class="w-full bg-white mt-10">
 
-        <div
-          class="relative p-6 md:p-12 rounded-t-xl bg-gray-200 bg-cover bg-no-repeat bg-center min-h-30 md:min-h-37.5">
-          <button
-            class="absolute bottom-2 right-2 bg-gray-800/60 hover:bg-gray-800/80 backdrop-blur-sm text-white text-xs md:text-sm px-3 py-1.5 rounded transition-colors">
-            Editar imagen de portada
-          </button>
-        </div>
-        <div class="bg-gray-100 mb-6 rounded-b-xl">
-          <div class="flex flex-col sm:flex-row p-6 md:p-8 gap-4 items-center text-center sm:text-left">
-            <img src="img/image.png" class="w-16 h-16 rounded-full shadow" alt="Avatar">
-            <div class="min-w-0">
-              <h2 class="text-xl font-bold text-gray-800 truncate">{{ user.nombre }}</h2>
-              <h2 class="text-gray-500 text-sm md:text-base break-all">{{ user.email }}</h2>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-6 w-full">
-          <!-- Columna 1 -->
-          <div class="flex flex-col gap-5">
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium text-gray-600">Nombre</label>
-              <input
-                class="w-full bg-gray-50 border border-gray-200 rounded-lg py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                type="text" placeholder="Tu Primer Nombre">
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium text-gray-600">Apellido</label>
-              <input
-                class="w-full bg-gray-50 border border-gray-200 rounded-lg py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                type="text" placeholder="Tu Primer Apellido">
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium text-gray-600">Lenguajes</label>
-              <select
-                class="w-full bg-gray-50 border border-gray-200 rounded-lg py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option selected>Español</option>
-                <option>Ingles</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Columna 2 -->
-          <div class="flex flex-col gap-5">
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium text-gray-600">Nombre de Usuario</label>
-              <input
-                class="w-full bg-gray-50 border border-gray-200 rounded-lg py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                type="text" placeholder="Tu Usuario">
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium text-gray-600">País de Residencia</label>
-              <select
-                class="w-full bg-gray-50 border border-gray-200 rounded-lg py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option>Pais 1</option>
-                <option>Pais 2</option>
-                <option>Pais 3</option>
-              </select>
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium text-gray-600">Género</label>
-              <select
-                class="w-full bg-gray-50 border border-gray-200 rounded-lg py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option>Hombre</option>
-                <option>Mujer</option>
-                <option>Otro</option>
-                <option>Prefiero no Decirlo</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="w-full mt-10 bg-white">
-          <h2 class="text-xl font-bold text-gray-800">Mis direcciones de Email</h2>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <!-- Email 1 -->
-            <div class="flex flex-row items-center p-3 bg-gray-50 rounded-xl border border-gray-100 min-w-0">
-              <i class="fa-solid fa-envelope bg-blue-100 p-3 rounded-full text-blue-600 shrink-0"></i>
-              <div class="flex flex-col ml-3 min-w-0">
-                <h2 class="font-medium text-gray-800 truncate text-sm md:text-base">angrybirdrojo@gmail.com</h2>
-                <h2 class="text-xs md:text-sm text-gray-500">Dirección Principal</h2>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="mb-6 space-y-3">
+            {% for category, message in messages %}
+              <div class="p-4 rounded-xl text-sm font-medium border {% if category == 'success' %}bg-green-50 text-green-700 border-green-200{% elif category == 'danger' %}bg-red-50 text-red-700 border-red-200{% else %}bg-blue-50 text-blue-700 border-blue-200{% endif %}">
+                {{ message }}
               </div>
-            </div>
-
-            <!-- Email 2 -->
-            <div class="flex flex-row items-center p-3 bg-gray-50 rounded-xl border border-gray-100 min-w-0">
-              <i class="fa-solid fa-envelope bg-blue-100 p-3 rounded-full text-blue-600 shrink-0"></i>
-              <div class="flex flex-col ml-3 min-w-0">
-                <h2 class="font-medium text-gray-800 truncate text-sm md:text-base">angrybirdrojo2@gmail.com</h2>
-                <h2 class="text-xs md:text-sm text-gray-500">Dirección Secundaria</h2>
-              </div>
-            </div>
+            {% endfor %}
           </div>
+        {% endif %}
+      {% endwith %}
 
-          <div class="mt-6">
-            <a class="inline-block bg-blue-50 text-blue-600 hover:bg-blue-100 text-sm font-medium px-4 py-3 rounded-xl transition-colors"
-              href="">
-              + Agregar dirección de Email
-            </a>
+      <div class="w-full bg-white mt-6">
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 md:p-8 rounded-t-2xl text-white flex flex-col sm:flex-row gap-6 items-center shadow-sm">
+          <div class="w-20 h-20 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-3xl font-extrabold border-2 border-white/50">
+            {{ (user.nombre[0] if user and user.nombre else 'U') | upper }}
+          </div>
+          <div class="min-w-0 text-center sm:text-left">
+            <h2 class="text-2xl font-bold truncate">{{ user.nombre if user else '' }}</h2>
+            <p class="text-blue-100 text-sm break-all"><i class="fa-regular fa-envelope mr-1.5"></i>{{ user.email if user else '' }}</p>
+            <p class="text-blue-200 text-xs mt-1"><i class="fa-solid fa-location-dot mr-1.5"></i>{{ user.direccion if user else 'Sin dirección asignada' }}</p>
           </div>
         </div>
+
+        <form method="POST" action="{{ url_for('user_blueprint.update_profile') }}" class="p-6 md:p-8 bg-gray-50 border border-t-0 border-gray-100 rounded-b-2xl shadow-sm">
+          <h2 class="text-xl font-bold text-gray-800 mb-6">Información Personal y de Contacto</h2>
+          
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
+            <!-- Nombre Completo -->
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-semibold text-gray-700">Nombre Completo <span class="text-red-500">*</span></label>
+              <input name="nombre" value="{{ user.nombre if user else '' }}" required
+                class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                type="text" placeholder="Tu nombre completo">
+            </div>
+
+            <!-- Email -->
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-semibold text-gray-700">Correo Electrónico <span class="text-red-500">*</span></label>
+              <input name="email" value="{{ user.email if user else '' }}" required
+                class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                type="email" placeholder="correo@ejemplo.com">
+            </div>
+
+            <!-- Celular -->
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-semibold text-gray-700">Número de Celular <span class="text-red-500">*</span></label>
+              <input name="celular" value="{{ user.celular if user else '' }}" required
+                class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                type="text" placeholder="Ej: 3001234567">
+            </div>
+
+            <!-- Teléfono Fijo -->
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-semibold text-gray-700">Teléfono Fijo (Opcional)</label>
+              <input name="telefono" value="{{ user.telefono if user and user.telefono else '' }}"
+                class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                type="text" placeholder="Ej: 6017654321">
+            </div>
+
+            <!-- Dirección de Residencia -->
+            <div class="flex flex-col gap-2 lg:col-span-2">
+              <label class="text-sm font-semibold text-gray-700">Dirección de Entrega / Residencia <span class="text-red-500">*</span></label>
+              <input name="direccion" value="{{ user.direccion if user else '' }}" required
+                class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                type="text" placeholder="Calle 10 # 2-34, Ciudad">
+            </div>
+          </div>
+
+          <div class="mt-8 flex justify-end">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg shadow-blue-200 transition-all hover:-translate-y-0.5">
+              <i class="fa-solid fa-floppy-disk mr-2"></i>Guardar Cambios
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </main>
-</body>
 {% endblock %}
