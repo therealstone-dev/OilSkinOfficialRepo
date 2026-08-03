@@ -1,0 +1,118 @@
+{% extends 'components/tailwind/layout_profile.jinja' %}
+{% from 'components/tailwind/elements/ui.jinja' import sidebar %}
+
+{% block title %}Checkout - Dashboard OilSkin{% endblock %}
+
+{% block content %}
+<body class="min-h-screen bg-gray-200 overflow-x-hidden font-sans">
+  {{ sidebar(items) }}
+    <main class="ml-0 sm:ml-64 bg-white min-h-screen p-4 md:p-8 transition-all duration-300">
+      <header class="flex flex-row justify-between items-start w-full gap-4 mb-8">
+        <div class="min-w-0 flex-1">
+          <h1 class="text-xl md:text-2xl font-bold truncate text-gray-800">
+            Finalizar Pedido - <span class="text-blue-600 font-semibold">{{ user.nombre if user else session.get('user_name', '') }}</span>
+          </h1>
+          <p class="text-xs md:text-sm text-gray-400">Verifica los datos de entrega y confirma tu compra</p>
+        </div>
+
+        <div class="flex flex-row items-center gap-3 md:gap-4 shrink-0">
+          <button class="relative group">
+            <i class="fa-regular fa-bell bg-gray-100 p-3 md:p-4 rounded-xl text-lg text-blue-600 group-hover:bg-blue-50 transition-colors"></i>
+            <span class="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full border-2 border-white"></span>
+          </button>
+          <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+            {{ (user.nombre[0] if user and user.nombre else 'U') | upper }}
+          </div>
+        </div>
+      </header>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Columna Izquierda: Resumen de Carrito -->
+        <div class="lg:col-span-7 flex flex-col gap-6">
+          <div class="bg-gray-50 border border-gray-200 rounded-2xl p-6 shadow-sm">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <i class="fa-solid fa-basket-shopping text-blue-600"></i> Resumen de tu Compra
+            </h2>
+
+            <div class="flex flex-col divide-y divide-gray-200">
+              {% for item in carrito %}
+                <div class="py-4 flex flex-row items-center justify-between gap-4">
+                  <div class="min-w-0 flex-1">
+                    <h3 class="font-bold text-gray-800 text-base truncate">{{ item.nombre_producto }}</h3>
+                    <p class="text-xs text-gray-500">Cantidad: {{ item.cantidad }} x ${{ "{:,.2f}".format(item.precio_unitario) }}</p>
+                  </div>
+                  <div class="text-right font-bold text-blue-700 text-base shrink-0">
+                    ${{ "{:,.2f}".format(item.subtotal) }}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+
+            <div class="border-t border-dashed border-gray-300 mt-4 pt-4 flex flex-col gap-2">
+              <div class="flex justify-between text-sm text-gray-600">
+                <span>Subtotal productos:</span>
+                <span class="font-semibold text-gray-800">${{ "{:,.2f}".format(total_precio) }}</span>
+              </div>
+              <div class="flex justify-between text-sm text-gray-600">
+                <span>Envío estimado:</span>
+                <span class="font-semibold text-green-600">¡Gratis!</span>
+              </div>
+              <div class="flex justify-between text-lg font-extrabold text-blue-800 mt-2 pt-2 border-t border-gray-200">
+                <span>Total a Pagar:</span>
+                <span>${{ "{:,.2f}".format(total_precio) }} COP</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Formulario de Confirmación -->
+        <div class="lg:col-span-5">
+          <form method="POST" action="{{ url_for('user_blueprint.user_checkout') }}" class="bg-gray-50 border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col gap-5">
+            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+              <i class="fa-solid fa-truck-ramp-box text-blue-600"></i> Datos de Entrega y Pago
+            </h2>
+
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-semibold text-gray-700">Nombre de quien recibe</label>
+              <input type="text" name="nombre" value="{{ user.nombre if user else '' }}" required
+                class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-semibold text-gray-700">Dirección de Entrega</label>
+              <input type="text" name="direccion_entrega" value="{{ user.direccion if user else '' }}" required
+                class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                placeholder="Calle, Número, Apto">
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-semibold text-gray-700">Ciudad</label>
+              <input type="text" name="ciudad" value="Bogotá" required
+                class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-semibold text-gray-700">Teléfono de Contacto</label>
+              <input type="text" name="telefono_contacto" value="{{ user.celular if user else '' }}" required
+                class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-semibold text-gray-700">Método de Pago</label>
+              <select name="metodo_pago" required
+                class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+                <option value="efectivo">Efectivo / Pago contra entrega</option>
+                <option value="transferencia">Transferencia Bancaria / PSE</option>
+                <option value="tarjeta">Tarjeta de Crédito / Débito</option>
+              </select>
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 transition-all hover:-translate-y-0.5 mt-2">
+              <i class="fa-solid fa-lock mr-2"></i>Confirmar y Realizar Pedido
+            </button>
+          </form>
+        </div>
+      </div>
+    </main>
+</body>
+{% endblock %}

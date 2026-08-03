@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verificación de Factura - OilSkin S.A.S.</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen py-10 px-4 sm:px-6">
+
+  <div class="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden space-y-8 p-6 sm:p-10">
+    
+    <!-- Encabezado de Verificación -->
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-slate-200 pb-6 text-center sm:text-left">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold mb-2">
+          <i class="fa-solid fa-circle-check"></i> Documento Verificado Oficial
+        </div>
+        <h1 class="text-2xl font-black text-slate-900">OILSKIN S.A.S.</h1>
+        <p class="text-xs text-slate-500">NIT: 901.654.321-8 | Sistema de Validación Digital DIAN</p>
+      </div>
+
+      <div class="text-center sm:text-right bg-slate-900 text-white p-4 rounded-2xl">
+        <span class="text-[10px] font-bold uppercase tracking-widest text-amber-400 block">Factura Nº</span>
+        <span class="text-xl font-extrabold text-white">{{ factura.numero_factura or ('FAC-' ~ factura.id_factura) }}</span>
+      </div>
+    </div>
+
+    <!-- Metadata General -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
+      <div>
+        <span class="text-slate-400 block text-[10px] uppercase font-bold">Fecha Emisión</span>
+        <span class="font-bold text-slate-800">{{ factura.fecha_factura }}</span>
+      </div>
+      <div>
+        <span class="text-slate-400 block text-[10px] uppercase font-bold">Método de Pago</span>
+        <span class="font-bold text-sky-700 uppercase">{{ factura.metodo_pago }}</span>
+      </div>
+      <div>
+        <span class="text-slate-400 block text-[10px] uppercase font-bold">Estado en Sistema</span>
+        <span class="inline-block px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800">{{ factura.estado_factura or 'Emitida' }}</span>
+      </div>
+    </div>
+
+    <!-- Tabla Detalle de Productos -->
+    <div>
+      <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Detalle de Ítems Facturados</h3>
+      <div class="overflow-x-auto rounded-xl border border-slate-200">
+        <table class="w-full text-left text-xs sm:text-sm">
+          <thead class="bg-slate-900 text-white uppercase text-[10px] font-bold">
+            <tr>
+              <th class="py-3 px-4">Producto</th>
+              <th class="py-3 px-4 text-center">Cant.</th>
+              <th class="py-3 px-4 text-right">Precio Unit.</th>
+              <th class="py-3 px-4 text-right">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 font-medium text-slate-700">
+            {% for item in items %}
+            <tr>
+              <td class="py-3 px-4 font-bold text-slate-800">{{ item.descripcion }}</td>
+              <td class="py-3 px-4 text-center font-bold">{{ item.cantidad }}</td>
+              <td class="py-3 px-4 text-right">${{ "{:,.2f}".format(item.precio_unitario) }}</td>
+              <td class="py-3 px-4 text-right font-bold text-slate-900">${{ "{:,.2f}".format(item.subtotal or (item.cantidad * item.precio_unitario)) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Totales y QR -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center pt-2">
+      <!-- QR Verification -->
+      {% if qr_image_data %}
+      <div class="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+        <img src="data:image/png;base64,{{ qr_image_data }}" alt="QR de la factura" class="w-24 h-24 rounded-xl border border-slate-300 bg-white p-1 shadow-sm" />
+        <div class="text-xs text-slate-600">
+          <p class="font-bold text-slate-800">Código QR de Autenticidad</p>
+          <p class="text-[10px] text-slate-500 mt-1">Este código valida la autenticidad fiscal de la factura generada por OilSkin S.A.S.</p>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Resumen Cifras -->
+      <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs space-y-2">
+        <div class="flex justify-between text-slate-600">
+          <span>Subtotal:</span>
+          <span class="font-semibold text-slate-800">${{ "{:,.2f}".format(factura.subtotal) }}</span>
+        </div>
+        <div class="flex justify-between text-slate-600">
+          <span>IVA (19% Discriminado):</span>
+          <span class="font-semibold text-slate-800">${{ "{:,.2f}".format(factura.impuesto or (factura.subtotal * 0.19)) }}</span>
+        </div>
+        <div class="border-t border-slate-300 pt-2 flex justify-between items-center font-black text-sm text-slate-900">
+          <span>Total Pagado:</span>
+          <span class="text-sky-700 text-base">${{ "{:,.2f}".format(factura.total) }} COP</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Legal -->
+    <div class="border-t border-slate-200 pt-6 text-center text-[10px] text-slate-400 space-y-1">
+      <p>Esta es una representación de consulta pública de la factura expedida por <strong>OILSKIN S.A.S.</strong> (NIT 901.654.321-8).</p>
+      <p>Regida según normatividad del Art. 774 del Código de Comercio.</p>
+    </div>
+
+  </div>
+
+</body>
+</html>

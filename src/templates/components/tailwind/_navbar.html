@@ -43,11 +43,19 @@
     </div>
 
     <div class="hidden lg:flex flex-1 justify-end gap-5 text-white text-md font-medium">
+        {% if session.get('user_id') %}
+        <span class="px-4 py-2 rounded-2xl bg-slate-800">Hola, {{ session.get('user_name', 'Usuario') }}</span>
+        <a href="{{ url_for('user_blueprint.profile') }}"
+            class="border border-slate-600 px-4 py-2 rounded-2xl transition hover:text-[#CEB06E] hover:border-[#CEB06E]">Mi Perfil</a>
+        <a href="{{ url_for('auth_blueprint.logout') }}"
+            class="border border-slate-600 px-4 py-2 rounded-2xl transition hover:text-[#CEB06E] hover:border-[#CEB06E]">Cerrar Sesión</a>
+        {% else %}
         <a href="{{ url_for('auth_blueprint.register') }}"
             class="border border-slate-600 px-4 py-2 rounded-2xl transition hover:text-[#CEB06E] hover:border-[#CEB06E]">Regístrate</a>
         <a href="{{ url_for('auth_blueprint.login') }}"
             class="border border-slate-600 px-4 py-2 rounded-2xl transition hover:text-[#CEB06E] hover:border-[#CEB06E]">Inicia
             Sesión</a>
+        {% endif %}
     </div>
 
     <div id="mobileMenu"
@@ -61,8 +69,14 @@
             {% endfor %}
         </div>
         <div class="flex flex-col gap-3 mt-4">
+            {% if session.get('user_id') %}
+            <span class="text-center bg-slate-800 text-white py-2 rounded-xl font-bold">Hola, {{ session.get('user_name', 'Usuario') }}</span>
+            <a href="{{ url_for('user_blueprint.profile') }}" class="text-center border border-slate-600 py-2 rounded-xl">Mi Perfil</a>
+            <a href="{{ url_for('auth_blueprint.logout') }}" class="text-center border border-slate-600 py-2 rounded-xl">Cerrar Sesión</a>
+            {% else %}
             <a href="{{ url_for('auth_blueprint.login') }}" class="text-center bg-[#CEB06E] text-black py-2 rounded-xl font-bold">Inicia Sesión</a>
             <a href="{{ url_for('auth_blueprint.register') }}" class="text-center border border-slate-600 py-2 rounded-xl">Regístrate</a>
+            {% endif %}
         </div>
     </div>
 </nav>

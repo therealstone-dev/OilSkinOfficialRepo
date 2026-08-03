@@ -1,0 +1,214 @@
+{% extends 'admin/admin_layout.jinja' %}
+{% set active_page = 'metricas' %}
+
+{% block title %}Métricas y Rendimiento - OilSkin Admin{% endblock %}
+{% block header_title %}Métricas y Gráficas{% endblock %}
+{% block header_subtitle %}Visión general del rendimiento de ventas, inventario e inteligencia de negocio{% endblock %}
+
+{% block admin_content %}
+<!-- KPI Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="kpi-card">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="kpi-label">Ingresos Totales</div>
+                    <div class="kpi-value">${{ "{:,.0f}".format(kpis.total_ingresos) }}</div>
+                    <div class="kpi-sub">Ticket prom: <strong style="color:var(--gold);">${{ "{:,.0f}".format(kpis.ticket_promedio) }}</strong></div>
+                </div>
+                <div class="kpi-icon" style="background:rgba(16,185,129,0.1); color:#34d399; border:1px solid rgba(16,185,129,0.15);">
+                    <i class="fa-solid fa-dollar-sign"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="kpi-card">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="kpi-label">Ventas Finalizadas</div>
+                    <div class="kpi-value">{{ kpis.total_pedidos }}</div>
+                    <div class="kpi-sub">Pedidos completados</div>
+                </div>
+                <div class="kpi-icon" style="background:rgba(56,189,248,0.1); color:#38bdf8; border:1px solid rgba(56,189,248,0.15);">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="kpi-card">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="kpi-label">Inventario Total</div>
+                    <div class="kpi-value">{{ kpis.total_unidades_inventario }}</div>
+                    <div class="kpi-sub">Valor: <strong style="color:var(--gold);">${{ "{:,.0f}".format(kpis.valor_total_inventario) }}</strong></div>
+                </div>
+                <div class="kpi-icon" style="background:rgba(206,176,110,0.1); color:var(--gold); border:1px solid rgba(206,176,110,0.15);">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="kpi-card">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="kpi-label">Alertas Stock</div>
+                    <div class="kpi-value" {% if kpis.productos_bajo_stock > 0 %}style="color:#f87171;"{% endif %}>{{ kpis.productos_bajo_stock }}</div>
+                    <div class="kpi-sub">Productos con ≤ 10 uds.</div>
+                </div>
+                <div class="kpi-icon" style="{% if kpis.productos_bajo_stock > 0 %}background:rgba(239,68,68,0.1); color:#f87171; border:1px solid rgba(239,68,68,0.15);{% else %}background:rgba(16,185,129,0.1); color:#34d399; border:1px solid rgba(16,185,129,0.15);{% endif %}">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Grid -->
+<div class="row g-3 mb-4">
+    <!-- Chart 1: Evolución Ingresos -->
+    <div class="col-12 col-lg-8">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div>
+                    <div style="font-size:0.88rem; font-weight:700; color:var(--text-primary);">
+                        <i class="fa-solid fa-chart-line me-2" style="color:#34d399;"></i>Evolución de Ingresos
+                    </div>
+                    <div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">Tendencia histórica de ingresos por fecha ($ COP)</div>
+                </div>
+            </div>
+            <div style="padding:18px 22px;">
+                <canvas id="chartEvolucionIngresos" height="130"></canvas>
+            </div>
+        </div>
+    </div>
+    <!-- Chart 2: Salud Inventario -->
+    <div class="col-12 col-lg-4">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div>
+                    <div style="font-size:0.88rem; font-weight:700; color:var(--text-primary);">
+                        <i class="fa-solid fa-pie-chart me-2" style="color:#f87171;"></i>Estado del Inventario
+                    </div>
+                    <div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">Distribución por nivel de existencias</div>
+                </div>
+            </div>
+            <div style="padding:18px 22px; display:flex; align-items:center; justify-content:center;">
+                <canvas id="chartSaludInventario" height="160"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Chart 3: Valor vs Ingresos -->
+    <div class="col-12 col-lg-7">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div>
+                    <div style="font-size:0.88rem; font-weight:700; color:var(--text-primary);">
+                        <i class="fa-solid fa-chart-bar me-2" style="color:var(--gold);"></i>Recaudación vs Valor Comercial
+                    </div>
+                    <div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">Top productos: ingresos reales vs stock restante</div>
+                </div>
+            </div>
+            <div style="padding:18px 22px;">
+                <canvas id="chartValorVsIngresos" height="140"></canvas>
+            </div>
+        </div>
+    </div>
+    <!-- Chart 4: Categorías -->
+    <div class="col-12 col-lg-5">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div>
+                    <div style="font-size:0.88rem; font-weight:700; color:var(--text-primary);">
+                        <i class="fa-solid fa-cubes me-2" style="color:#38bdf8;"></i>Unidades por Categoría
+                    </div>
+                    <div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">Stock disponible según categoría</div>
+                </div>
+            </div>
+            <div style="padding:18px 22px; display:flex; align-items:center; justify-content:center;">
+                <canvas id="chartCategoriasStock" height="160"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block admin_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    Chart.defaults.color = '#5c5650';
+    Chart.defaults.borderColor = 'rgba(255,255,255,0.05)';
+    Chart.defaults.font.family = 'Inter';
+
+    const fechasLabels = {{ graficas.fechas_labels | tojson }};
+    const fechasIngresos = {{ graficas.fechas_ingresos | tojson }};
+    const catNombres = {{ graficas.categorias_nombres | tojson }};
+    const catStock = {{ graficas.categorias_stock | tojson }};
+    const invEstadosLabels = {{ graficas.inv_estados_labels | tojson }};
+    const invEstadosCounts = {{ graficas.inv_estados_counts | tojson }};
+    const prodNombres = {{ graficas.prod_nombres | tojson }};
+    const prodValorInv = {{ graficas.prod_valor_inv | tojson }};
+    const prodIngresos = {{ graficas.prod_ingresos | tojson }};
+
+    // 1. Evolución Ingresos
+    const ctxEv = document.getElementById('chartEvolucionIngresos').getContext('2d');
+    const grad = ctxEv.createLinearGradient(0, 0, 0, 280);
+    grad.addColorStop(0, 'rgba(16,185,129,0.25)');
+    grad.addColorStop(1, 'rgba(16,185,129,0.0)');
+    new Chart(ctxEv, {
+        type: 'line',
+        data: { labels: fechasLabels, datasets: [{
+            label: 'Ingresos ($)', data: fechasIngresos,
+            borderColor: '#34d399', backgroundColor: grad, borderWidth: 2.5,
+            fill: true, tension: 0.4, pointBackgroundColor: '#CEB06E',
+            pointBorderColor: '#CEB06E', pointRadius: 4, pointHoverRadius: 6
+        }]},
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' } }, x: { grid: { display: false } } }
+        }
+    });
+
+    // 2. Salud Inventario
+    new Chart(document.getElementById('chartSaludInventario'), {
+        type: 'doughnut',
+        data: { labels: invEstadosLabels, datasets: [{
+            data: invEstadosCounts, backgroundColor: ['#ef4444','#34d399','#38bdf8'],
+            borderWidth: 0, hoverOffset: 8
+        }]},
+        options: { responsive: true, maintainAspectRatio: false, cutout: '72%',
+            plugins: { legend: { position: 'bottom', labels: { color: '#9a9590', font: { size: 11 }, padding: 12 } } }
+        }
+    });
+
+    // 3. Valor vs Ingresos
+    new Chart(document.getElementById('chartValorVsIngresos'), {
+        type: 'bar',
+        data: { labels: prodNombres, datasets: [
+            { label: 'Ingresos ($)', data: prodIngresos, backgroundColor: '#CEB06E', borderRadius: 6, barPercentage: 0.6 },
+            { label: 'Stock ($)', data: prodValorInv, backgroundColor: 'rgba(56,189,248,0.6)', borderRadius: 6, barPercentage: 0.6 }
+        ]},
+        options: { responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'top', labels: { color: '#9a9590', font: { size: 11 }, padding: 15 } } },
+            scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' } }, x: { grid: { display: false } } }
+        }
+    });
+
+    // 4. Categorías
+    new Chart(document.getElementById('chartCategoriasStock'), {
+        type: 'doughnut',
+        data: { labels: catNombres, datasets: [{
+            data: catStock, backgroundColor: ['#CEB06E','#38bdf8','#34d399','#a78bfa','#f472b6','#64748b'],
+            borderWidth: 0, hoverOffset: 8
+        }]},
+        options: { responsive: true, maintainAspectRatio: false, cutout: '70%',
+            plugins: { legend: { position: 'bottom', labels: { color: '#9a9590', font: { size: 11 }, padding: 12 } } }
+        }
+    });
+});
+</script>
+{% endblock %}
