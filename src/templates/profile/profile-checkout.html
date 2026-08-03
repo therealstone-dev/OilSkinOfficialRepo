@@ -26,18 +26,6 @@
         </div>
       </header>
 
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          <div class="mb-6 space-y-3">
-            {% for category, message in messages %}
-              <div class="p-4 rounded-xl text-sm font-medium border {% if category == 'success' %}bg-green-50 text-green-700 border-green-200{% elif category == 'danger' %}bg-red-50 text-red-700 border-red-200{% else %}bg-blue-50 text-blue-700 border-blue-200{% endif %}">
-                {{ message }}
-              </div>
-            {% endfor %}
-          </div>
-        {% endif %}
-      {% endwith %}
-
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <!-- Columna Izquierda: Resumen de Carrito -->
         <div class="lg:col-span-7 flex flex-col gap-6">
