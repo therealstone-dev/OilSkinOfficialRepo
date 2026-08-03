@@ -1,0 +1,102 @@
+{% extends 'admin/admin_layout.jinja' %}
+{% set active_page = 'ventas' %}
+
+{% block title %}Ventas y Reportes - OilSkin Admin{% endblock %}
+{% block header_title %}Ventas y Reportes{% endblock %}
+{% block header_subtitle %}Historial de pedidos, estados y exportación de informes{% endblock %}
+
+{% block admin_content %}
+<!-- KPI Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="kpi-card">
+            <div class="kpi-label">Ingresos Netos</div>
+            <div class="kpi-value" style="color:#34d399;">${{ "{:,.0f}".format(resumen_ventas.ingresos_netos) }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="kpi-card">
+            <div class="kpi-label">Pagados</div>
+            <div class="kpi-value">{{ resumen_ventas.pedidos_pagados }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="kpi-card">
+            <div class="kpi-label">Pendientes</div>
+            <div class="kpi-value" style="color:var(--gold);">{{ resumen_ventas.pedidos_pendientes }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="kpi-card">
+            <div class="kpi-label">Cancelados</div>
+            <div class="kpi-value" style="color:#f87171;">{{ resumen_ventas.pedidos_cancelados }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
+    <form action="{{ url_for('admin_blueprint.ventas') }}" method="GET" class="d-flex align-items-center gap-2">
+        <span style="font-size:0.78rem; font-weight:600; color:var(--text-secondary);">Filtrar:</span>
+        <select name="estado_filtro" onchange="this.form.submit()" class="admin-select" style="width:auto; padding:7px 14px; font-size:0.78rem;">
+            <option value="todos" {% if estado_filtro == 'todos' %}selected{% endif %}>Todos</option>
+            <option value="pendiente" {% if estado_filtro == 'pendiente' %}selected{% endif %}>Pendientes</option>
+            <option value="pagado" {% if estado_filtro == 'pagado' %}selected{% endif %}>Pagados</option>
+            <option value="cancelado" {% if estado_filtro == 'cancelado' %}selected{% endif %}>Cancelados</option>
+        </select>
+    </form>
+    <a href="{{ url_for('admin_blueprint.exportar_reporte_ventas') }}" class="btn-gold" style="text-decoration:none;">
+        <i class="fa-solid fa-file-csv"></i> Exportar CSV
+    </a>
+</div>
+
+<!-- Tabla de Ventas -->
+<div class="admin-card">
+    <div style="overflow-x:auto;">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID Pedido</th>
+                    <th>Cliente</th>
+                    <th>Fecha</th>
+                    <th style="text-align:center;">Pago</th>
+                    <th style="text-align:right;">Monto</th>
+                    <th style="text-align:center;">Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if not ultimas_ventas or ultimas_ventas|length == 0 %}
+                    <tr>
+                        <td colspan="6" style="text-align:center; padding:40px; color:var(--text-muted);">
+                            <i class="fa-solid fa-inbox me-2" style="font-size:1.2rem;"></i>No hay ventas con este filtro.
+                        </td>
+                    </tr>
+                {% else %}
+                    {% for v in ultimas_ventas %}
+                    <tr>
+                        <td><span style="font-family:monospace; font-weight:700; font-size:0.78rem; color:#38bdf8;">#OS-{{ "%05d"|format(v.id_pedido) }}</span></td>
+                        <td>
+                            <div style="font-weight:700; color:var(--text-primary); font-size:0.85rem;">{{ v.cliente_nombre or 'Cliente' }}</div>
+                            <div style="font-size:0.7rem; color:var(--text-muted);">{{ v.cliente_email or '' }}</div>
+                        </td>
+                        <td style="font-size:0.78rem; color:var(--text-muted);">{{ v.fecha_pedido.strftime('%d/%m/%Y %H:%M') if v.fecha_pedido else '' }}</td>
+                        <td style="text-align:center; font-size:0.75rem; text-transform:uppercase; color:var(--text-secondary); font-weight:600;">{{ v.metodo_pago or 'Efectivo' }}</td>
+                        <td style="text-align:right; font-weight:800; color:var(--gold);">${{ "{:,.0f}".format(v.pedido_subtotal) }}</td>
+                        <td style="text-align:center;">
+                            <form action="{{ url_for('admin_blueprint.cambiar_estado_pedido', id_pedido=v.id_pedido) }}" method="POST" class="d-flex align-items-center justify-content-center gap-2">
+                                <select name="estado_pedido" class="admin-select" style="width:auto; padding:5px 10px; font-size:0.75rem;">
+                                    <option value="pendiente" {% if v.estado_pedido == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                                    <option value="pagado" {% if v.estado_pedido == 'pagado' %}selected{% endif %}>Pagado</option>
+                                    <option value="cancelado" {% if v.estado_pedido == 'cancelado' %}selected{% endif %}>Cancelado</option>
+                                </select>
+                                <button type="submit" class="btn-gold" style="padding:5px 12px; font-size:0.72rem;">Guardar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

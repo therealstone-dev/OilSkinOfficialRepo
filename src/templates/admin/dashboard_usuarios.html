@@ -1,0 +1,94 @@
+{% extends 'admin/admin_layout.jinja' %}
+{% set active_page = 'usuarios' %}
+
+{% block title %}Gestión de Usuarios - OilSkin Admin{% endblock %}
+{% block header_title %}Gestión de Usuarios{% endblock %}
+{% block header_subtitle %}Administración de cuentas, roles y permisos de acceso{% endblock %}
+
+{% block admin_content %}
+<div class="admin-card">
+    <div class="admin-card-header">
+        <div>
+            <div style="font-size:0.88rem; font-weight:700; color:var(--text-primary);">
+                <i class="fa-solid fa-users me-2" style="color:var(--gold);"></i>Usuarios Registrados
+            </div>
+        </div>
+        <span class="badge-gold">{{ usuarios|length }} usuarios</span>
+    </div>
+
+    <div style="overflow-x:auto;">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Contacto</th>
+                    <th>Registro</th>
+                    <th style="text-align:center;">Rol</th>
+                    <th style="text-align:center;">Estado</th>
+                    <th style="text-align:center;">Cambiar Rol</th>
+                    <th style="text-align:center;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in usuarios %}
+                <tr {% if u.activo is defined and not u.activo %}style="opacity:0.5;"{% endif %}>
+                    <td><span style="font-family:monospace; font-weight:700; font-size:0.75rem; color:var(--gold);">#{{ u.id_usuario }}</span></td>
+                    <td>
+                        <div style="font-weight:700; color:var(--text-primary); font-size:0.85rem;">{{ u.nombre }}</div>
+                        <div style="font-size:0.72rem; color:var(--text-muted);"><i class="fa-regular fa-envelope me-1"></i>{{ u.email }}</div>
+                    </td>
+                    <td style="font-size:0.78rem;">
+                        <div><i class="fa-solid fa-phone me-1" style="color:var(--text-muted);"></i>{{ u.celular or 'N/A' }}</div>
+                        <div style="color:var(--text-muted);"><i class="fa-solid fa-location-dot me-1"></i>{{ u.direccion or 'N/A' }}</div>
+                    </td>
+                    <td style="font-size:0.75rem; color:var(--text-muted);">{{ u.created_at or 'Reciente' }}</td>
+                    <td style="text-align:center;">
+                        {% if u.id_rol == 2 or u.nombre_rol|lower == 'admin' or u.nombre_rol|lower == 'administrador' %}
+                            <span class="badge-gold"><i class="fa-solid fa-shield-halved me-1"></i>Admin</span>
+                        {% else %}
+                            <span class="badge-dark"><i class="fa-solid fa-user me-1"></i>Cliente</span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align:center;">
+                        {% if u.activo is defined and not u.activo %}
+                            <span class="badge-danger"><i class="fa-solid fa-ban me-1"></i>Restringido</span>
+                        {% else %}
+                            <span class="badge-success"><i class="fa-solid fa-check me-1"></i>Activo</span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align:center;">
+                        <form action="{{ url_for('admin_blueprint.cambiar_rol_usuario', id_usuario=u.id_usuario) }}" method="POST" class="d-flex align-items-center justify-content-center gap-2">
+                            <select name="id_rol" class="admin-select" style="width:auto; padding:5px 10px; font-size:0.75rem;">
+                                <option value="1" {% if u.id_rol == 1 %}selected{% endif %}>Cliente</option>
+                                <option value="2" {% if u.id_rol == 2 %}selected{% endif %}>Admin</option>
+                            </select>
+                            <button type="submit" class="btn-gold" style="padding:5px 12px; font-size:0.72rem;">Guardar</button>
+                        </form>
+                    </td>
+                    <td style="text-align:center;">
+                        {% if u.id_usuario != session.get('user_id') %}
+                            {% if u.activo is defined and not u.activo %}
+                                <form action="{{ url_for('admin_blueprint.reactivar_usuario', id_usuario=u.id_usuario) }}" method="POST">
+                                    <button type="submit" class="btn-dark-subtle" style="font-size:0.72rem; color:#34d399; border-color:rgba(16,185,129,0.2);">
+                                        <i class="fa-solid fa-rotate-left me-1"></i>Reactivar
+                                    </button>
+                                </form>
+                            {% else %}
+                                <form action="{{ url_for('admin_blueprint.eliminar_usuario', id_usuario=u.id_usuario) }}" method="POST" onsubmit="return confirm('¿Confirma que desea restringir a este usuario? No podrá iniciar sesión.');">
+                                    <button type="submit" class="btn-danger-subtle" style="font-size:0.72rem;">
+                                        <i class="fa-solid fa-ban me-1"></i>Restringir
+                                    </button>
+                                </form>
+                            {% endif %}
+                        {% else %}
+                            <span style="font-size:0.72rem; color:var(--text-muted); font-style:italic;">Tú</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

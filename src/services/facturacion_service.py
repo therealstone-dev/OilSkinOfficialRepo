@@ -27,6 +27,17 @@ class FacturacionService:
     PORCENTAJE_IMPUESTO = Decimal('0.19')
     VENCIMIENTO_DIAS = 15
 
+    # Información corporativa y tributaria legal (OilSkin S.A.S.)
+    EMISOR_NOMBRE = "OILSKIN S.A.S."
+    EMISOR_NIT = "901.654.321-8"
+    EMISOR_REGIMEN = "Responsable de IVA - Régimen Común"
+    EMISOR_DIRECCION = "Calle 100 # 15-20, Oficina 502"
+    EMISOR_CIUDAD = "Bogotá D.C., Colombia"
+    EMISOR_TELEFONO = "+57 (601) 555-0199 / 300 123 4567"
+    EMISOR_EMAIL = "facturacion@oilskin.com.co"
+    RESOLUCION_DIAN = "Resolución DIAN No. 18760001234567 de 2026-01-15 | Habilitación de Facturación Electrónica FAC-2026-000001 a FAC-2026-999999"
+    LEYENDA_LEGAL = "Esta factura de venta es un título valor según el Art. 774 del Código de Comercio. Productos cosméticos con registro sanitario INVIMA."
+
     @staticmethod
     def _to_decimal(value: Any) -> Decimal:
         if isinstance(value, Decimal):
@@ -34,6 +45,68 @@ class FacturacionService:
         if value is None:
             return Decimal('0.00')
         return Decimal(str(value))
+
+    @staticmethod
+    def numero_a_letras(numero: Any) -> str:
+        """Convierte una cifra decimal a su equivalente en texto en pesos colombianos (M/CTE)."""
+        units = ("", "UN", "DOS", "TRES", "CUATRO", "CINCO", "SEIS", "SIETE", "OCHO", "NUEVE", "DIEZ", 
+                 "ONCE", "DOCE", "TRECE", "CATORCE", "QUINCE", "DIECISEIS", "DIECISIETE", "DIECIOCHO", "DIECINUEVE")
+        tens = ("", "", "VEINTE", "TREINTA", "CUARENTA", "CINCUENTA", "SESENTA", "SETENTA", "OCHENTA", "NOVENTA")
+        hundreds = ("", "CIENTO", "DOSCIENTOS", "TRESCIENTOS", "CUATROCIENTOS", "QUINIENTOS", 
+                    "SETECIENTOS", "OCHOCIENTOS", "NOVECIENTOS")
+
+        def _convert_group(n: int) -> str:
+            if n == 0:
+                return ""
+            if n == 100:
+                return "CIEN"
+            res = []
+            c = n // 100
+            d = (n % 100) // 10
+            u = n % 10
+            if c > 0:
+                res.append(hundreds[c])
+            if n % 100 < 20:
+                if n % 100 > 0:
+                    res.append(units[n % 100])
+            else:
+                if d == 2 and u > 0:
+                    res.append(f"VEINTI{units[u]}")
+                else:
+                    if d > 0:
+                        res.append(tens[d])
+                    if u > 0:
+                        res.append(f"Y {units[u]}")
+            return " ".join(res)
+
+        val = FacturacionService._to_decimal(numero).quantize(Decimal('0.01'))
+        ent = int(val)
+        cent = int((val - Decimal(ent)) * 100)
+
+        if ent == 0:
+            str_ent = "CERO"
+        else:
+            millions = ent // 1_000_000
+            thousands = (ent % 1_000_000) // 1_000
+            rem = ent % 1_000
+
+            parts = []
+            if millions == 1:
+                parts.append("UN MILLÓN")
+            elif millions > 1:
+                parts.append(f"{_convert_group(millions)} MILLONES")
+
+            if thousands == 1:
+                parts.append("MIL")
+            elif thousands > 1:
+                parts.append(f"{_convert_group(thousands)} MIL")
+
+            if rem > 0:
+                parts.append(_convert_group(rem))
+
+            str_ent = " ".join(parts)
+
+        return f"SON: {str_ent} PESOS {cent:02d}/100 M/CTE."
 
     @classmethod
     def calcular_totales(cls, subtotal: Any, porcentaje_impuesto: Any = None, descuento: Any = None) -> Dict[str, Decimal]:
@@ -104,90 +177,115 @@ class FacturacionService:
         styles = getSampleStyleSheet()
         story = []
 
-        # Título y Encabezado de Factura
-        story.append(Paragraph(f"<b>OIL SKIN - FACTURA DE VENTA</b>", styles['Title']))
-        story.append(Paragraph(f"Nº Factura: <b>{factura.get('numero_factura', 'FAC-000')}</b>", styles['Heading2']))
-        story.append(Spacer(1, 0.15 * inch))
+        # Header Corporativo Emisor
+        story.append(Paragraph(f"<b><font size=16 color='#0f172a'>{cls.EMISOR_NOMBRE}</font></b>", styles['Normal']))
+        story.append(Paragraph(f"<font size=9 color='#475569'><b>NIT:</b> {cls.EMISOR_NIT} | {cls.EMISOR_REGIMEN}</font>", styles['Normal']))
+        story.append(Paragraph(f"<font size=9 color='#475569'><b>Dirección:</b> {cls.EMISOR_DIRECCION} - {cls.EMISOR_CIUDAD}</font>", styles['Normal']))
+        story.append(Paragraph(f"<font size=9 color='#475569'><b>Contacto:</b> {cls.EMISOR_TELEFONO} | {cls.EMISOR_EMAIL}</font>", styles['Normal']))
+        story.append(Spacer(1, 0.1 * inch))
 
-        # Información general del pedido y método de pago
+        # Cuadro de Número de Factura y Resolución
+        num_fac = factura.get('numero_factura', 'FAC-000')
+        fecha_fac = str(factura.get('fecha_factura', ''))
+        fecha_venc = str(factura.get('fecha_vencimiento', ''))
         metodo = str(factura.get('metodo_pago', 'efectivo')).upper()
-        estado = str(factura.get('estado_factura', 'emitida')).capitalize()
-        fecha = str(factura.get('fecha_factura', ''))
+        estado = str(factura.get('estado_factura', 'emitida')).upper()
 
-        datos_factura = [
-            [Paragraph("<b>Fecha de Emisión:</b>", styles['Normal']), Paragraph(fecha, styles['Normal']),
-             Paragraph("<b>Método de Pago:</b>", styles['Normal']), Paragraph(f"<font color='#0284c7'><b>{metodo}</b></font>", styles['Normal'])],
-            [Paragraph("<b>Estado del Pedido:</b>", styles['Normal']), Paragraph(estado, styles['Normal']),
-             Paragraph("<b>Moneda:</b>", styles['Normal']), Paragraph("COP ($)", styles['Normal'])],
+        datos_encabezado = [
+            [
+                Paragraph(f"<b>FACTURA ELECTRÓNICA DE VENTA</b><br/><font size=12 color='#0284c7'><b>Nº {num_fac}</b></font>", styles['Normal']),
+                Paragraph(f"<b>Fecha de Emisión:</b> {fecha_fac}<br/><b>Fecha Vencimiento:</b> {fecha_venc}<br/><b>Forma de Pago:</b> Contado ({metodo})<br/><b>Estado:</b> {estado}", styles['Normal'])
+            ]
         ]
-        t_info = Table(datos_factura, colWidths=[1.5*inch, 2*inch, 1.5*inch, 2*inch])
-        t_info.setStyle(TableStyle([
+        t_enc = Table(datos_encabezado, colWidths=[3.5*inch, 3.5*inch])
+        t_enc.setStyle(TableStyle([
             ('BACKGROUND', (0,0), (-1,-1), colors.HexColor('#f8fafc')),
-            ('INNERGRID', (0,0), (-1,-1), 0.5, colors.HexColor('#e2e8f0')),
-            ('BOX', (0,0), (-1,-1), 1, colors.HexColor('#cbd5e1')),
-            ('PADDING', (0,0), (-1,-1), 6),
+            ('BOX', (0,0), (-1,-1), 1, colors.HexColor('#0284c7')),
+            ('INNERGRID', (0,0), (-1,-1), 0.5, colors.HexColor('#cbd5e1')),
+            ('PADDING', (0,0), (-1,-1), 8),
         ]))
-        story.append(t_info)
+        story.append(t_enc)
+        story.append(Spacer(1, 0.05 * inch))
+
+        # Resolución DIAN
+        story.append(Paragraph(f"<font size=7 color='#64748b'><b>AUTORIZACIÓN DIAN:</b> {cls.RESOLUCION_DIAN}</font>", styles['Normal']))
         story.append(Spacer(1, 0.15 * inch))
 
-        # Detalles del Cliente
+        # Detalles del Cliente (Adquirente)
         nombre = str(factura.get('cliente_nombre', 'Cliente General'))
         email = str(factura.get('cliente_email', 'N/A'))
         celular = str(factura.get('cliente_celular', 'N/A'))
         direccion = str(factura.get('direccion_entrega', 'N/A'))
-        ciudad = str(factura.get('ciudad', ''))
+        ciudad = str(factura.get('ciudad', 'Bogotá'))
 
         datos_cliente = [
-            [Paragraph("<b>DATOS DEL CLIENTE Y ENVÍO</b>", styles['Heading3']), ""],
-            [Paragraph("<b>Nombre Completo:</b>", styles['Normal']), Paragraph(nombre, styles['Normal'])],
+            [Paragraph("<b>DATOS DEL ADQUIRENTE (CLIENTE)</b>", styles['Normal']), ""],
+            [Paragraph("<b>Nombre / Razón Social:</b>", styles['Normal']), Paragraph(nombre, styles['Normal'])],
             [Paragraph("<b>Correo Electrónico:</b>", styles['Normal']), Paragraph(email, styles['Normal'])],
-            [Paragraph("<b>Teléfono Contacto:</b>", styles['Normal']), Paragraph(celular, styles['Normal'])],
-            [Paragraph("<b>Dirección de Entrega:</b>", styles['Normal']), Paragraph(f"{direccion} ({ciudad})" if ciudad else direccion, styles['Normal'])],
+            [Paragraph("<b>Teléfono / Celular:</b>", styles['Normal']), Paragraph(celular, styles['Normal'])],
+            [Paragraph("<b>Dirección de Envío:</b>", styles['Normal']), Paragraph(f"{direccion} - {ciudad}", styles['Normal'])],
         ]
         t_cliente = Table(datos_cliente, colWidths=[2*inch, 5*inch])
         t_cliente.setStyle(TableStyle([
             ('SPAN', (0, 0), (1, 0)),
-            ('BACKGROUND', (0, 0), (1, 0), colors.HexColor('#e0f2fe')),
-            ('TEXTCOLOR', (0, 0), (1, 0), colors.HexColor('#0369a1')),
+            ('BACKGROUND', (0, 0), (1, 0), colors.HexColor('#0f172a')),
+            ('TEXTCOLOR', (0, 0), (1, 0), colors.white),
             ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#ffffff')),
-            ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#bae6fd')),
+            ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#cbd5e1')),
             ('PADDING', (0, 0), (-1, -1), 5),
         ]))
         story.append(t_cliente)
-        story.append(Spacer(1, 0.2 * inch))
+        story.append(Spacer(1, 0.15 * inch))
 
         # Tabla de Productos
-        story.append(Paragraph("<b>DETALLE DE PRODUCTOS</b>", styles['Heading3']))
+        story.append(Paragraph("<b>DETALLE DE PRODUCTOS Y SERVICIOS</b>", styles['Normal']))
         story.append(Spacer(1, 0.05 * inch))
 
-        table_data = [['Producto', 'Cantidad', 'Precio Unitario', 'Subtotal']]
+        table_data = [['Ítem / Descripción', 'Cant.', 'Precio Unitario', 'IVA %', 'Total Línea']]
         for item in items:
+            p_unit = cls._to_decimal(item.get('precio_unitario', 0))
+            cant = int(item.get('cantidad', 0))
+            tot_linea = p_unit * Decimal(cant)
             table_data.append([
-                item.get('descripcion', 'Producto'),
-                str(item.get('cantidad', 0)),
-                f"${item.get('precio_unitario', 0):,.2f}",
-                f"${item.get('total_linea', 0):,.2f}",
+                Paragraph(str(item.get('descripcion', 'Producto')), styles['Normal']),
+                str(cant),
+                f"${p_unit:,.2f}",
+                "19%",
+                f"${tot_linea:,.2f}",
             ])
-        table = Table(table_data, colWidths=[3.5*inch, 1*inch, 1.25*inch, 1.25*inch], repeatRows=1)
+
+        table = Table(table_data, colWidths=[3.25*inch, 0.75*inch, 1.25*inch, 0.75*inch, 1.0*inch], repeatRows=1)
         table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0f172a')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1')),
-            ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
-            ('PADDING', (0, 0), (-1, -1), 6),
+            ('ALIGN', (1, 0), (-1, -1), 'CENTER'),
+            ('ALIGN', (2, 0), (2, -1), 'RIGHT'),
+            ('ALIGN', (4, 0), (4, -1), 'RIGHT'),
+            ('PADDING', (0, 0), (-1, -1), 5),
         ]))
         story.append(table)
         story.append(Spacer(1, 0.15 * inch))
 
-        # Totales
-        subtotal_val = f"${factura.get('subtotal', 0):,.2f}"
-        total_val = f"${factura.get('total', 0):,.2f}"
+        # Resumen de Totales y Base Gravable
+        subtotal_val = cls._to_decimal(factura.get('subtotal', 0))
+        impuesto_val = cls._to_decimal(factura.get('impuesto', 0))
+        descuento_val = cls._to_decimal(factura.get('descuento', 0))
+        total_val = cls._to_decimal(factura.get('total', 0))
+
+        if impuesto_val == Decimal('0.00') and subtotal_val > Decimal('0.00'):
+            subtotal_neto = subtotal_val - descuento_val
+            impuesto_val = (subtotal_neto * Decimal('0.19')).quantize(Decimal('0.01'))
+            total_val = subtotal_neto + impuesto_val
+
+        texto_letras = cls.numero_a_letras(total_val)
 
         datos_totales = [
-            ["Subtotal:", subtotal_val],
-            ["Descuento / Impuestos:", "$0.00 COP"],
-            [Paragraph("<b>TOTAL PAGADO:</b>", styles['Normal']), Paragraph(f"<b><font color='#0369a1' size='12'>{total_val} COP</font></b>", styles['Normal'])],
+            ["Subtotal (Base Gravable):", f"${subtotal_val:,.2f} COP"],
+            ["Descuento Aplicado:", f"-${descuento_val:,.2f} COP"],
+            ["IVA (19% Discriminado):", f"${impuesto_val:,.2f} COP"],
+            [Paragraph("<b>TOTAL A PAGAR:</b>", styles['Normal']), Paragraph(f"<b><font color='#0369a1' size='11'>${total_val:,.2f} COP</font></b>", styles['Normal'])],
         ]
         t_totales = Table(datos_totales, colWidths=[5*inch, 2*inch])
         t_totales.setStyle(TableStyle([
@@ -196,18 +294,39 @@ class FacturacionService:
             ('LINEABOVE', (0, -1), (-1, -1), 1, colors.HexColor('#0284c7')),
         ]))
         story.append(t_totales)
+        story.append(Spacer(1, 0.1 * inch))
 
-        # Código QR de Verificación
+        # Total en letras
+        story.append(Paragraph(f"<font size=8 color='#1e293b'><b>VALOR EN LETRAS:</b> {texto_letras}</font>", styles['Normal']))
+        story.append(Spacer(1, 0.15 * inch))
+
+        # QR y Verificación Digital
         qr_url = f"{base_url}/factura/{factura.get('id_factura', 1)}"
         qr = qrcode.make(qr_url)
         qr_bytes = BytesIO()
         qr.save(qr_bytes, format='PNG')
         qr_bytes.seek(0)
 
-        story.append(Spacer(1, 0.2 * inch))
-        story.append(Paragraph('Verifique la validez de esta factura escaneando el código QR:', styles['Italic']))
-        story.append(Spacer(1, 0.05 * inch))
-        story.append(Image(qr_bytes, width=1.5 * inch, height=1.5 * inch))
+        cufe_simulado = f"CUFE-{factura.get('id_factura', 1):06d}-OILSKIN-2026"
+
+        datos_qr = [
+            [
+                Image(qr_bytes, width=1.1 * inch, height=1.1 * inch),
+                Paragraph(f"<font size=8 color='#475569'><b>VERIFICACIÓN DIGITAL Y SEGURIDAD</b><br/>Escanee este código QR o ingrese al portal web para consultar la autenticidad de este documento.<br/><b>Código Único (CUFE):</b> {cufe_simulado}<br/><b>Enlace:</b> {qr_url}</font>", styles['Normal'])
+            ]
+        ]
+        t_qr = Table(datos_qr, colWidths=[1.3*inch, 5.7*inch])
+        t_qr.setStyle(TableStyle([
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('BACKGROUND', (0,0), (-1,-1), colors.HexColor('#f8fafc')),
+            ('BOX', (0,0), (-1,-1), 0.5, colors.HexColor('#cbd5e1')),
+            ('PADDING', (0,0), (-1,-1), 6),
+        ]))
+        story.append(t_qr)
+        story.append(Spacer(1, 0.15 * inch))
+
+        # Pie de página legal
+        story.append(Paragraph(f"<para align='center'><font size=7 color='#64748b'><i>{cls.LEYENDA_LEGAL}</i></font></para>", styles['Normal']))
 
         doc.build(story)
         return buffer.getvalue()

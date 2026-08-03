@@ -20,6 +20,12 @@ def login():
         password = form.password.data
         ok, user = ModeloUsuario.verify_password(email, password)
         if ok:
+            # Verificar si el usuario está restringido
+            is_active = user.get('activo', 1) if isinstance(user, dict) else 1
+            if not is_active:
+                flash('Tu cuenta ha sido restringida por un administrador. Contacta soporte.', 'danger')
+                return render_template('login.jinja', categorias=get_nav_data(), form=form)
+
             # Guardar datos en sesión
             session.permanent = True
             session['user_id'] = user.get('id_usuario') if isinstance(user, dict) else user[0]
