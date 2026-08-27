@@ -1,7 +1,9 @@
+import os
 from datetime import timedelta
 from flask import Flask
 from pathlib import Path
 from decouple import config
+from werkzeug.middleware.proxy_fix import ProxyFix
 from src.database.db_mysql import init_db
 from src.routes import main_routes, auth_routes, user_routes, admin_routes
 
@@ -26,7 +28,10 @@ def create_app():
     app.config['WTF_CSRF_ENABLED'] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
     app.config['SESSION_COOKIE_HTTPONLY'] = True
-    app.permanent_session_lifetime = timedelta(days=7) 
+    app.permanent_session_lifetime = timedelta(days=7)
+
+    # Soporte para proxy inverso en producción (HTTPS, IP real del cliente)
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
     app.register_blueprint(main_routes.main, url_prefix='/')
     app.register_blueprint(auth_routes.auth, url_prefix='/auth')
@@ -36,7 +41,11 @@ def create_app():
     return app
 
 
+# Instancia a nivel de módulo para servidores WSGI
+app = create_app()
+
 if __name__ == '__main__':
-    app = create_app()
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
+
  
