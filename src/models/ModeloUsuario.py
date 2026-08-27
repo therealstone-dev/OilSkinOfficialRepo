@@ -99,11 +99,27 @@ class ModeloUsuario:
     @classmethod
     def update_images(cls, id_usuario, foto_perfil=None, foto_portada=None):
         try:
+            foto_perfil = foto_perfil.strip() if (foto_perfil and isinstance(foto_perfil, str) and foto_perfil.strip()) else None
+            foto_portada = foto_portada.strip() if (foto_portada and isinstance(foto_portada, str) and foto_portada.strip()) else None
+
+            if not foto_perfil and not foto_portada:
+                return False, "No se proporcionó ninguna imagen para actualizar."
+
             conn = get_connection()
             cur = conn.cursor()
-            sql = ("UPDATE usuario SET foto_perfil = COALESCE(%s, foto_perfil), "
-                   "foto_portada = COALESCE(%s, foto_portada) WHERE id_usuario = %s")
-            cur.execute(sql, (foto_perfil, foto_portada, id_usuario))
+            
+            updates = []
+            params = []
+            if foto_perfil:
+                updates.append("foto_perfil = %s")
+                params.append(foto_perfil)
+            if foto_portada:
+                updates.append("foto_portada = %s")
+                params.append(foto_portada)
+                
+            params.append(id_usuario)
+            sql = f"UPDATE usuario SET {', '.join(updates)} WHERE id_usuario = %s"
+            cur.execute(sql, tuple(params))
             conn.commit()
             cur.close()
             conn.close()

@@ -1,7 +1,14 @@
-from datetime import datetime
+import os
+import uuid
 import traceback
-from flask import Blueprint, render_template, url_for, session, request, redirect, flash
+from werkzeug.utils import secure_filename
+from flask import Blueprint, render_template, url_for, session, request, redirect, flash, current_app
 from pathlib import Path
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 from src.utils.nav_helper import get_nav_data
 from src.utils.auth_utils import require_login
 from src.models.ModeloUsuario import ModeloUsuario
@@ -71,8 +78,48 @@ def update_profile():
 @require_login
 def update_profile_images():
     user_id = session['user_id']
-    foto_perfil = request.form.get('foto_perfil', '').strip() or None
-    foto_portada = request.form.get('foto_portada', '').strip() or None
+    active_tab = request.form.get('active_tab', 'all')
+    
+    foto_perfil = None
+    foto_portada = None
+
+    # Directorio para guardar subidas de imágenes dentro del static_folder de Flask
+    upload_folder = os.path.join(current_app.static_folder, 'uploads', 'profiles')
+    os.makedirs(upload_folder, exist_ok=True)
+
+    # 1. Foto de Perfil (Avatar)
+    if active_tab in ('avatar', 'all'):
+        if 'foto_perfil_file' in request.files:
+            file = request.files['foto_perfil_file']
+            if file and file.filename != '' and allowed_file(file.filename):
+                ext = file.filename.rsplit('.', 1)[1].lower()
+                filename = f"avatar_{user_id}_{uuid.uuid4().hex[:8]}.{ext}"
+                file.save(os.path.join(upload_folder, filename))
+                foto_perfil = f"/static/uploads/profiles/{filename}"
+        
+        if not foto_perfil:
+            url_val = request.form.get('foto_perfil_url', '').strip() or request.form.get('foto_perfil', '').strip()
+            if url_val:
+                foto_perfil = url_val
+
+    # 2. Portada (Banner)
+    if active_tab in ('banner', 'all'):
+        if 'foto_portada_file' in request.files:
+            file = request.files['foto_portada_file']
+            if file and file.filename != '' and allowed_file(file.filename):
+                ext = file.filename.rsplit('.', 1)[1].lower()
+                filename = f"banner_{user_id}_{uuid.uuid4().hex[:8]}.{ext}"
+                file.save(os.path.join(upload_folder, filename))
+                foto_portada = f"/static/uploads/profiles/{filename}"
+        
+        if not foto_portada:
+            url_val = request.form.get('foto_portada_url', '').strip() or request.form.get('foto_portada', '').strip()
+            if url_val:
+                foto_portada = url_val
+
+    if not foto_perfil and not foto_portada:
+        flash('Por favor selecciona una imagen para subir o ingresa una URL válida.', 'warning')
+        return redirect(url_for('user_blueprint.profile'))
 
     exito, mensaje = ModeloUsuario.update_images(
         id_usuario=user_id,
@@ -161,9 +208,24 @@ def user_checkout():
                     (pedido_id, item['id_producto'], item['cantidad'], item['precio_unitario'], item['subtotal']),
                 )
 
+            lat_entrega = request.form.get('lat_entrega', type=float)
+            lng_entrega = request.form.get('lng_entrega', type=float)
+            origen_despacho = request.form.get('origen_despacho', 'Centro de Distribución OilSkin - Bogotá D.C.').strip() or 'Centro de Distribución OilSkin - Bogotá D.C.'
+            lat_origen = request.form.get('lat_origen', default=4.6533, type=float)
+            lng_origen = request.form.get('lng_origen', default=-74.0836, type=float)
+            empresa_envio = 'OilSkin Express Logistics'
+            numero_guia = f"OS-GUIA-{pedido_id:05d}"
+            mensaje_transportista = "Pedido registrado y confirmado. Paquete en proceso de alistamiento y control de calidad en bodega."
+
             cur.execute(
-                "INSERT INTO domicilio (id_pedido, direccion_entrega, ciudad, telefono_contacto, costo_envio, estado_envio) VALUES (%s, %s, %s, %s, %s, %s)",
-                (pedido_id, direccion_entrega, ciudad, telefono_contacto, 0.00, 'pendiente'),
+                """INSERT INTO domicilio (
+                    id_pedido, direccion_entrega, ciudad, telefono_contacto, costo_envio, estado_envio,
+                    origen_despacho, lat_entrega, lng_entrega, lat_origen, lng_origen,
+                    empresa_envio, numero_guia, mensaje_transportista, fecha_estimada_entrega
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                (pedido_id, direccion_entrega, ciudad, telefono_contacto, 0.00, 'pendiente',
+                 origen_despacho, lat_entrega, lng_entrega, lat_origen, lng_origen,
+                 empresa_envio, numero_guia, mensaje_transportista, '2-4 días hábiles'),
             )
 
             factura = FacturacionService.crear_desde_pedido(

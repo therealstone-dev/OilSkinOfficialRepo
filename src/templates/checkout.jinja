@@ -1,64 +1,470 @@
 {% extends 'components/boostrap/layout_boostrap.jinja' %}
-{% block title %}Checkout - OilSkin{% endblock %}
-{% block content %}
-<div class="container py-5">
-    <h1 class="mb-4">Checkout</h1>
+{% block title %}Finalizar Compra - Checkout Seguro OilSkin{% endblock %}
 
-    <div class="row g-4">
+{% block content %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+<div class="container py-5">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 pb-3 border-bottom border-secondary gap-3">
+        <div>
+            <span class="text-warning text-uppercase fw-bold small letter-spacing-2" style="letter-spacing: 2px;">
+                <i class="fa-solid fa-lock me-1"></i> Checkout Cifrado y Seguro
+            </span>
+            <h1 class="text-white fw-bold display-6 mb-0 mt-1">
+                Finalizar Compra y Envío
+            </h1>
+        </div>
+        <a href="{{ url_for('main_blueprint.carrito') }}" class="btn btn-outline-light btn-sm rounded-pill px-4 py-2 text-nowrap">
+            <i class="fa-solid fa-arrow-left me-2"></i> Volver al Carrito
+        </a>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="mb-4">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'danger' else 'danger' }} alert-dismissible fade show rounded-3 bg-dark text-white border-{{ 'warning' if category=='success' else 'danger' }}" role="alert">
+                        <i class="fa-solid {{ 'fa-circle-check text-warning' if category=='success' else 'fa-circle-exclamation text-danger' }} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="row g-4 align-items-start">
+        <!-- Formulario de Datos de Entrega y Pago -->
         <div class="col-lg-7">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h4 class="mb-3">Resumen de tu compra</h4>
-                    {% for item in carrito %}
-                        <div class="d-flex justify-content-between align-items-center border-bottom py-2">
-                            <div>
-                                <strong>{{ item.nombre_producto }}</strong><br>
-                                <small class="text-muted">Cantidad: {{ item.cantidad }}</small>
-                            </div>
-                            <div>${{ "%.2f"|format(item.subtotal) }}</div>
+            <form method="POST" id="checkoutForm" class="d-flex flex-column gap-4">
+                <!-- Hidden inputs for coordinates and origin -->
+                <input type="hidden" id="lat_entrega" name="lat_entrega" value="4.6533">
+                <input type="hidden" id="lng_entrega" name="lng_entrega" value="-74.0836">
+                <input type="hidden" id="origen_despacho" name="origen_despacho" value="Centro de Distribución OilSkin - Bogotá D.C.">
+                <input type="hidden" id="lat_origen" name="lat_origen" value="4.6533">
+                <input type="hidden" id="lng_origen" name="lng_origen" value="-74.0836">
+
+                <!-- Bloque 1: Información de Contacto y Entrega -->
+                <div class="card bg-dark text-white border rounded-4 shadow-sm overflow-hidden p-4" 
+                     style="background: #141414 !important; border-color: rgba(206,176,110,0.25) !important;">
+                    
+                    <h4 class="card-title fw-bold text-white mb-4 d-flex align-items-center gap-2 pb-2 border-bottom border-secondary border-opacity-50">
+                        <i class="fa-solid fa-map-location-dot text-warning"></i> 1. Datos de Entrega y Verificación de Dirección
+                    </h4>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label text-secondary small fw-bold">Nombre Completo de quien recibe *</label>
+                            <input type="text" class="form-control bg-black text-white border-secondary py-2.5" name="nombre" 
+                                   value="{{ user.nombre if user else '' }}" placeholder="Ej. Carlos Mendoza" required>
                         </div>
-                    {% endfor %}
-                    <div class="d-flex justify-content-between mt-3 fw-bold">
-                        <span>Total</span>
-                        <span>${{ "%.2f"|format(total_precio) }}</span>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small fw-bold">Ciudad de Entrega *</label>
+                            <input type="text" class="form-control bg-black text-white border-secondary py-2.5" id="ciudad" name="ciudad" 
+                                   value="Bogotá" placeholder="Ej. Bogotá, Medellín, Cali" required onchange="verificarDireccionEnMapa()">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small fw-bold">Teléfono o Celular de Contacto *</label>
+                            <input type="tel" class="form-control bg-black text-white border-secondary py-2.5" name="telefono_contacto" 
+                                   value="{{ user.celular if user else '' }}" placeholder="Ej. 3101234567" required>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label text-secondary small fw-bold">Dirección de Entrega Exacta *</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control bg-black text-white border-secondary py-2.5" id="direccion_entrega" name="direccion_entrega" 
+                                       value="{{ user.direccion if user else '' }}" placeholder="Ej. Calle 26 # 68-50, Apto 402" required onchange="verificarDireccionEnMapa()">
+                                <button type="button" class="btn fw-bold px-3 text-dark d-flex align-items-center gap-2" style="background:#CEB06E;" onclick="verificarDireccionEnMapa()">
+                                    <i class="fa-solid fa-magnifying-glass-location"></i> Verificar
+                                </button>
+                            </div>
+                            <small class="text-secondary mt-1 d-block" style="font-size: 0.72rem;">
+                                Ingresa tu dirección y el sistema verificará automáticamente su localización satelital en el mapa.
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Verification Map Container -->
+                    <div class="mt-4 pt-3 border-top border-secondary border-opacity-50">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-white small fw-bold d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-satellite text-warning"></i> Mapa Interactivo de Verificación
+                            </span>
+                            <span id="map-status" class="badge bg-secondary bg-opacity-50 text-light small px-3 py-1 rounded-pill">
+                                Esperando dirección...
+                            </span>
+                        </div>
+
+                        <!-- Map DIV -->
+                        <div id="checkout-map" class="rounded-3 border border-secondary shadow-inner position-relative overflow-hidden" 
+                             style="height: 280px; width: 100%; z-index: 10; background: #0c0c0c;">
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <span class="text-secondary small" style="font-size: 0.72rem;">
+                                <i class="fa-solid fa-hand-pointer text-warning me-1"></i> Puedes hacer clic o arrastrar el marcador en el mapa para ajustar el punto exacto.
+                            </span>
+                            <span id="coord-badge" class="text-warning small font-monospace" style="font-size: 0.72rem;"></span>
+                        </div>
                     </div>
                 </div>
-            </div>
+
+                <!-- Bloque 2: Método de Pago -->
+                <div class="card bg-dark text-white border rounded-4 shadow-sm overflow-hidden p-4" 
+                     style="background: #141414 !important; border-color: rgba(206,176,110,0.25) !important;">
+                    
+                    <h4 class="card-title fw-bold text-white mb-4 d-flex align-items-center gap-2 pb-2 border-bottom border-secondary border-opacity-50">
+                        <i class="fa-solid fa-credit-card text-warning"></i> 2. Selecciona tu Método de Pago
+                    </h4>
+
+                    <div class="d-flex flex-column gap-3">
+                        <label class="p-3 rounded-3 border d-flex align-items-center justify-content-between cursor-pointer payment-option active-payment" 
+                               style="background: rgba(206,176,110,0.06); border-color: #CEB06E !important; cursor: pointer;">
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="radio" name="metodo_pago" value="efectivo" checked class="form-check-input mt-0 border-warning text-warning" onchange="seleccionarPago(this)">
+                                <div>
+                                    <div class="text-white fw-bold">Pago en Efectivo / Contra Entrega</div>
+                                    <div class="text-secondary small">Cancela al momento de recibir tu paquete en la puerta de tu domicilio</div>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-hand-holding-dollar fa-2x text-warning"></i>
+                        </label>
+
+                        <label class="p-3 rounded-3 border d-flex align-items-center justify-content-between cursor-pointer payment-option" 
+                               style="background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.1); cursor: pointer;">
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="radio" name="metodo_pago" value="transferencia" class="form-check-input mt-0 border-secondary" onchange="seleccionarPago(this)">
+                                <div>
+                                    <div class="text-white fw-bold">Transferencia Bancaria / PSE / Nequi</div>
+                                    <div class="text-secondary small">Pago digital instantáneo con confirmación automática</div>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-building-columns fa-2x text-secondary"></i>
+                        </label>
+
+                        <label class="p-3 rounded-3 border d-flex align-items-center justify-content-between cursor-pointer payment-option" 
+                               style="background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.1); cursor: pointer;">
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="radio" name="metodo_pago" value="tarjeta" class="form-check-input mt-0 border-secondary" onchange="seleccionarPago(this)">
+                                <div>
+                                    <div class="text-white fw-bold">Tarjeta de Crédito / Débito (Visa, Mastercard)</div>
+                                    <div class="text-secondary small">Transacción cifrada protegida con token de seguridad 3DS</div>
+                                </div>
+                            </div>
+                            <i class="fa-brands fa-cc-visa fa-2x text-secondary"></i>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Botón de Envío -->
+                <button type="submit" class="btn fw-bold w-100 py-3 rounded-3 text-dark shadow-lg d-flex align-items-center justify-content-center gap-2 fs-5"
+                        style="background: #CEB06E; transition: all 0.2s;" onmouseover="this.style.filter='brightness(1.1)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.filter='none'; this.style.transform='none'">
+                    <i class="fa-solid fa-shield-check"></i> Confirmar y Realizar Pedido
+                </button>
+            </form>
         </div>
 
+        <!-- Columna Resumen de Compra -->
         <div class="col-lg-5">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h4 class="mb-3">Confirmar pedido</h4>
-                    <form method="post">
-                        <div class="mb-3">
-                            <label class="form-label">Método de pago</label>
-                            <select class="form-select" name="metodo_pago" required>
-                                <option value="efectivo">PSE</option>
-                                <option value="transferencia">Tarjeta</option>
-                            </select>
+            <div class="card text-white rounded-4 shadow-lg sticky-top overflow-hidden border" 
+                 style="top: 100px; background: #141414; border-color: rgba(206, 176, 110, 0.35) !important;">
+                
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom border-secondary border-opacity-50">
+                        <h4 class="card-title fw-bold mb-0 text-white fs-5">
+                            <i class="fa-solid fa-basket-shopping text-warning me-2"></i> Resumen de Compra
+                        </h4>
+                        <span class="badge rounded-pill bg-dark border border-warning text-warning">{{ total_items }} artículos</span>
+                    </div>
+
+                    <!-- Items List -->
+                    <div class="d-flex flex-column gap-3 mb-4 max-h-300 overflow-auto pe-1" style="max-height: 280px;">
+                        {% for item in carrito %}
+                            <div class="d-flex align-items-center justify-content-between gap-3 p-2 rounded-3 bg-black bg-opacity-40 border border-secondary border-opacity-25">
+                                <div class="p-2 rounded-3 text-warning border border-secondary border-opacity-25 d-flex align-items-center justify-content-center"
+                                     style="width: 48px; height: 48px; background: rgba(206,176,110,0.1);">
+                                    <i class="fa-solid fa-spray-can-sparkles" style="color: #CEB06E;"></i>
+                                </div>
+                                <div class="min-w-0 flex-grow-1">
+                                    <div class="fw-bold text-white text-truncate small">{{ item.nombre_producto }}</div>
+                                    <div class="text-secondary small" style="font-size: 0.72rem;">{{ item.cantidad }} x ${{ "{:,.2f}".format(item.precio_unitario) }}</div>
+                                </div>
+                                <div class="fw-bold text-warning font-monospace small">
+                                    ${{ "{:,.2f}".format(item.subtotal) }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Subtotales y Total -->
+                    <div class="border-top border-secondary border-opacity-50 pt-3 d-flex flex-column gap-2 text-light small">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-secondary">Subtotal productos:</span>
+                            <span class="font-monospace fw-semibold text-white">${{ "{:,.2f}".format(total_precio) }}</span>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Dirección de entrega</label>
-                            <input type="text" class="form-control" name="direccion_entrega" required>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-secondary">Envío a domicilio:</span>
+                            <span class="text-success fw-bold"><i class="fa-solid fa-check me-1"></i>¡Gratis!</span>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Ciudad</label>
-                            <input type="text" class="form-control" name="ciudad" required>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-secondary">Empaque ecológico:</span>
+                            <span class="text-warning fw-semibold">Incluido</span>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Teléfono de contacto</label>
-                            <input type="text" class="form-control" name="telefono_contacto" required>
+
+                        <hr class="border-secondary border-opacity-50 my-2">
+
+                        <div class="d-flex justify-content-between align-items-baseline pt-1">
+                            <span class="fs-6 text-uppercase fw-bold text-secondary">Total a Pagar:</span>
+                            <div class="text-end">
+                                <span class="fs-4 fw-bold font-monospace" style="color: #CEB06E;">
+                                    ${{ "{:,.2f}".format(total_precio) }}
+                                </span>
+                                <span class="d-block text-secondary small" style="font-size: 0.68rem;">COP • IVA incluido</span>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Nombre de la persona que recibe el producto</label>
-                            <input type="text" class="form-control" name="nombre" required>
+                    </div>
+
+                    <!-- Garantías -->
+                    <div class="mt-4 pt-3 border-top border-secondary border-opacity-25 d-flex flex-column gap-2 text-secondary small" style="font-size: 0.75rem;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-shield-check text-warning"></i> Garantía de 30 días con satisfacción 100%
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Confirmar compra</button>
-                    </form>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-truck-fast text-warning"></i> Despacho express con trazabilidad satelital en vivo
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<script>
+let map = null;
+let marker = null;
+let debounceTimer = null;
+
+// Custom Golden Leaflet Icon
+const goldIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+
+function normalizarDireccionColombia(dir) {
+    if (!dir) return '';
+    let d = dir.trim().toLowerCase();
+
+    // 1. Normalizar prefijos viales colombianos
+    d = d.replace(/\b(cll|cl|c)\.?\b/g, 'calle');
+    d = d.replace(/\b(cra|cr|kra|kr|k)\.?\b/g, 'carrera');
+    d = d.replace(/\b(avda|av|ak)\.?\b/g, 'avenida');
+    d = d.replace(/\b(diag|dg)\.?\b/g, 'diagonal');
+    d = d.replace(/\b(trans|tv)\.?\b/g, 'transversal');
+    d = d.replace(/\bac\b/g, 'avenida calle');
+    d = d.replace(/\bautonorte\b/g, 'autopista norte');
+    d = d.replace(/\bautosur\b/g, 'autopista sur');
+
+    // 2. Normalizar cuadrantes y sufijos cardinales (ej. 32s -> 32 sur, 7e -> 7 este)
+    d = d.replace(/(\d+)\s*s\b/g, '$1 sur');
+    d = d.replace(/(\d+)\s*e\b/g, '$1 este');
+    d = d.replace(/(\d+)\s*n\b/g, '$1 norte');
+    d = d.replace(/(\d+)\s*o\b/g, '$1 oeste');
+    d = d.replace(/(\d+)\s*w\b/g, '$1 oeste');
+
+    // 3. Normalizar símbolos #, No., No, Nro, N°
+    d = d.replace(/(?:no\.?|nro\.?|num\.?|n°)\s*/g, '#');
+    d = d.replace(/\s*#\s*/g, ' # ');
+    d = d.replace(/\s+/g, ' ').trim();
+
+    return d;
+}
+
+function generarConsultasGeocodificacion(dirNorm, ciudad) {
+    const city = ciudad.trim() || 'Bogotá';
+    const queries = [];
+
+    // Consulta 1: Dirección completa normalizada
+    queries.push({ q: `${dirNorm}, ${city}, Colombia`, level: 'exact' });
+
+    // Consulta 2 y 3: Desglose de vía principal y cruce (ej. calle 32 sur # 7-06 -> calle 32 sur # 7 / calle 32 sur)
+    const matchNum = dirNorm.match(/^(.*?)\s*#\s*(\d+)(?:-\d+)?(.*)$/);
+    if (matchNum) {
+        const viaPrincipal = matchNum[1].trim();
+        const numCruce = matchNum[2].trim();
+        queries.push({ q: `${viaPrincipal} #${numCruce}, ${city}, Colombia`, level: 'block' });
+        queries.push({ q: `${viaPrincipal} ${numCruce}, ${city}, Colombia`, level: 'block' });
+        queries.push({ q: `${viaPrincipal}, ${city}, Colombia`, level: 'street' });
+    } else {
+        queries.push({ q: `${dirNorm}, ${city}, Colombia`, level: 'street' });
+    }
+
+    // Consulta 4: Centroide de la ciudad como último recurso
+    queries.push({ q: `${city}, Colombia`, level: 'city' });
+
+    return queries;
+}
+
+function initMap() {
+    const defaultLat = 4.6533;
+    const defaultLng = -74.0836;
+
+    map = L.map('checkout-map').setView([defaultLat, defaultLng], 12);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; CARTO | OpenStreetMap',
+        maxZoom: 19
+    }).addTo(map);
+
+    marker = L.marker([defaultLat, defaultLng], {
+        icon: goldIcon,
+        draggable: true
+    }).addTo(map);
+
+    marker.bindPopup("<b style='color:#000;'>📍 Punto de Entrega</b><br><span style='color:#555;'>Mueve este pin para ajustar tu ubicación exacta</span>").openPopup();
+
+    // Arrastre manual del pin con geocodificación inversa
+    marker.on('dragend', function (e) {
+        const pos = marker.getLatLng();
+        actualizarCoordenadas(pos.lat, pos.lng, "Ubicación fijada manualmente");
+        obtenerDireccionInversa(pos.lat, pos.lng);
+    });
+
+    // Clic en el mapa para posicionar el pin
+    map.on('click', function(e) {
+        marker.setLatLng(e.latlng);
+        actualizarCoordenadas(e.latlng.lat, e.latlng.lng, "Punto fijado en el mapa");
+        obtenerDireccionInversa(e.latlng.lat, e.latlng.lng);
+    });
+
+    // Verificación inicial si ya hay dirección
+    const initialAddress = document.getElementById('direccion_entrega').value.trim();
+    if (initialAddress) {
+        verificarDireccionEnMapa();
+    }
+}
+
+function actualizarCoordenadas(lat, lng, mensajeEstado = null) {
+    document.getElementById('lat_entrega').value = lat.toFixed(7);
+    document.getElementById('lng_entrega').value = lng.toFixed(7);
+    document.getElementById('coord-badge').innerText = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+    
+    const statusBadge = document.getElementById('map-status');
+    if (mensajeEstado) {
+        statusBadge.className = "badge bg-success text-white small px-3 py-1 rounded-pill shadow-sm";
+        statusBadge.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> ${mensajeEstado}`;
+    }
+}
+
+async function obtenerDireccionInversa(lat, lng) {
+    try {
+        const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+        const data = await resp.json();
+        if (data && data.display_name) {
+            const shortName = data.name || data.address.road || data.address.neighbourhood || data.address.suburb || data.display_name.split(',')[0];
+            marker.bindPopup(`<b style='color:#000;'>📍 Ubicación Seleccionada</b><br><span style='color:#444; font-size:11px;'>${shortName} (${data.address.city || data.address.town || 'Colombia'})</span>`).openPopup();
+        }
+    } catch (e) {
+        console.warn("Reverse geocode silent fallback:", e);
+    }
+}
+
+async function verificarDireccionEnMapa() {
+    const direccionInput = document.getElementById('direccion_entrega').value.trim();
+    const ciudadInput = document.getElementById('ciudad').value.trim() || 'Bogotá';
+    const statusBadge = document.getElementById('map-status');
+
+    if (!direccionInput) {
+        statusBadge.className = "badge bg-secondary text-light small px-3 py-1 rounded-pill";
+        statusBadge.innerText = "Ingresa una dirección...";
+        return;
+    }
+
+    statusBadge.className = "badge bg-warning text-dark small px-3 py-1 rounded-pill";
+    statusBadge.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> Localizando en mapa satelital...`;
+
+    const dirNorm = normalizarDireccionColombia(direccionInput);
+    const queries = generarConsultasGeocodificacion(dirNorm, ciudadInput);
+
+    let matchEncontrado = null;
+
+    for (const item of queries) {
+        try {
+            const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=co&limit=1&q=${encodeURIComponent(item.q)}`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data && data.length > 0) {
+                matchEncontrado = {
+                    lat: parseFloat(data[0].lat),
+                    lon: parseFloat(data[0].lon),
+                    displayName: data[0].display_name,
+                    level: item.level
+                };
+                break;
+            }
+        } catch (err) {
+            console.warn("Intento de geocodificación fallido:", item.q, err);
+        }
+    }
+
+    if (matchEncontrado) {
+        const { lat, lon, displayName, level } = matchEncontrado;
+
+        let zoomLevel = 17;
+        let badgeMsg = "Dirección verificada con éxito ✓";
+
+        if (level === 'street') {
+            zoomLevel = 16;
+            badgeMsg = "Vía localizada • Ajusta el pin a tu predio";
+        } else if (level === 'city') {
+            zoomLevel = 13;
+            badgeMsg = "Ciudad localizada • Mueve el pin a tu ubicación";
+        }
+
+        map.setView([lat, lon], zoomLevel);
+        marker.setLatLng([lat, lon]);
+        marker.bindPopup(`<b style='color:#000;'>📍 ${level === 'exact' ? 'Dirección Exacta' : 'Ubicación Localizada'}</b><br><span style='color:#333; font-size:11px;'>${displayName}</span>`).openPopup();
+
+        actualizarCoordenadas(lat, lon, badgeMsg);
+    } else {
+        statusBadge.className = "badge bg-info text-dark small px-3 py-1 rounded-pill";
+        statusBadge.innerHTML = `<i class="fa-solid fa-location-crosshairs me-1"></i> Ubicación aproximada - Mueve el pin`;
+    }
+}
+
+function seleccionarPago(radio) {
+    document.querySelectorAll('.payment-option').forEach(el => {
+        el.style.borderColor = 'rgba(255,255,255,0.1)';
+        el.style.background = 'rgba(0,0,0,0.4)';
+    });
+    const parent = radio.closest('.payment-option');
+    if (parent) {
+        parent.style.borderColor = '#CEB06E';
+        parent.style.background = 'rgba(206,176,110,0.06)';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', initMap);
+</script>
+
+<style>
+.payment-option:hover {
+    border-color: rgba(206,176,110,0.5) !important;
+}
+.cursor-pointer {
+    cursor: pointer;
+}
+</style>
 {% endblock %}

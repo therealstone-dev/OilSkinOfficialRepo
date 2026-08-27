@@ -1,98 +1,146 @@
 {% extends 'components/tailwind/layout_profile.jinja' %}
 {% from 'components/tailwind/elements/ui.jinja' import sidebar %}
 
-{% block title %}Carrito de Compras - OilSkin{% endblock %}
+{% block title %}Mi Carrito de Compras - Dashboard OilSkin{% endblock %}
 
 {% block content %}
-<body class="min-h-screen bg-gray-200 overflow-x-hidden font-sans">
+<body class="min-h-screen bg-neutral-900 text-gray-100 overflow-x-hidden font-sans">
   {{ sidebar(items) }}
-    <main class="ml-0 sm:ml-64 bg-white min-h-screen p-4 md:p-8 transition-all duration-300">
-      <header class="flex flex-row justify-between items-start w-full gap-4 mb-10">
+    <main class="ml-0 sm:ml-64 bg-neutral-950 min-h-screen p-4 md:p-8 transition-all duration-300">
+      
+      <!-- Top Header -->
+      <header class="flex flex-row justify-between items-start w-full gap-4 mb-8 pb-4 border-b border-neutral-800">
         <div class="min-w-0 flex-1">
-          <h1 class="text-xl md:text-2xl font-bold truncate text-gray-800">
-            Bienvenido, <span class="text-blue-600 font-semibold">{{ user.nombre if user else session.get('user_name', '') }}</span>
+          <span class="text-xs uppercase tracking-widest text-[#CEB06E] font-bold">Panel de Cliente</span>
+          <h1 class="text-xl md:text-2xl font-bold truncate text-white mt-1">
+            Carrito de Compras de <span class="text-[#CEB06E] font-semibold">{{ user.nombre if user else session.get('user_name', 'Usuario') }}</span>
           </h1>
-          <p class="text-xs md:text-sm text-gray-400">Resumen de tu carrito de compras activo</p>
+          <p class="text-xs md:text-sm text-neutral-400">Revisa tus productos seleccionados antes de finalizar tu orden</p>
         </div>
 
-        <div class="flex flex-row items-center gap-3 md:gap-4 shrink-0">
-          <button class="relative group">
-            <i class="fa-regular fa-bell bg-gray-100 p-3 md:p-4 rounded-xl text-lg text-blue-600 group-hover:bg-blue-50 transition-colors"></i>
-            <span class="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full border-2 border-white"></span>
-          </button>
-          <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+        <div class="flex flex-row items-center gap-3 shrink-0">
+          <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-[#CEB06E] text-neutral-950 flex items-center justify-center font-bold text-lg shadow-md">
             {{ (user.nombre[0] if user and user.nombre else 'U') | upper }}
           </div>
         </div>
       </header>
 
       <section>
-        <h2 class="text-3xl font-bold mb-6 text-gray-800">Mi Carrito Activo</h2>
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-cart-shopping text-[#CEB06E]"></i> Productos en Carrito
+          </h2>
+          {% if total_items and total_items > 0 %}
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-[#CEB06E]/20 text-[#CEB06E] border border-[#CEB06E]/30">
+              {{ total_items }} {{ 'ítem' if total_items == 1 else 'ítems' }}
+            </span>
+          {% endif %}
+        </div>
         
         {% if not carrito or carrito|length == 0 %}
-          <div class="bg-gray-50 rounded-2xl border border-gray-100 p-12 text-center shadow-sm">
-            <i class="fa-solid fa-cart-flatbed text-5xl text-gray-300 mb-4"></i>
-            <h3 class="text-xl font-bold text-gray-700 mb-2">Tu carrito está vacío</h3>
-            <p class="text-gray-500 mb-6 text-sm">Explora nuestro catálogo de cosméticos y añade tus productos preferidos.</p>
-            <a href="{{ url_for('main_blueprint.index') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-md">
-              Ver Productos
+          <div class="bg-neutral-900/80 rounded-2xl border border-neutral-800 p-12 text-center shadow-lg">
+            <div class="w-20 h-20 mx-auto rounded-full bg-[#CEB06E]/10 border border-[#CEB06E]/20 flex items-center justify-center mb-4">
+              <i class="fa-solid fa-basket-shopping text-3xl text-[#CEB06E]"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">Tu carrito está vacío</h3>
+            <p class="text-neutral-400 mb-6 text-sm max-w-md mx-auto">Explora nuestro catálogo exclusivo de cosmética botánica y añade tus productos naturales favoritos.</p>
+            <a href="{{ url_for('main_blueprint.index') }}" class="inline-flex items-center gap-2 bg-[#CEB06E] hover:bg-[#dfc98e] text-neutral-950 font-bold px-6 py-3 rounded-xl transition-all shadow-md">
+              <i class="fa-solid fa-store"></i> Explorar Catálogo
             </a>
           </div>
         {% else %}
-          <div class="bg-gray-50 flex flex-col w-full rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
-            
-            {% for item in carrito %}
-              <div class="flex flex-col sm:flex-row gap-4 p-4 md:p-6 items-center border-b border-gray-200 last:border-b-0">
-                <div class="w-20 h-20 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-2xl font-bold shrink-0">
-                  <i class="fa-solid fa-box-open"></i>
-                </div>
-                
-                <div class="flex flex-col flex-1 text-center sm:text-left">
-                  <h2 class="text-xl font-bold text-gray-800">{{ item.nombre_producto }}</h2>
-                  <span class="text-sm text-gray-500 font-medium tracking-tight">ID: #PROD-{{ item.id_producto }}</span>
-                  <p class="mt-2 font-bold text-blue-600">${{ "{:,.2f}".format(item.precio_unitario) }} <span class="text-gray-400 font-normal text-xs">c/u</span></p>
-                </div>
-
-                <div class="flex flex-col items-center sm:items-end gap-3 ml-auto w-full sm:w-auto">
-                  <a href="{{ url_for('user_blueprint.delete_cart_item', id_producto=item.id_producto) }}" 
-                     class="text-gray-400 hover:text-red-600 transition-colors" title="Eliminar producto">
-                    <i class="fa-solid fa-trash-can text-lg"></i>
-                  </a>
-                  
-                  <div class="flex flex-row items-center gap-3 bg-white p-1 rounded-full border border-gray-200 px-3">
-                    <form method="POST" action="{{ url_for('user_blueprint.update_cart_item') }}" class="inline">
-                      <input type="hidden" name="producto_id" value="{{ item.id_producto }}">
-                      <input type="hidden" name="cantidad" value="{{ item.cantidad - 1 }}">
-                      <button type="submit" class="w-7 h-7 flex items-center justify-center text-blue-600 border border-blue-600 rounded-full hover:bg-blue-600 hover:text-white transition-all">
-                        <i class="fa-solid fa-minus text-xs"></i>
-                      </button>
-                    </form>
-
-                    <span class="text-lg font-bold w-6 text-center text-gray-800">{{ item.cantidad }}</span>
-
-                    <form method="POST" action="{{ url_for('user_blueprint.update_cart_item') }}" class="inline">
-                      <input type="hidden" name="producto_id" value="{{ item.id_producto }}">
-                      <input type="hidden" name="cantidad" value="{{ item.cantidad + 1 }}">
-                      <button type="submit" class="w-7 h-7 flex items-center justify-center text-blue-600 border border-blue-600 rounded-full hover:bg-blue-600 hover:text-white transition-all">
-                        <i class="fa-solid fa-plus text-xs"></i>
-                      </button>
-                    </form>
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Product List -->
+            <div class="lg:col-span-8 flex flex-col gap-4">
+              {% for item in carrito %}
+                <div class="bg-neutral-900 border border-neutral-800 hover:border-[#CEB06E]/40 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 transition-all shadow-sm">
+                  <div class="flex items-center gap-4 w-full sm:w-auto">
+                    <div class="w-16 h-16 rounded-xl bg-black/60 border border-[#CEB06E]/20 text-[#CEB06E] flex items-center justify-center text-2xl font-bold shrink-0">
+                      <i class="fa-solid fa-spray-can-sparkles"></i>
+                    </div>
+                    
+                    <div class="flex flex-col min-w-0 flex-1">
+                      <span class="text-xs text-neutral-500 font-mono">Ref: #OS-{{ item.id_producto }}</span>
+                      <h3 class="text-lg font-bold text-white truncate">{{ item.nombre_producto }}</h3>
+                      <p class="text-sm font-semibold text-[#CEB06E] mt-0.5">
+                        ${{ "{:,.2f}".format(item.precio_unitario) }} <span class="text-neutral-500 font-normal text-xs">c/u</span>
+                      </p>
+                    </div>
                   </div>
-                  <h2 class="text-base font-bold text-gray-700 pt-1">Subtotal: <span class="text-blue-700">${{ "{:,.2f}".format(item.subtotal) }}</span></h2>
+
+                  <div class="flex flex-row sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-3 pt-3 sm:pt-0 border-t border-neutral-800 sm:border-t-0">
+                    <div class="flex items-center gap-2">
+                      <form method="POST" action="{{ url_for('user_blueprint.update_cart_item') }}" class="inline">
+                        <input type="hidden" name="producto_id" value="{{ item.id_producto }}">
+                        <input type="hidden" name="cantidad" value="{{ item.cantidad - 1 }}">
+                        <button type="submit" class="w-8 h-8 flex items-center justify-center text-[#CEB06E] border border-neutral-700 bg-neutral-800 rounded-lg hover:bg-[#CEB06E] hover:text-neutral-950 transition-all font-bold">
+                          -
+                        </button>
+                      </form>
+
+                      <span class="text-base font-bold w-8 text-center text-white font-mono">{{ item.cantidad }}</span>
+
+                      <form method="POST" action="{{ url_for('user_blueprint.update_cart_item') }}" class="inline">
+                        <input type="hidden" name="producto_id" value="{{ item.id_producto }}">
+                        <input type="hidden" name="cantidad" value="{{ item.cantidad + 1 }}">
+                        <button type="submit" class="w-8 h-8 flex items-center justify-center text-[#CEB06E] border border-neutral-700 bg-neutral-800 rounded-lg hover:bg-[#CEB06E] hover:text-neutral-950 transition-all font-bold">
+                          +
+                        </button>
+                      </form>
+
+                      <a href="{{ url_for('user_blueprint.delete_cart_item', id_producto=item.id_producto) }}" 
+                         class="ml-2 text-neutral-500 hover:text-red-400 p-2 transition-colors" title="Eliminar producto"
+                         onclick="return confirm('¿Deseas retirar este producto de tu carrito?');">
+                        <i class="fa-solid fa-trash-can"></i>
+                      </a>
+                    </div>
+
+                    <div class="text-right">
+                      <span class="text-xs text-neutral-500 block">Subtotal:</span>
+                      <span class="text-base font-bold text-[#CEB06E] font-mono">${{ "{:,.2f}".format(item.subtotal) }}</span>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+
+            <!-- Order Summary Column -->
+            <div class="lg:col-span-4">
+              <div class="bg-neutral-900 border border-[#CEB06E]/30 rounded-2xl p-6 shadow-xl sticky top-6">
+                <h3 class="text-lg font-bold text-white mb-4 pb-3 border-b border-neutral-800 flex items-center justify-between">
+                  <span>Resumen de Compra</span>
+                  <i class="fa-solid fa-shield-heart text-[#CEB06E]"></i>
+                </h3>
+
+                <div class="space-y-3 text-sm text-neutral-400 mb-6">
+                  <div class="flex justify-between">
+                    <span>Artículos seleccionados:</span>
+                    <span class="font-bold text-white">{{ total_items }} unidades</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span>Subtotal:</span>
+                    <span class="font-bold text-white font-mono">${{ "{:,.2f}".format(total_precio) }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span>Envío:</span>
+                    <span class="font-bold text-emerald-400">¡Gratis a todo el país!</span>
+                  </div>
+                  <div class="border-t border-neutral-800 pt-3 flex justify-between text-base font-extrabold text-white">
+                    <span>Total a Pagar:</span>
+                    <span class="text-[#CEB06E] font-mono text-xl">${{ "{:,.2f}".format(total_precio) }} COP</span>
+                  </div>
+                </div>
+
+                <a href="{{ url_for('user_blueprint.user_checkout') }}" 
+                   class="w-full block py-4 bg-[#CEB06E] hover:bg-[#dfc98e] text-neutral-950 font-bold rounded-xl text-center shadow-lg transition-all hover:-translate-y-0.5">
+                  Finalizar Compra <i class="fa-solid fa-arrow-right ml-2"></i>
+                </a>
+
+                <div class="mt-4 pt-4 border-t border-neutral-800 text-center text-xs text-neutral-500 flex items-center justify-center gap-2">
+                  <i class="fa-solid fa-lock text-[#CEB06E]"></i> Transacción 100% segura y garantizada
                 </div>
               </div>
-            {% endfor %}
-
-          </div>
-
-          <div class="flex flex-col md:flex-row justify-between md:items-center mt-8 p-6 bg-blue-50 rounded-2xl gap-6 border border-blue-100 shadow-sm">
-            <div>
-              <p class="text-gray-600">Ítems en el carrito: <span class="font-bold text-gray-800">{{ total_items }}</span></p>
-              <h3 class="text-2xl font-bold text-gray-800">Total: <span class="text-blue-700">${{ "{:,.2f}".format(total_precio) }} COP</span></h3>
             </div>
-            <a href="{{ url_for('user_blueprint.user_checkout') }}" class="w-full md:w-auto px-8 py-4 bg-blue-600 text-white font-bold rounded-xl text-center shadow-lg shadow-blue-200 hover:bg-blue-700 hover:-translate-y-0.5 transition-all">
-              Continuar con el Pedido <i class="fa-solid fa-arrow-right ml-2"></i>
-            </a>
           </div>
         {% endif %}
       </section>

@@ -49,11 +49,20 @@ CREATE TABLE factura (
 CREATE TABLE domicilio (
   id_domicilio INT PRIMARY KEY AUTO_INCREMENT,
   id_pedido INT NOT NULL,
-  direccion_entrega VARCHAR(50) NOT NULL,
+  direccion_entrega VARCHAR(150) NOT NULL,
   ciudad VARCHAR(50) NOT NULL,
   telefono_contacto VARCHAR(15) NOT NULL,
   costo_envio DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-  estado_envio ENUM('pendiente','en camino','entregado','cancelado') NOT NULL,
+  estado_envio ENUM('pendiente','en camino','entregado','cancelado') NOT NULL DEFAULT 'pendiente',
+  origen_despacho VARCHAR(255) DEFAULT 'Centro de Distribución OilSkin - Bogotá D.C.',
+  lat_entrega DECIMAL(10, 7) NULL,
+  lng_entrega DECIMAL(10, 7) NULL,
+  lat_origen DECIMAL(10, 7) DEFAULT 4.6533,
+  lng_origen DECIMAL(10, 7) DEFAULT -74.0836,
+  empresa_envio VARCHAR(100) DEFAULT 'OilSkin Express Logistics',
+  numero_guia VARCHAR(50) DEFAULT NULL,
+  mensaje_transportista TEXT DEFAULT NULL,
+  fecha_estimada_entrega VARCHAR(100) DEFAULT NULL,
   FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido)
 )ENGINE=InnoDB;
 CREATE TABLE detalle_pedido (

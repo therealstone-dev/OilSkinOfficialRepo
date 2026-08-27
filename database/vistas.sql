@@ -12,11 +12,21 @@ SELECT
     f.subtotal AS factura_subtotal,
     f.total AS factura_total,
     f.metodo_pago,
+    d.id_domicilio,
     d.direccion_entrega,
     d.ciudad,
     d.telefono_contacto,
     d.costo_envio,
-    d.estado_envio
+    d.estado_envio,
+    d.origen_despacho,
+    d.lat_entrega,
+    d.lng_entrega,
+    d.lat_origen,
+    d.lng_origen,
+    d.empresa_envio,
+    d.numero_guia,
+    d.mensaje_transportista,
+    d.fecha_estimada_entrega
 FROM pedido p
 LEFT JOIN factura f ON f.id_pedido = p.id_pedido
 LEFT JOIN domicilio d ON d.id_pedido = p.id_pedido;

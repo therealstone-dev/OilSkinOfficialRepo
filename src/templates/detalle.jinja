@@ -1,55 +1,353 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ producto.nombre_producto }} - OilSkin</title>
+{% extends 'components/boostrap/layout_boostrap.jinja' %}
+{% block title %}{{ producto.nombre_producto }} - Cosmética Natural OilSkin{% endblock %}
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+{% block content %}
+<div class="container py-5">
 
-<body class="bg-light">
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb bg-dark bg-opacity-50 p-2 px-3 rounded-pill border border-secondary" style="font-size: 0.85rem; width: fit-content;">
+            <li class="breadcrumb-item"><a href="{{ url_for('main_blueprint.index') }}" class="text-warning text-decoration-none"><i class="fa-solid fa-house me-1"></i>Inicio</a></li>
+            <li class="breadcrumb-item">
+                {% if categoria %}
+                    <a href="{{ url_for('main_blueprint.show_category', category_name=categoria.nombre_categoria) }}" class="text-warning text-decoration-none">{{ categoria.nombre_categoria }}</a>
+                {% else %}
+                    <span class="text-secondary">Cosmética Natural</span>
+                {% endif %}
+            </li>
+            <li class="breadcrumb-item active text-light" aria-current="page">{{ producto.nombre_producto }}</li>
+        </ol>
+    </nav>
 
-    <div class="container py-5" style="max-width: 700px;">
-        <div class="card shadow p-4">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="mb-4">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'danger' else 'danger' }} alert-dismissible fade show rounded-3 bg-dark text-white border-{{ 'warning' if category=='success' else 'danger' }}" role="alert">
+                        <i class="fa-solid {{ 'fa-circle-check text-warning' if category=='success' else 'fa-circle-exclamation text-danger' }} me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
 
-            <h1 class="display-5 fw-bold text-dark mb-3">
+    <!-- Main Product Showcase -->
+    <div class="row g-5 align-items-start mb-5">
+        <!-- Visual Column -->
+        <div class="col-lg-6">
+            <div class="position-relative p-5 rounded-4 text-center overflow-hidden shadow-lg border" 
+                 style="background: radial-gradient(circle at center, #1e1e1e 0%, #0c0c0c 100%); border-color: rgba(206, 176, 110, 0.25) !important;">
+                
+                <!-- Floating Eco Badges -->
+                <div class="position-absolute top-0 start-0 p-3 d-flex flex-column gap-2" style="z-index: 10;">
+                    <span class="badge rounded-pill px-3 py-2 text-dark fw-bold" style="background:#CEB06E; font-size: 0.75rem;">
+                        <i class="fa-solid fa-leaf me-1"></i> 100% Orgánico
+                    </span>
+                    <span class="badge rounded-pill px-3 py-2 bg-dark bg-opacity-75 text-warning border border-warning" style="font-size: 0.72rem;">
+                        <i class="fa-solid fa-droplet me-1"></i> Palma Pura
+                    </span>
+                </div>
+
+                <div class="position-absolute top-0 end-0 p-3" style="z-index: 10;">
+                    <span class="badge bg-black bg-opacity-75 text-light border border-secondary px-3 py-2 rounded-pill" style="font-size: 0.72rem;">
+                        <i class="fa-solid fa-shield-halved text-warning me-1"></i> Testeado
+                    </span>
+                </div>
+
+                <!-- Product Icon / Hero Representation -->
+                <div class="my-5 py-4 position-relative">
+                    <div class="mx-auto rounded-circle d-flex align-items-center justify-content-center shadow-lg"
+                         style="width: 220px; height: 220px; background: linear-gradient(135deg, rgba(206,176,110,0.15), rgba(0,0,0,0.8)); border: 2px solid #CEB06E; box-shadow: 0 0 50px rgba(206,176,110,0.2) !important;">
+                        <i class="fa-solid fa-pump-soap fa-5x" style="color: #CEB06E; filter: drop-shadow(0 0 15px rgba(206,176,110,0.4));"></i>
+                    </div>
+                </div>
+
+                <!-- Bottom highlights pill -->
+                <div class="d-flex justify-content-center gap-3 pt-3 border-top border-secondary border-opacity-50">
+                    <div class="text-secondary small d-flex align-items-center gap-1">
+                        <i class="fa-solid fa-paw text-warning"></i> Cruelty Free
+                    </div>
+                    <div class="text-secondary small d-flex align-items-center gap-1">
+                        <i class="fa-solid fa-recycle text-warning"></i> Envase Eco
+                    </div>
+                    <div class="text-secondary small d-flex align-items-center gap-1">
+                        <i class="fa-solid fa-certificate text-warning"></i> Calidad Premium
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Information Column -->
+        <div class="col-lg-6 text-white">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="text-warning text-uppercase fw-bold letter-spacing-2" style="font-size: 0.8rem; letter-spacing: 2px;">
+                    {{ categoria.nombre_categoria if categoria else 'Cuidado Dermatológico' }}
+                </span>
+                <span class="text-secondary">•</span>
+                <div class="text-warning small">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star-half-stroke"></i>
+                    <span class="text-light ms-1 fw-bold">4.9</span>
+                    <span class="text-secondary">(128 opiniones)</span>
+                </div>
+            </div>
+
+            <h1 class="display-5 fw-bold mb-3 text-white">
                 {{ producto.nombre_producto }}
             </h1>
 
-            <p class="fs-5 text-secondary mb-4">
-                {{ producto.descripcion }}
+            <p class="lead text-light text-opacity-75 mb-4" style="font-size: 1.05rem; line-height: 1.7;">
+                {{ producto.descripcion or 'Fórmula magistral enriquecida con extractos puros y bioactivos derivados del aceite de palma. Diseñado para ofrecer máxima nutrición celular, elasticidad y una piel rejuvenecida de tacto sedoso.' }}
             </p>
 
-            <div class="bg-light border-start border-4 border-primary p-3 mb-4">
-                <p class="mb-1 fs-5">
-                    <strong>Precio:</strong> ${{ producto.precio }}
-                </p>
-                <p class="mb-0 fs-5">
-                    <strong>Stock:</strong> {{ producto.stock }} unidades
-                </p>
+            <!-- Price & Stock Section -->
+            <div class="p-4 rounded-4 bg-dark bg-opacity-75 border border-secondary mb-4 shadow-sm">
+                <div class="d-flex flex-wrap align-items-baseline justify-content-between gap-3 mb-2">
+                    <div>
+                        <span class="text-secondary small d-block">Precio unitario:</span>
+                        <div class="display-6 fw-bold" style="color: #CEB06E;">
+                            ${{ "{:,.2f}".format(producto.precio) }} <span class="fs-6 text-secondary fw-normal">COP</span>
+                        </div>
+                    </div>
+                    <div>
+                        {% if producto.stock and producto.stock > 10 %}
+                            <span class="badge bg-success bg-opacity-25 text-success border border-success px-3 py-2 rounded-pill">
+                                <i class="fa-solid fa-check-circle me-1"></i> En Stock ({{ producto.stock }} disp.)
+                            </span>
+                        {% elif producto.stock and producto.stock > 0 %}
+                            <span class="badge bg-warning bg-opacity-25 text-warning border border-warning px-3 py-2 rounded-pill">
+                                <i class="fa-solid fa-triangle-exclamation me-1"></i> ¡Últimas {{ producto.stock }} unidades!
+                            </span>
+                        {% else %}
+                            <span class="badge bg-danger bg-opacity-25 text-danger border border-danger px-3 py-2 rounded-pill">
+                                <i class="fa-solid fa-circle-xmark me-1"></i> Agotado temporalmente
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
 
-            <form action="{{ url_for('main_blueprint.agregar_al_carrito') }}" method="post" class="mt-4">
+            <!-- Form: Add to Cart & Buy Now -->
+            <form action="{{ url_for('main_blueprint.agregar_al_carrito') }}" method="post" class="mb-4">
                 <input type="hidden" name="producto_id" value="{{ producto.id_producto }}">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <label for="cantidad" class="fw-semibold">Cantidad:</label>
-                    <input type="number" id="cantidad" name="cantidad" value="1" min="1" class="form-control" style="width: 90px;">
+                
+                <div class="row g-3 align-items-center mb-4">
+                    <div class="col-auto">
+                        <label for="cantidad" class="fw-semibold text-secondary small d-block mb-1">Cantidad:</label>
+                        <div class="input-group" style="width: 140px;">
+                            <button type="button" class="btn btn-outline-warning" onclick="cambiarCant(-1)">-</button>
+                            <input type="number" id="cantidad" name="cantidad" value="1" min="1" max="{{ producto.stock }}" class="form-control text-center bg-black text-white border-warning font-monospace fw-bold">
+                            <button type="button" class="btn btn-outline-warning" onclick="cambiarCant(1)">+</button>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <label class="fw-semibold text-secondary small d-block mb-1">&nbsp;</label>
+                        <button type="submit" class="btn fw-bold w-100 py-2 px-4 rounded-3 text-dark shadow d-flex align-items-center justify-content-center gap-2"
+                                style="background: #CEB06E; height: 38px; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+                            <i class="fa-solid fa-cart-plus"></i> Agregar al Carrito
+                        </button>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-success fw-bold">
-                    Agregar al carrito
-                </button>
             </form>
 
-            <a href="/" class="btn btn-primary fw-bold mt-3">
-                ← Volver a productos
-            </a>
-            <a href="{{ url_for('main_blueprint.carrito') }}" class="btn btn-outline-secondary fw-bold mt-3 ms-2">
-                Ir al Carrito
-            </a>
+            <!-- Guarantee Cards -->
+            <div class="row g-3 text-secondary small">
+                <div class="col-sm-6">
+                    <div class="d-flex align-items-center gap-3 p-3 rounded-3 bg-dark bg-opacity-50 border border-secondary">
+                        <i class="fa-solid fa-truck-fast text-warning fs-4"></i>
+                        <div>
+                            <div class="text-white fw-bold">Envío a todo Colombia</div>
+                            <div style="font-size: 0.75rem;">Con seguimiento dinámico satelital</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="d-flex align-items-center gap-3 p-3 rounded-3 bg-dark bg-opacity-50 border border-secondary">
+                        <i class="fa-solid fa-shield-halved text-warning fs-4"></i>
+                        <div>
+                            <div class="text-white fw-bold">Pago 100% Seguro</div>
+                            <div style="font-size: 0.75rem;">Cifrado SSL de 256 bits y PSE</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
-</body>
-</html>
+    <!-- Product Features Tabs / Accordion -->
+    <div class="p-4 p-md-5 rounded-4 bg-dark bg-opacity-75 border border-secondary mb-5 shadow-lg">
+        <ul class="nav nav-pills mb-4 border-bottom border-secondary pb-3 gap-2" id="prodTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active rounded-pill px-4 text-white fw-bold" id="desc-tab" data-bs-toggle="pill" data-bs-target="#tab-desc" type="button" role="tab">
+                    🌿 Beneficios de la Palma
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill px-4 text-white fw-bold" id="uso-tab" data-bs-toggle="pill" data-bs-target="#tab-uso" type="button" role="tab">
+                    ✨ Modo de Uso
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill px-4 text-white fw-bold" id="ingr-tab" data-bs-toggle="pill" data-bs-target="#tab-ingr" type="button" role="tab">
+                    🧪 Ingredientes Puros
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill px-4 text-white fw-bold" id="envio-tab" data-bs-toggle="pill" data-bs-target="#tab-envio" type="button" role="tab">
+                    📦 Envíos y Garantía
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content text-light" id="prodTabsContent">
+            <!-- TAB 1 -->
+            <div class="tab-pane fade show active" id="tab-desc" role="tabpanel">
+                <div class="row g-4 align-items-center">
+                    <div class="col-md-7">
+                        <h4 class="text-warning fw-bold mb-3">La Fuerza Antioxidante de la Palma Africana</h4>
+                        <p class="text-secondary">
+                            El aceite de palma es la fuente natural más rica del planeta en <strong>Tocotrienoles</strong> (una forma de Vitamina E hasta 60 veces más potente que los tocoferoles convencionales) y <strong>Carotenoides</strong>.
+                        </p>
+                        <ul class="list-unstyled d-flex flex-column gap-2 text-light">
+                            <li><i class="fa-solid fa-circle-check text-warning me-2"></i> <strong>Anti-envejecimiento:</strong> neutraliza los radicales libres causados por el sol y la polución.</li>
+                            <li><i class="fa-solid fa-circle-check text-warning me-2"></i> <strong>Restauración de barrera:</strong> lípidos naturales biocompatibles con el manto hidrolipídico humano.</li>
+                            <li><i class="fa-solid fa-circle-check text-warning me-2"></i> <strong>Cero sensación grasa:</strong> rápida absorción cutánea con acabado sedoso mate.</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="p-4 rounded-4 bg-black bg-opacity-50 border border-secondary text-center">
+                            <i class="fa-solid fa-spa fa-3x text-warning mb-3"></i>
+                            <h5 class="text-white fw-bold">Cultivo Sostenible Certificado</h5>
+                            <p class="text-secondary small mb-0">Extraído bajo estándares internacionales de preservación ambiental y comercio justo en Colombia.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2 -->
+            <div class="tab-pane fade" id="tab-uso" role="tabpanel">
+                <h4 class="text-warning fw-bold mb-3">Rutina Recomendada para Máxima Efectividad</h4>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="p-3 bg-black bg-opacity-40 rounded-3 border border-secondary">
+                            <span class="badge bg-warning text-dark rounded-circle p-2 mb-2 fw-bold">1</span>
+                            <h6 class="text-white fw-bold">Limpieza Previa</h6>
+                            <p class="text-secondary small mb-0">Limpia suavemente el rostro o área del cuerpo con agua tibia para abrir los poros.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-black bg-opacity-40 rounded-3 border border-secondary">
+                            <span class="badge bg-warning text-dark rounded-circle p-2 mb-2 fw-bold">2</span>
+                            <h6 class="text-white fw-bold">Aplicación Suave</h6>
+                            <p class="text-secondary small mb-0">Aplica 2 a 3 gotas o una porción moderada masajeando en movimientos circulares ascendentes.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-black bg-opacity-40 rounded-3 border border-secondary">
+                            <span class="badge bg-warning text-dark rounded-circle p-2 mb-2 fw-bold">3</span>
+                            <h6 class="text-white fw-bold">Frecuencia</h6>
+                            <p class="text-secondary small mb-0">Uso diario en la mañana antes del bloqueador solar o en la noche como nutrición intensiva.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3 -->
+            <div class="tab-pane fade" id="tab-ingr" role="tabpanel">
+                <h4 class="text-warning fw-bold mb-3">Formulación 100% Limpia y Libre de Tóxicos</h4>
+                <p class="text-secondary">
+                    <em>Elaeis Guineensis (Palm) Fruit Oil Organic Extract, Tocotrienol Complex, Simmondsia Chinensis Seed Oil, Carotenoid Complex, Natural Botanical Essence.</em>
+                </p>
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    <span class="badge bg-dark border border-secondary text-secondary p-2">Sin Parabenos</span>
+                    <span class="badge bg-dark border border-secondary text-secondary p-2">Sin Sulfatos</span>
+                    <span class="badge bg-dark border border-secondary text-secondary p-2">Sin Aceites Minerales</span>
+                    <span class="badge bg-dark border border-secondary text-secondary p-2">Sin Siliconas</span>
+                    <span class="badge bg-dark border border-secondary text-secondary p-2">Vegano</span>
+                </div>
+            </div>
+
+            <!-- TAB 4 -->
+            <div class="tab-pane fade" id="tab-envio" role="tabpanel">
+                <h4 class="text-warning fw-bold mb-3">Envíos Rápidos y Garantía OilSkin</h4>
+                <p class="text-secondary">
+                    Despachamos directamente desde nuestros centros logísticos en Bogotá y puntos de distribución nacional. Tu paquete cuenta con monitoreo satelital en tiempo real e informe del transportista visible desde tu panel de usuario.
+                </p>
+                <p class="text-secondary">
+                    Si por algún motivo tu producto no cumple al 100% tus expectativas, cuentas con <strong>30 días de garantía de satisfacción</strong> para solicitar cambio o reembolso sin complicaciones.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products Section -->
+    {% if relacionados and relacionados|length > 0 %}
+        <div class="mt-5">
+            <h3 class="text-white fw-bold mb-4 d-flex align-items-center gap-2">
+                <i class="fa-solid fa-sparkles text-warning"></i> Podría interesarte también
+            </h3>
+            <div class="row g-4">
+                {% for rel in relacionados %}
+                    <div class="col-md-4">
+                        <div class="card h-100 bg-dark text-white border border-secondary rounded-4 overflow-hidden shadow-sm" style="transition: transform 0.25s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='none'">
+                            <div class="p-4 text-center bg-black bg-opacity-50">
+                                <div class="mx-auto rounded-circle d-flex align-items-center justify-content-center" style="width: 100px; height: 100px; background: rgba(206,176,110,0.1); border: 1px solid rgba(206,176,110,0.3);">
+                                    <i class="fa-solid fa-spray-can-sparkles fa-2x text-warning"></i>
+                                </div>
+                            </div>
+                            <div class="card-body p-4 d-flex flex-column justify-content-between">
+                                <div>
+                                    <h5 class="card-title fw-bold text-white mb-2">{{ rel.nombre_producto }}</h5>
+                                    <p class="card-text text-secondary small mb-3">{{ rel.descripcion[:90] if rel.descripcion else '' }}...</p>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between mt-3 pt-3 border-top border-secondary">
+                                    <span class="fs-5 fw-bold text-warning">${{ "{:,.2f}".format(rel.precio) }}</span>
+                                    <a href="{{ url_for('main_blueprint.get_product', id=rel.id_producto) }}" class="btn btn-outline-warning btn-sm rounded-pill px-3 fw-bold">
+                                        Ver Detalle
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+
+<script>
+function cambiarCant(delta) {
+    const input = document.getElementById('cantidad');
+    let val = parseInt(input.value) || 1;
+    val += delta;
+    if (val < 1) val = 1;
+    const max = parseInt(input.getAttribute('max'));
+    if (max && val > max) val = max;
+    input.value = val;
+}
+</script>
+
+<style>
+.nav-pills .nav-link {
+    color: #9a9590 !important;
+    background: rgba(255,255,255,0.05);
+    transition: all 0.2s ease;
+}
+.nav-pills .nav-link:hover {
+    color: #f0ece4 !important;
+    background: rgba(206, 176, 110, 0.15);
+}
+.nav-pills .nav-link.active {
+    color: #0c0c0c !important;
+    background: #CEB06E !important;
+}
+</style>
+{% endblock %}

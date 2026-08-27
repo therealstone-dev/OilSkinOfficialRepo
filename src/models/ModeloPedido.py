@@ -21,7 +21,16 @@ class ModeloPedido:
                     ciudad,
                     telefono_contacto,
                     costo_envio,
-                    estado_envio
+                    estado_envio,
+                    origen_despacho,
+                    lat_entrega,
+                    lng_entrega,
+                    lat_origen,
+                    lng_origen,
+                    empresa_envio,
+                    numero_guia,
+                    mensaje_transportista,
+                    fecha_estimada_entrega
                 FROM vw_historial_pedidos
                 WHERE id_usuario = %s
                 ORDER BY fecha_pedido DESC

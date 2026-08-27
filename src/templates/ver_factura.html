@@ -91,7 +91,7 @@
         </div>
         <div class="flex justify-between text-slate-600">
           <span>IVA (19% Discriminado):</span>
-          <span class="font-semibold text-slate-800">${{ "{:,.2f}".format(factura.impuesto or (factura.subtotal * 0.19)) }}</span>
+          <span class="font-semibold text-slate-800">${{ "{:,.2f}".format(factura.impuesto or ((factura.subtotal|float) * 0.19)) }}</span>
         </div>
         <div class="border-t border-slate-300 pt-2 flex justify-between items-center font-black text-sm text-slate-900">
           <span>Total Pagado:</span>

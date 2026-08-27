@@ -5,7 +5,6 @@ from flask_mysqldb import MySQL
 
 mysql = MySQL()
 
-
 def init_db(app):
     try:
         app.config['MYSQL_HOST'] = config('MYSQL_HOST')

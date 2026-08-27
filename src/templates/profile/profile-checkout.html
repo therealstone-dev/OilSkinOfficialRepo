@@ -1,118 +1,429 @@
 {% extends 'components/tailwind/layout_profile.jinja' %}
 {% from 'components/tailwind/elements/ui.jinja' import sidebar %}
 
-{% block title %}Checkout - Dashboard OilSkin{% endblock %}
+{% block title %}Finalizar Pedido - Dashboard OilSkin{% endblock %}
 
 {% block content %}
-<body class="min-h-screen bg-gray-200 overflow-x-hidden font-sans">
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+<body class="min-h-screen bg-neutral-900 text-gray-100 overflow-x-hidden font-sans">
   {{ sidebar(items) }}
-    <main class="ml-0 sm:ml-64 bg-white min-h-screen p-4 md:p-8 transition-all duration-300">
-      <header class="flex flex-row justify-between items-start w-full gap-4 mb-8">
+    <main class="ml-0 sm:ml-64 bg-neutral-950 min-h-screen p-4 md:p-8 transition-all duration-300">
+      
+      <!-- Header -->
+      <header class="flex flex-row justify-between items-start w-full gap-4 mb-8 pb-4 border-b border-neutral-800">
         <div class="min-w-0 flex-1">
-          <h1 class="text-xl md:text-2xl font-bold truncate text-gray-800">
-            Finalizar Pedido - <span class="text-blue-600 font-semibold">{{ user.nombre if user else session.get('user_name', '') }}</span>
+          <span class="text-xs uppercase tracking-widest text-[#CEB06E] font-bold">Checkout Seguro</span>
+          <h1 class="text-xl md:text-2xl font-bold truncate text-white mt-1">
+            Confirmación de Pedido - <span class="text-[#CEB06E] font-semibold">{{ user.nombre if user else session.get('user_name', 'Usuario') }}</span>
           </h1>
-          <p class="text-xs md:text-sm text-gray-400">Verifica los datos de entrega y confirma tu compra</p>
+          <p class="text-xs md:text-sm text-neutral-400">Verifica la geolocalización de tu entrega y selecciona tu forma de pago</p>
         </div>
 
-        <div class="flex flex-row items-center gap-3 md:gap-4 shrink-0">
-          <button class="relative group">
-            <i class="fa-regular fa-bell bg-gray-100 p-3 md:p-4 rounded-xl text-lg text-blue-600 group-hover:bg-blue-50 transition-colors"></i>
-            <span class="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full border-2 border-white"></span>
-          </button>
-          <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+        <div class="flex flex-row items-center gap-3 shrink-0">
+          <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-[#CEB06E] text-neutral-950 flex items-center justify-center font-bold text-lg shadow-md">
             {{ (user.nombre[0] if user and user.nombre else 'U') | upper }}
           </div>
         </div>
       </header>
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <!-- Columna Izquierda: Resumen de Carrito -->
+        <!-- Columna Izquierda: Formulario de Entrega, Mapa y Pago -->
         <div class="lg:col-span-7 flex flex-col gap-6">
-          <div class="bg-gray-50 border border-gray-200 rounded-2xl p-6 shadow-sm">
-            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <i class="fa-solid fa-basket-shopping text-blue-600"></i> Resumen de tu Compra
+          <form method="POST" action="{{ url_for('user_blueprint.user_checkout') }}" id="profileCheckoutForm" class="flex flex-col gap-6">
+            <!-- Hidden inputs -->
+            <input type="hidden" id="lat_entrega" name="lat_entrega" value="4.6533">
+            <input type="hidden" id="lng_entrega" name="lng_entrega" value="-74.0836">
+            <input type="hidden" id="origen_despacho" name="origen_despacho" value="Centro de Distribución OilSkin - Bogotá D.C.">
+            <input type="hidden" id="lat_origen" name="lat_origen" value="4.6533">
+            <input type="hidden" id="lng_origen" name="lng_origen" value="-74.0836">
+
+            <!-- Card 1: Datos de Entrega -->
+            <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-md">
+              <h2 class="text-lg font-bold text-white mb-4 pb-2 border-b border-neutral-800 flex items-center gap-2">
+                <i class="fa-solid fa-map-location-dot text-[#CEB06E]"></i> 1. Información y Geolocalización de Entrega
+              </h2>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-semibold text-neutral-400 mb-1">Nombre Completo del Receptor *</label>
+                  <input type="text" name="nombre" value="{{ user.nombre if user else '' }}" required
+                    class="w-full bg-neutral-950 border border-neutral-700 rounded-xl py-3 px-4 text-white text-sm focus:border-[#CEB06E] focus:ring-1 focus:ring-[#CEB06E] focus:outline-none transition-all">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-neutral-400 mb-1">Ciudad de Entrega *</label>
+                  <input type="text" id="ciudad" name="ciudad" value="Bogotá" required onchange="verificarDireccionEnMapa()"
+                    class="w-full bg-neutral-950 border border-neutral-700 rounded-xl py-3 px-4 text-white text-sm focus:border-[#CEB06E] focus:ring-1 focus:ring-[#CEB06E] focus:outline-none transition-all">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-neutral-400 mb-1">Teléfono o Celular *</label>
+                  <input type="tel" name="telefono_contacto" value="{{ user.celular if user else '' }}" required
+                    class="w-full bg-neutral-950 border border-neutral-700 rounded-xl py-3 px-4 text-white text-sm focus:border-[#CEB06E] focus:ring-1 focus:ring-[#CEB06E] focus:outline-none transition-all">
+                </div>
+
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-semibold text-neutral-400 mb-1">Dirección de Entrega Exacta *</label>
+                  <div class="flex gap-2">
+                    <input type="text" id="direccion_entrega" name="direccion_entrega" value="{{ user.direccion if user else '' }}" required
+                      placeholder="Calle, Carrera, Número, Apto / Casa" onchange="verificarDireccionEnMapa()"
+                      class="flex-1 bg-neutral-950 border border-neutral-700 rounded-xl py-3 px-4 text-white text-sm focus:border-[#CEB06E] focus:ring-1 focus:ring-[#CEB06E] focus:outline-none transition-all">
+                    <button type="button" onclick="verificarDireccionEnMapa()"
+                      class="px-4 py-3 bg-[#CEB06E] hover:bg-[#dfc98e] text-neutral-950 font-bold rounded-xl text-sm transition-all flex items-center gap-1.5 shrink-0">
+                      <i class="fa-solid fa-magnifying-glass-location"></i> Verificar
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Interactive Map Container -->
+              <div class="mt-5 pt-4 border-t border-neutral-800">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-bold text-neutral-300 flex items-center gap-1.5">
+                    <i class="fa-solid fa-satellite text-[#CEB06E]"></i> Mapa Interactivo de Verificación
+                  </span>
+                  <span id="map-status" class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-800 text-neutral-300">
+                    Esperando dirección...
+                  </span>
+                </div>
+
+                <div id="checkout-map" class="w-full rounded-xl border border-neutral-800 overflow-hidden shadow-inner" style="height: 260px; z-index: 10; background: #0c0c0c;">
+                </div>
+
+                <div class="flex justify-between items-center mt-2 text-xs text-neutral-500">
+                  <span><i class="fa-solid fa-hand-pointer text-[#CEB06E] mr-1"></i> Arrastra el pin o haz clic en el mapa para ajustar</span>
+                  <span id="coord-badge" class="text-[#CEB06E] font-mono"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2: Método de Pago -->
+            <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-md">
+              <h2 class="text-lg font-bold text-white mb-4 pb-2 border-b border-neutral-800 flex items-center gap-2">
+                <i class="fa-solid fa-credit-card text-[#CEB06E]"></i> 2. Método de Pago
+              </h2>
+
+              <div class="space-y-3">
+                <label class="p-4 rounded-xl border border-[#CEB06E] bg-[#CEB06E]/10 flex items-center justify-between cursor-pointer payment-option transition-all">
+                  <div class="flex items-center gap-3">
+                    <input type="radio" name="metodo_pago" value="efectivo" checked class="text-[#CEB06E] focus:ring-[#CEB06E]" onchange="seleccionarPago(this)">
+                    <div>
+                      <div class="font-bold text-white text-sm">Pago Contra Entrega / Efectivo</div>
+                      <div class="text-xs text-neutral-400">Pagas en efectivo al recibir tu pedido en tu puerta</div>
+                    </div>
+                  </div>
+                  <i class="fa-solid fa-hand-holding-dollar text-xl text-[#CEB06E]"></i>
+                </label>
+
+                <label class="p-4 rounded-xl border border-neutral-800 bg-neutral-950 flex items-center justify-between cursor-pointer payment-option transition-all">
+                  <div class="flex items-center gap-3">
+                    <input type="radio" name="metodo_pago" value="transferencia" class="text-[#CEB06E] focus:ring-[#CEB06E]" onchange="seleccionarPago(this)">
+                    <div>
+                      <div class="font-bold text-white text-sm">Transferencia Bancaria / PSE / Nequi</div>
+                      <div class="text-xs text-neutral-400">Pago seguro con débito directo desde tu banco o billetera</div>
+                    </div>
+                  </div>
+                  <i class="fa-solid fa-building-columns text-xl text-neutral-500"></i>
+                </label>
+
+                <label class="p-4 rounded-xl border border-neutral-800 bg-neutral-950 flex items-center justify-between cursor-pointer payment-option transition-all">
+                  <div class="flex items-center gap-3">
+                    <input type="radio" name="metodo_pago" value="tarjeta" class="text-[#CEB06E] focus:ring-[#CEB06E]" onchange="seleccionarPago(this)">
+                    <div>
+                      <div class="font-bold text-white text-sm">Tarjeta de Crédito / Débito</div>
+                      <div class="text-xs text-neutral-400">Visa, Mastercard, American Express con cifrado SSL 256-bit</div>
+                    </div>
+                  </div>
+                  <i class="fa-brands fa-cc-visa text-xl text-neutral-500"></i>
+                </label>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="w-full bg-[#CEB06E] hover:bg-[#dfc98e] text-neutral-950 font-bold py-4 rounded-xl shadow-lg transition-all hover:-translate-y-0.5 text-base flex items-center justify-center gap-2">
+              <i class="fa-solid fa-lock"></i> Confirmar y Realizar Pedido
+            </button>
+          </form>
+        </div>
+
+        <!-- Columna Derecha: Resumen de Carrito -->
+        <div class="lg:col-span-5">
+          <div class="bg-neutral-900 border border-[#CEB06E]/30 rounded-2xl p-6 shadow-xl sticky top-6">
+            <h2 class="text-lg font-bold text-white mb-4 pb-3 border-b border-neutral-800 flex items-center justify-between">
+              <span><i class="fa-solid fa-basket-shopping text-[#CEB06E] mr-2"></i> Resumen de Compra</span>
+              <span class="text-xs px-2.5 py-1 rounded-full bg-neutral-800 text-[#CEB06E] font-mono">{{ total_items }} artículos</span>
             </h2>
 
-            <div class="flex flex-col divide-y divide-gray-200">
+            <div class="flex flex-col divide-y divide-neutral-800 max-h-72 overflow-y-auto pr-1">
               {% for item in carrito %}
-                <div class="py-4 flex flex-row items-center justify-between gap-4">
-                  <div class="min-w-0 flex-1">
-                    <h3 class="font-bold text-gray-800 text-base truncate">{{ item.nombre_producto }}</h3>
-                    <p class="text-xs text-gray-500">Cantidad: {{ item.cantidad }} x ${{ "{:,.2f}".format(item.precio_unitario) }}</p>
+                <div class="py-3 flex items-center justify-between gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-black/60 border border-[#CEB06E]/20 text-[#CEB06E] flex items-center justify-center font-bold text-base shrink-0">
+                    <i class="fa-solid fa-spray-can-sparkles"></i>
                   </div>
-                  <div class="text-right font-bold text-blue-700 text-base shrink-0">
+                  <div class="min-w-0 flex-1">
+                    <h3 class="font-bold text-white text-sm truncate">{{ item.nombre_producto }}</h3>
+                    <p class="text-xs text-neutral-400">{{ item.cantidad }} x ${{ "{:,.2f}".format(item.precio_unitario) }}</p>
+                  </div>
+                  <div class="text-right font-bold text-[#CEB06E] text-sm font-mono shrink-0">
                     ${{ "{:,.2f}".format(item.subtotal) }}
                   </div>
                 </div>
               {% endfor %}
             </div>
 
-            <div class="border-t border-dashed border-gray-300 mt-4 pt-4 flex flex-col gap-2">
-              <div class="flex justify-between text-sm text-gray-600">
+            <div class="border-t border-neutral-800 mt-4 pt-4 space-y-2 text-sm text-neutral-400">
+              <div class="flex justify-between">
                 <span>Subtotal productos:</span>
-                <span class="font-semibold text-gray-800">${{ "{:,.2f}".format(total_precio) }}</span>
+                <span class="font-semibold text-white font-mono">${{ "{:,.2f}".format(total_precio) }}</span>
               </div>
-              <div class="flex justify-between text-sm text-gray-600">
-                <span>Envío estimado:</span>
-                <span class="font-semibold text-green-600">¡Gratis!</span>
+              <div class="flex justify-between">
+                <span>Envío a domicilio:</span>
+                <span class="font-semibold text-emerald-400">¡Gratis!</span>
               </div>
-              <div class="flex justify-between text-lg font-extrabold text-blue-800 mt-2 pt-2 border-t border-gray-200">
+              <div class="flex justify-between">
+                <span>Empaque botánico:</span>
+                <span class="font-semibold text-[#CEB06E]">Incluido</span>
+              </div>
+              <div class="flex justify-between text-lg font-extrabold text-white mt-3 pt-3 border-t border-neutral-800">
                 <span>Total a Pagar:</span>
-                <span>${{ "{:,.2f}".format(total_precio) }} COP</span>
+                <span class="text-[#CEB06E] font-mono text-xl">${{ "{:,.2f}".format(total_precio) }} COP</span>
               </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-neutral-800 text-center space-y-1.5 text-xs text-neutral-500">
+              <div class="flex items-center justify-center gap-1.5 text-neutral-400">
+                <i class="fa-solid fa-shield-check text-[#CEB06E]"></i> Compra 100% segura y garantizada
+              </div>
+              <div>Monitoreo satelital y tracking en vivo de tu pedido</div>
             </div>
           </div>
         </div>
-
-        <!-- Columna Derecha: Formulario de Confirmación -->
-        <div class="lg:col-span-5">
-          <form method="POST" action="{{ url_for('user_blueprint.user_checkout') }}" class="bg-gray-50 border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col gap-5">
-            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-              <i class="fa-solid fa-truck-ramp-box text-blue-600"></i> Datos de Entrega y Pago
-            </h2>
-
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-semibold text-gray-700">Nombre de quien recibe</label>
-              <input type="text" name="nombre" value="{{ user.nombre if user else '' }}" required
-                class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-semibold text-gray-700">Dirección de Entrega</label>
-              <input type="text" name="direccion_entrega" value="{{ user.direccion if user else '' }}" required
-                class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
-                placeholder="Calle, Número, Apto">
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-semibold text-gray-700">Ciudad</label>
-              <input type="text" name="ciudad" value="Bogotá" required
-                class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-semibold text-gray-700">Teléfono de Contacto</label>
-              <input type="text" name="telefono_contacto" value="{{ user.celular if user else '' }}" required
-                class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-semibold text-gray-700">Método de Pago</label>
-              <select name="metodo_pago" required
-                class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-800 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
-                <option value="efectivo">Efectivo / Pago contra entrega</option>
-                <option value="transferencia">Transferencia Bancaria / PSE</option>
-                <option value="tarjeta">Tarjeta de Crédito / Débito</option>
-              </select>
-            </div>
-
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 transition-all hover:-translate-y-0.5 mt-2">
-              <i class="fa-solid fa-lock mr-2"></i>Confirmar y Realizar Pedido
-            </button>
-          </form>
-        </div>
       </div>
     </main>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+    let map = null;
+    let marker = null;
+
+    const goldIcon = L.icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+
+    function normalizarDireccionColombia(dir) {
+        if (!dir) return '';
+        let d = dir.trim().toLowerCase();
+
+        // 1. Normalizar prefijos viales colombianos
+        d = d.replace(/\b(cll|cl|c)\.?\b/g, 'calle');
+        d = d.replace(/\b(cra|cr|kra|kr|k)\.?\b/g, 'carrera');
+        d = d.replace(/\b(avda|av|ak)\.?\b/g, 'avenida');
+        d = d.replace(/\b(diag|dg)\.?\b/g, 'diagonal');
+        d = d.replace(/\b(trans|tv)\.?\b/g, 'transversal');
+        d = d.replace(/\bac\b/g, 'avenida calle');
+        d = d.replace(/\bautonorte\b/g, 'autopista norte');
+        d = d.replace(/\bautosur\b/g, 'autopista sur');
+
+        // 2. Normalizar cuadrantes y sufijos cardinales (ej. 32s -> 32 sur, 7e -> 7 este)
+        d = d.replace(/(\d+)\s*s\b/g, '$1 sur');
+        d = d.replace(/(\d+)\s*e\b/g, '$1 este');
+        d = d.replace(/(\d+)\s*n\b/g, '$1 norte');
+        d = d.replace(/(\d+)\s*o\b/g, '$1 oeste');
+        d = d.replace(/(\d+)\s*w\b/g, '$1 oeste');
+
+        // 3. Normalizar símbolos #, No., No, Nro, N°
+        d = d.replace(/(?:no\.?|nro\.?|num\.?|n°)\s*/g, '#');
+        d = d.replace(/\s*#\s*/g, ' # ');
+        d = d.replace(/\s+/g, ' ').trim();
+
+        return d;
+    }
+
+    function generarConsultasGeocodificacion(dirNorm, ciudad) {
+        const city = ciudad.trim() || 'Bogotá';
+        const queries = [];
+
+        // Consulta 1: Dirección completa normalizada
+        queries.push({ q: `${dirNorm}, ${city}, Colombia`, level: 'exact' });
+
+        // Consulta 2 y 3: Desglose de vía principal y cruce (ej. calle 32 sur # 7-06 -> calle 32 sur # 7 / calle 32 sur)
+        const matchNum = dirNorm.match(/^(.*?)\s*#\s*(\d+)(?:-\d+)?(.*)$/);
+        if (matchNum) {
+            const viaPrincipal = matchNum[1].trim();
+            const numCruce = matchNum[2].trim();
+            queries.push({ q: `${viaPrincipal} #${numCruce}, ${city}, Colombia`, level: 'block' });
+            queries.push({ q: `${viaPrincipal} ${numCruce}, ${city}, Colombia`, level: 'block' });
+            queries.push({ q: `${viaPrincipal}, ${city}, Colombia`, level: 'street' });
+        } else {
+            queries.push({ q: `${dirNorm}, ${city}, Colombia`, level: 'street' });
+        }
+
+        // Consulta 4: Centroide de la ciudad como último recurso
+        queries.push({ q: `${city}, Colombia`, level: 'city' });
+
+        return queries;
+    }
+
+    function initMap() {
+        const defaultLat = 4.6533;
+        const defaultLng = -74.0836;
+
+        map = L.map('checkout-map').setView([defaultLat, defaultLng], 12);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; CARTO | OpenStreetMap',
+            maxZoom: 19
+        }).addTo(map);
+
+        marker = L.marker([defaultLat, defaultLng], {
+            icon: goldIcon,
+            draggable: true
+        }).addTo(map);
+
+        marker.bindPopup("<b style='color:#000;'>📍 Punto de Entrega</b><br><span style='color:#555;'>Mueve este pin para ajustar tu ubicación exacta</span>").openPopup();
+
+        // Arrastre manual del pin con geocodificación inversa
+        marker.on('dragend', function (e) {
+            const pos = marker.getLatLng();
+            actualizarCoordenadas(pos.lat, pos.lng, "Ubicación fijada manualmente");
+            obtenerDireccionInversa(pos.lat, pos.lng);
+        });
+
+        // Clic en el mapa para posicionar el pin
+        map.on('click', function(e) {
+            marker.setLatLng(e.latlng);
+            actualizarCoordenadas(e.latlng.lat, e.latlng.lng, "Punto fijado en el mapa");
+            obtenerDireccionInversa(e.latlng.lat, e.latlng.lng);
+        });
+
+        // Verificación inicial si ya hay dirección
+        const initialAddress = document.getElementById('direccion_entrega').value.trim();
+        if (initialAddress) {
+            verificarDireccionEnMapa();
+        }
+    }
+
+    function actualizarCoordenadas(lat, lng, mensajeEstado = null) {
+        document.getElementById('lat_entrega').value = lat.toFixed(7);
+        document.getElementById('lng_entrega').value = lng.toFixed(7);
+        document.getElementById('coord-badge').innerText = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+        
+        const statusBadge = document.getElementById('map-status');
+        if (mensajeEstado) {
+            statusBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-900/80 text-emerald-300 border border-emerald-700 shadow-sm";
+            statusBadge.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> ${mensajeEstado}`;
+        }
+    }
+
+    async function obtenerDireccionInversa(lat, lng) {
+        try {
+            const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+            const data = await resp.json();
+            if (data && data.display_name) {
+                const shortName = data.name || data.address.road || data.address.neighbourhood || data.address.suburb || data.display_name.split(',')[0];
+                marker.bindPopup(`<b style='color:#000;'>📍 Ubicación Seleccionada</b><br><span style='color:#444; font-size:11px;'>${shortName} (${data.address.city || data.address.town || 'Colombia'})</span>`).openPopup();
+            }
+        } catch (e) {
+            console.warn("Reverse geocode silent fallback:", e);
+        }
+    }
+
+    async function verificarDireccionEnMapa() {
+        const direccionInput = document.getElementById('direccion_entrega').value.trim();
+        const ciudadInput = document.getElementById('ciudad').value.trim() || 'Bogotá';
+        const statusBadge = document.getElementById('map-status');
+
+        if (!direccionInput) {
+            statusBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-800 text-neutral-400";
+            statusBadge.innerText = "Ingresa una dirección...";
+            return;
+        }
+
+        statusBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-900/80 text-amber-300 border border-amber-700";
+        statusBadge.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Localizando en mapa satelital...`;
+
+        const dirNorm = normalizarDireccionColombia(direccionInput);
+        const queries = generarConsultasGeocodificacion(dirNorm, ciudadInput);
+
+        let matchEncontrado = null;
+
+        for (const item of queries) {
+            try {
+                const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=co&limit=1&q=${encodeURIComponent(item.q)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data && data.length > 0) {
+                    matchEncontrado = {
+                        lat: parseFloat(data[0].lat),
+                        lon: parseFloat(data[0].lon),
+                        displayName: data[0].display_name,
+                        level: item.level
+                    };
+                    break;
+                }
+            } catch (err) {
+                console.warn("Intento de geocodificación fallido:", item.q, err);
+            }
+        }
+
+        if (matchEncontrado) {
+            const { lat, lon, displayName, level } = matchEncontrado;
+
+            let zoomLevel = 17;
+            let badgeMsg = "Dirección verificada con éxito ✓";
+
+            if (level === 'street') {
+                zoomLevel = 16;
+                badgeMsg = "Vía localizada • Ajusta el pin a tu predio";
+            } else if (level === 'city') {
+                zoomLevel = 13;
+                badgeMsg = "Ciudad localizada • Mueve el pin a tu ubicación";
+            }
+
+            map.setView([lat, lon], zoomLevel);
+            marker.setLatLng([lat, lon]);
+            marker.bindPopup(`<b style='color:#000;'>📍 ${level === 'exact' ? 'Dirección Exacta' : 'Ubicación Localizada'}</b><br><span style='color:#333; font-size:11px;'>${displayName}</span>`).openPopup();
+
+            actualizarCoordenadas(lat, lon, badgeMsg);
+        } else {
+            statusBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-900/80 text-sky-300 border border-sky-700";
+            statusBadge.innerHTML = `<i class="fa-solid fa-location-crosshairs mr-1"></i> Ubicación aproximada - Mueve el pin`;
+        }
+    }
+
+    function seleccionarPago(radio) {
+        document.querySelectorAll('.payment-option').forEach(el => {
+            el.classList.remove('border-[#CEB06E]', 'bg-[#CEB06E]/10');
+            el.classList.add('border-neutral-800', 'bg-neutral-950');
+            const icon = el.querySelector('i');
+            if (icon) {
+                icon.classList.remove('text-[#CEB06E]');
+                icon.classList.add('text-neutral-500');
+            }
+        });
+        const parent = radio.closest('.payment-option');
+        if (parent) {
+            parent.classList.remove('border-neutral-800', 'bg-neutral-950');
+            parent.classList.add('border-[#CEB06E]', 'bg-[#CEB06E]/10');
+            const icon = parent.querySelector('i');
+            if (icon) {
+                icon.classList.remove('text-neutral-500');
+                icon.classList.add('text-[#CEB06E]');
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', initMap);
+    </script>
 </body>
 {% endblock %}

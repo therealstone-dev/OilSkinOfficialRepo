@@ -1,9 +1,9 @@
 {% extends 'admin/admin_layout.jinja' %}
 {% set active_page = 'ventas' %}
 
-{% block title %}Ventas y Reportes - OilSkin Admin{% endblock %}
-{% block header_title %}Ventas y Reportes{% endblock %}
-{% block header_subtitle %}Historial de pedidos, estados y exportación de informes{% endblock %}
+{% block title %}Ventas y Logística de Envíos - OilSkin Admin{% endblock %}
+{% block header_title %}Ventas y Gestión de Despacho{% endblock %}
+{% block header_subtitle %}Historial de pedidos, configuración de origen de envíos y notas del transportista{% endblock %}
 
 {% block admin_content %}
 <!-- KPI Cards -->
@@ -16,13 +16,13 @@
     </div>
     <div class="col-6 col-lg-3">
         <div class="kpi-card">
-            <div class="kpi-label">Pagados</div>
+            <div class="kpi-label">Pagados / Entregados</div>
             <div class="kpi-value">{{ resumen_ventas.pedidos_pagados }}</div>
         </div>
     </div>
     <div class="col-6 col-lg-3">
         <div class="kpi-card">
-            <div class="kpi-label">Pendientes</div>
+            <div class="kpi-label">Pendientes / En Ruta</div>
             <div class="kpi-value" style="color:var(--gold);">{{ resumen_ventas.pedidos_pendientes }}</div>
         </div>
     </div>
@@ -34,63 +34,93 @@
     </div>
 </div>
 
-<!-- Filtros -->
+<!-- Filtros y Acciones -->
 <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
     <form action="{{ url_for('admin_blueprint.ventas') }}" method="GET" class="d-flex align-items-center gap-2">
-        <span style="font-size:0.78rem; font-weight:600; color:var(--text-secondary);">Filtrar:</span>
+        <span style="font-size:0.78rem; font-weight:600; color:var(--text-secondary);">Filtrar por estado:</span>
         <select name="estado_filtro" onchange="this.form.submit()" class="admin-select" style="width:auto; padding:7px 14px; font-size:0.78rem;">
-            <option value="todos" {% if estado_filtro == 'todos' %}selected{% endif %}>Todos</option>
+            <option value="todos" {% if estado_filtro == 'todos' %}selected{% endif %}>Todos los pedidos</option>
             <option value="pendiente" {% if estado_filtro == 'pendiente' %}selected{% endif %}>Pendientes</option>
             <option value="pagado" {% if estado_filtro == 'pagado' %}selected{% endif %}>Pagados</option>
             <option value="cancelado" {% if estado_filtro == 'cancelado' %}selected{% endif %}>Cancelados</option>
         </select>
     </form>
     <a href="{{ url_for('admin_blueprint.exportar_reporte_ventas') }}" class="btn-gold" style="text-decoration:none;">
-        <i class="fa-solid fa-file-csv"></i> Exportar CSV
+        <i class="fa-solid fa-file-csv"></i> Exportar Informe CSV
     </a>
 </div>
 
-<!-- Tabla de Ventas -->
+<!-- Tabla de Ventas y Tracking -->
 <div class="admin-card">
     <div style="overflow-x:auto;">
         <table class="admin-table">
             <thead>
                 <tr>
                     <th>ID Pedido</th>
-                    <th>Cliente</th>
+                    <th>Cliente & Destino</th>
                     <th>Fecha</th>
                     <th style="text-align:center;">Pago</th>
                     <th style="text-align:right;">Monto</th>
-                    <th style="text-align:center;">Estado</th>
+                    <th style="text-align:center;">Estado Envío</th>
+                    <th style="text-align:center;">Gestión Logística</th>
                 </tr>
             </thead>
             <tbody>
                 {% if not ultimas_ventas or ultimas_ventas|length == 0 %}
                     <tr>
-                        <td colspan="6" style="text-align:center; padding:40px; color:var(--text-muted);">
-                            <i class="fa-solid fa-inbox me-2" style="font-size:1.2rem;"></i>No hay ventas con este filtro.
+                        <td colspan="7" style="text-align:center; padding:40px; color:var(--text-muted);">
+                            <i class="fa-solid fa-inbox me-2" style="font-size:1.2rem;"></i>No hay ventas registradas con este filtro.
                         </td>
                     </tr>
                 {% else %}
                     {% for v in ultimas_ventas %}
                     <tr>
-                        <td><span style="font-family:monospace; font-weight:700; font-size:0.78rem; color:#38bdf8;">#OS-{{ "%05d"|format(v.id_pedido) }}</span></td>
+                        <td>
+                            <span style="font-family:monospace; font-weight:700; font-size:0.78rem; color:#38bdf8;">#OS-{{ "%05d"|format(v.id_pedido) }}</span>
+                            {% if v.id_factura %}
+                                <a href="{{ url_for('main_blueprint.ver_factura', id_factura=v.id_factura) }}" target="_blank" class="d-block text-secondary small" style="font-size: 0.68rem; text-decoration: underline;">
+                                    <i class="fa-solid fa-file-invoice"></i> Ver Factura
+                                </a>
+                            {% endif %}
+                        </td>
                         <td>
                             <div style="font-weight:700; color:var(--text-primary); font-size:0.85rem;">{{ v.cliente_nombre or 'Cliente' }}</div>
-                            <div style="font-size:0.7rem; color:var(--text-muted);">{{ v.cliente_email or '' }}</div>
+                            <div style="font-size:0.72rem; color:var(--text-secondary);"><i class="fa-solid fa-location-dot text-warning me-1"></i>{{ v.direccion_entrega or 'Sin dirección' }}, {{ v.ciudad or '' }}</div>
+                            <div style="font-size:0.68rem; color:var(--text-muted);">Tel: {{ v.telefono_contacto or v.cliente_celular or 'N/A' }}</div>
                         </td>
                         <td style="font-size:0.78rem; color:var(--text-muted);">{{ v.fecha_pedido.strftime('%d/%m/%Y %H:%M') if v.fecha_pedido else '' }}</td>
                         <td style="text-align:center; font-size:0.75rem; text-transform:uppercase; color:var(--text-secondary); font-weight:600;">{{ v.metodo_pago or 'Efectivo' }}</td>
                         <td style="text-align:right; font-weight:800; color:var(--gold);">${{ "{:,.0f}".format(v.pedido_subtotal) }}</td>
                         <td style="text-align:center;">
-                            <form action="{{ url_for('admin_blueprint.cambiar_estado_pedido', id_pedido=v.id_pedido) }}" method="POST" class="d-flex align-items-center justify-content-center gap-2">
-                                <select name="estado_pedido" class="admin-select" style="width:auto; padding:5px 10px; font-size:0.75rem;">
-                                    <option value="pendiente" {% if v.estado_pedido == 'pendiente' %}selected{% endif %}>Pendiente</option>
-                                    <option value="pagado" {% if v.estado_pedido == 'pagado' %}selected{% endif %}>Pagado</option>
-                                    <option value="cancelado" {% if v.estado_pedido == 'cancelado' %}selected{% endif %}>Cancelado</option>
-                                </select>
-                                <button type="submit" class="btn-gold" style="padding:5px 12px; font-size:0.72rem;">Guardar</button>
-                            </form>
+                            {% set env_st = (v.estado_envio or 'pendiente') | lower %}
+                            {% if env_st == 'entregado' %}
+                                <span class="badge-success">Entregado</span>
+                            {% elif env_st == 'en camino' %}
+                                <span class="badge-gold">En Camino</span>
+                            {% elif env_st == 'cancelado' %}
+                                <span class="badge-danger">Cancelado</span>
+                            {% else %}
+                                <span class="badge-dark">Pendiente</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align:center;">
+                            <button type="button" class="btn-gold" style="padding:6px 14px; font-size:0.75rem;"
+                                    onclick="abrirModalLogistica(
+                                        {{ v.id_pedido }},
+                                        '{{ v.cliente_nombre or '' }}',
+                                        '{{ v.direccion_entrega or '' }}',
+                                        '{{ v.ciudad or '' }}',
+                                        '{{ v.origen_despacho or 'Centro de Distribución OilSkin - Bogotá D.C.' }}',
+                                        {{ v.lat_origen or 4.6533 }},
+                                        {{ v.lng_origen or -74.0836 }},
+                                        '{{ v.estado_envio or 'pendiente' }}',
+                                        '{{ v.empresa_envio or 'OilSkin Express Logistics' }}',
+                                        '{{ v.numero_guia or ('OS-GUIA-' ~ ('%05d'|format(v.id_pedido))) }}',
+                                        '{{ v.mensaje_transportista or 'Pedido confirmado y en proceso de alistamiento en bodega central.' }}',
+                                        '{{ v.fecha_estimada_entrega or '2-4 días hábiles' }}'
+                                    )">
+                                <i class="fa-solid fa-truck-ramp-box"></i> Gestionar Despacho
+                            </button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -99,4 +129,154 @@
         </table>
     </div>
 </div>
+
+<!-- Modal de Gestión Logística y Origen de Envío -->
+<div id="modalLogistica" class="admin-modal-overlay" style="display:none;">
+    <div class="admin-modal" style="max-width: 620px;">
+        <div class="admin-modal-header">
+            <div class="d-flex align-items-center gap-2">
+                <i class="fa-solid fa-truck-fast text-warning fs-5"></i>
+                <h3 id="modalTitulo">Gestionar Logística de Envío</h3>
+            </div>
+            <button type="button" onclick="cerrarModalLogistica()" style="background:none; border:none; color:var(--text-secondary); font-size:1.2rem; cursor:pointer;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form id="formLogistica" method="POST">
+            <div class="row g-3">
+                
+                <!-- Info resumen cliente -->
+                <div class="col-12 p-3 rounded-3 mb-1" style="background: rgba(255,255,255,0.03); border: 1px solid var(--dark-border);">
+                    <div class="d-flex justify-content-between text-secondary small">
+                        <span><strong>Destinatario:</strong> <span id="modalClienteNombre" class="text-white"></span></span>
+                        <span><strong>Ciudad:</strong> <span id="modalClienteCiudad" class="text-warning"></span></span>
+                    </div>
+                    <div class="text-secondary small mt-1">
+                        <strong>Dirección Destino:</strong> <span id="modalClienteDireccion" class="text-white"></span>
+                    </div>
+                </div>
+
+                <!-- Origen de Despacho (Preset & Custom) -->
+                <div class="col-12">
+                    <label class="admin-label">Punto / Sede de Origen de Despacho (Admin) *</label>
+                    <select id="presetOrigen" class="admin-select mb-2" onchange="aplicarPresetOrigen(this.value)">
+                        <option value="bogota">Sede Principal: Centro Logístico OilSkin - Bogotá D.C.</option>
+                        <option value="medellin">Bodega Regional Antioquia - Medellín (El Poblado)</option>
+                        <option value="cesar">Planta Extractora de Palma - San Alberto, Cesar</option>
+                        <option value="barranquilla">Centro Logístico Costa Norte - Barranquilla</option>
+                        <option value="cali">Sede Occidente - Cali (Valle del Cauca)</option>
+                        <option value="custom">Otro (Especificar manualmente)</option>
+                    </select>
+                    <input type="text" id="origen_despacho_input" name="origen_despacho" class="admin-input" required placeholder="Nombre descriptivo del origen de despacho">
+                </div>
+
+                <!-- Coordenadas Origen -->
+                <div class="col-6">
+                    <label class="admin-label">Latitud Origen</label>
+                    <input type="number" step="any" id="lat_origen_input" name="lat_origen" class="admin-input" required>
+                </div>
+                <div class="col-6">
+                    <label class="admin-label">Longitud Origen</label>
+                    <input type="number" step="any" id="lng_origen_input" name="lng_origen" class="admin-input" required>
+                </div>
+
+                <!-- Estado del Envío -->
+                <div class="col-6">
+                    <label class="admin-label">Estado del Envío *</label>
+                    <select id="estado_envio_input" name="estado_envio" class="admin-select" required>
+                        <option value="pendiente">Pedido Solicitado (Pendiente)</option>
+                        <option value="en camino">Enviado (En camino / En ruta)</option>
+                        <option value="entregado">Entregado al Cliente</option>
+                        <option value="cancelado">Cancelado / Reembolsado</option>
+                    </select>
+                </div>
+
+                <!-- Empresa de Mensajería -->
+                <div class="col-6">
+                    <label class="admin-label">Empresa Transportista / Domicilios</label>
+                    <select id="empresa_envio_input" name="empresa_envio" class="admin-select">
+                        <option value="OilSkin Express Logistics">OilSkin Express Logistics</option>
+                        <option value="Servientrega">Servientrega</option>
+                        <option value="Coordinadora Mercantil">Coordinadora Mercantil</option>
+                        <option value="Envía Colvanes">Envía Colvanes</option>
+                        <option value="Interrapidísimo">Interrapidísimo</option>
+                    </select>
+                </div>
+
+                <!-- Número de Guía y Fecha Estimada -->
+                <div class="col-6">
+                    <label class="admin-label">Número de Guía</label>
+                    <input type="text" id="numero_guia_input" name="numero_guia" class="admin-input">
+                </div>
+                <div class="col-6">
+                    <label class="admin-label">Fecha Estimada de Entrega</label>
+                    <input type="text" id="fecha_estimada_entrega_input" name="fecha_estimada_entrega" class="admin-input" placeholder="Ej. Mañana antes de las 5:00 PM">
+                </div>
+
+                <!-- Mensaje / Informe del Transportista -->
+                <div class="col-12">
+                    <label class="admin-label">Informe / Mensaje en Vivo del Transportista (Visible al cliente) *</label>
+                    <textarea id="mensaje_transportista_input" name="mensaje_transportista" class="admin-input" rows="3" required placeholder="Ej. El paquete ha sido recolectado por el transportista y se encuentra en ruta hacia la dirección del cliente."></textarea>
+                    <small style="font-size:0.7rem; color:var(--text-muted); display:block; margin-top:3px;">
+                        Este mensaje aparecerá en tiempo real en la barra y panel de seguimiento del usuario.
+                    </small>
+                </div>
+
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top" style="border-color: var(--dark-border);">
+                <button type="button" onclick="cerrarModalLogistica()" class="btn-dark-subtle">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn-gold">
+                    <i class="fa-solid fa-floppy-disk"></i> Guardar y Actualizar Tracking
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+const sedesPresets = {
+    bogota: { nombre: 'Centro Logístico OilSkin - Bogotá D.C. (Sede Principal)', lat: 4.6533, lng: -74.0836 },
+    medellin: { nombre: 'Bodega Regional Antioquia - Medellín (El Poblado)', lat: 6.2088, lng: -75.5678 },
+    cesar: { nombre: 'Planta Extractora de Palma - San Alberto, Cesar', lat: 7.7612, lng: -73.3934 },
+    barranquilla: { nombre: 'Centro Logístico Costa Norte - Barranquilla (Vía 40)', lat: 10.9984, lng: -74.7932 },
+    cali: { nombre: 'Sede Occidente - Cali (Valle del Cauca)', lat: 3.4516, lng: -76.5320 }
+};
+
+function aplicarPresetOrigen(key) {
+    if (sedesPresets[key]) {
+        document.getElementById('origen_despacho_input').value = sedesPresets[key].nombre;
+        document.getElementById('lat_origen_input').value = sedesPresets[key].lat;
+        document.getElementById('lng_origen_input').value = sedesPresets[key].lng;
+    }
+}
+
+function abrirModalLogistica(idPedido, cliente, direccion, ciudad, origen, latOrigen, lngOrigen, estadoEnvio, empresa, guia, mensaje, fechaEst) {
+    document.getElementById('modalTitulo').innerText = `Logística del Pedido #OS-${String(idPedido).padStart(5, '0')}`;
+    document.getElementById('modalClienteNombre').innerText = cliente || 'Cliente General';
+    document.getElementById('modalClienteDireccion').innerText = direccion || 'Sin dirección';
+    document.getElementById('modalClienteCiudad').innerText = ciudad || 'Colombia';
+
+    document.getElementById('origen_despacho_input').value = origen;
+    document.getElementById('lat_origen_input').value = latOrigen;
+    document.getElementById('lng_origen_input').value = lngOrigen;
+    document.getElementById('estado_envio_input').value = estadoEnvio;
+    document.getElementById('empresa_envio_input').value = empresa;
+    document.getElementById('numero_guia_input').value = guia;
+    document.getElementById('mensaje_transportista_input').value = mensaje;
+    document.getElementById('fecha_estimada_entrega_input').value = fechaEst;
+
+    // Configurar acción del formulario
+    document.getElementById('formLogistica').action = `/admin/ventas/${idPedido}/domicilio`;
+
+    document.getElementById('modalLogistica').style.display = 'flex';
+}
+
+function cerrarModalLogistica() {
+    document.getElementById('modalLogistica').style.display = 'none';
+}
+</script>
 {% endblock %}

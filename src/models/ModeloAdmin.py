@@ -421,8 +421,24 @@ class ModeloAdmin:
                     hp.estado_pedido,
                     hp.pedido_subtotal,
                     hp.metodo_pago,
+                    hp.id_factura,
+                    hp.direccion_entrega,
+                    hp.ciudad,
+                    hp.telefono_contacto,
+                    hp.costo_envio,
+                    hp.estado_envio,
+                    hp.origen_despacho,
+                    hp.lat_entrega,
+                    hp.lng_entrega,
+                    hp.lat_origen,
+                    hp.lng_origen,
+                    hp.empresa_envio,
+                    hp.numero_guia,
+                    hp.mensaje_transportista,
+                    hp.fecha_estimada_entrega,
                     u.nombre AS cliente_nombre,
-                    u.email AS cliente_email
+                    u.email AS cliente_email,
+                    u.celular AS cliente_celular
                 FROM vw_historial_pedidos hp
                 LEFT JOIN usuario u ON u.id_usuario = hp.id_usuario
             """
@@ -441,6 +457,52 @@ class ModeloAdmin:
         except Exception as ex:
             print(f"Error en get_ventas_filtradas: {ex}")
             return []
+
+    @classmethod
+    def actualizar_domicilio_pedido(cls, id_pedido: int, origen_despacho: str, lat_origen: float, lng_origen: float,
+                                    estado_envio: str, empresa_envio: str, numero_guia: str, mensaje_transportista: str,
+                                    fecha_estimada_entrega: str = None):
+        try:
+            conn = get_connection()
+            cur = conn.cursor()
+
+            # Verificar si existe registro de domicilio para el pedido
+            cur.execute("SELECT id_domicilio FROM domicilio WHERE id_pedido = %s", (id_pedido,))
+            domicilio = cur.fetchone()
+
+            if domicilio:
+                cur.execute("""
+                    UPDATE domicilio 
+                    SET origen_despacho = %s,
+                        lat_origen = %s,
+                        lng_origen = %s,
+                        estado_envio = %s,
+                        empresa_envio = %s,
+                        numero_guia = %s,
+                        mensaje_transportista = %s,
+                        fecha_estimada_entrega = %s
+                    WHERE id_pedido = %s
+                """, (origen_despacho, lat_origen, lng_origen, estado_envio, empresa_envio, numero_guia, mensaje_transportista, fecha_estimada_entrega, id_pedido))
+            else:
+                cur.execute("""
+                    INSERT INTO domicilio (id_pedido, direccion_entrega, ciudad, telefono_contacto, costo_envio, estado_envio,
+                                           origen_despacho, lat_origen, lng_origen, empresa_envio, numero_guia, mensaje_transportista, fecha_estimada_entrega)
+                    VALUES (%s, 'Dirección principal', 'Colombia', '0000000000', 0.00, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (id_pedido, estado_envio, origen_despacho, lat_origen, lng_origen, empresa_envio, numero_guia, mensaje_transportista, fecha_estimada_entrega))
+
+            # Si el estado de envío pasa a entregado o cancelado, sincronizar estado del pedido si corresponde
+            if estado_envio == 'entregado':
+                cur.execute("UPDATE pedido SET estado_pedido = 'pagado' WHERE id_pedido = %s AND estado_pedido != 'cancelado'", (id_pedido,))
+            elif estado_envio == 'cancelado':
+                cur.execute("UPDATE pedido SET estado_pedido = 'cancelado' WHERE id_pedido = %s", (id_pedido,))
+
+            conn.commit()
+            cur.close()
+            conn.close()
+            return True, f"Datos de despacho y transportista para el pedido #{id_pedido} actualizados exitosamente."
+        except Exception as ex:
+            print(f"Error en actualizar_domicilio_pedido: {ex}")
+            return False, f"Error al actualizar datos de despacho: {ex}"
 
     @classmethod
     def generar_resumen_reporte_ventas(cls):

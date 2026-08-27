@@ -42,7 +42,21 @@ def about():
 def get_product(id):
     producto = ModeloProducto.get_by_id(id)
     if producto:
-        return _render_with_cart('detalle.jinja', producto=producto)
+        categoria = None
+        relacionados = []
+        if producto.get('id_categoria'):
+            try:
+                conn = get_connection()
+                cur = conn.cursor()
+                cur.execute("SELECT nombre_categoria, descripcion FROM categoria WHERE id_categoria = %s", (producto['id_categoria'],))
+                categoria = cur.fetchone()
+                cur.execute("SELECT * FROM producto WHERE id_categoria = %s AND id_producto != %s LIMIT 3", (producto['id_categoria'], id))
+                relacionados = cur.fetchall()
+                cur.close()
+                conn.close()
+            except Exception as e:
+                print(f"Error cargando categoria/relacionados: {e}")
+        return _render_with_cart('detalle.jinja', producto=producto, categoria=categoria, relacionados=relacionados)
     return _render_with_cart('error_page.jinja', mensaje='Producto no encontrado')
 
 # Ruta de categoría por nombre
@@ -278,9 +292,24 @@ def checkout():
                     (pedido_id, item['id_producto'], item['cantidad'], item['precio_unitario'], item['subtotal']),
                 )
 
+            lat_entrega = request.form.get('lat_entrega', type=float)
+            lng_entrega = request.form.get('lng_entrega', type=float)
+            origen_despacho = request.form.get('origen_despacho', 'Centro de Distribución OilSkin - Bogotá D.C.').strip() or 'Centro de Distribución OilSkin - Bogotá D.C.'
+            lat_origen = request.form.get('lat_origen', default=4.6533, type=float)
+            lng_origen = request.form.get('lng_origen', default=-74.0836, type=float)
+            empresa_envio = 'OilSkin Express Logistics'
+            numero_guia = f"OS-GUIA-{pedido_id:05d}"
+            mensaje_transportista = "Pedido registrado y confirmado. Paquete en proceso de alistamiento y control de calidad en bodega."
+
             cur.execute(
-                "INSERT INTO domicilio (id_pedido, direccion_entrega, ciudad, telefono_contacto, costo_envio, estado_envio) VALUES (%s, %s, %s, %s, %s, %s)",
-                (pedido_id, direccion_entrega, ciudad, telefono_contacto, 0.00, 'pendiente'),
+                """INSERT INTO domicilio (
+                    id_pedido, direccion_entrega, ciudad, telefono_contacto, costo_envio, estado_envio,
+                    origen_despacho, lat_entrega, lng_entrega, lat_origen, lng_origen,
+                    empresa_envio, numero_guia, mensaje_transportista, fecha_estimada_entrega
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                (pedido_id, direccion_entrega, ciudad, telefono_contacto, 0.00, 'pendiente',
+                 origen_despacho, lat_entrega, lng_entrega, lat_origen, lng_origen,
+                 empresa_envio, numero_guia, mensaje_transportista, '2-4 días hábiles'),
             )
 
             factura = FacturacionService.crear_desde_pedido(

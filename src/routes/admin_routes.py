@@ -142,6 +142,32 @@ def cambiar_estado_pedido(id_pedido):
     flash(mensaje, 'success' if exito else 'danger')
     return redirect(url_for('admin_blueprint.ventas'))
 
+@admin.route('/ventas/<int:id_pedido>/domicilio', methods=['POST'])
+@require_admin
+def actualizar_domicilio_pedido(id_pedido):
+    origen_despacho = request.form.get('origen_despacho', '').strip() or 'Centro de Distribución OilSkin - Bogotá D.C.'
+    lat_origen = request.form.get('lat_origen', default=4.6533, type=float)
+    lng_origen = request.form.get('lng_origen', default=-74.0836, type=float)
+    estado_envio = request.form.get('estado_envio', 'pendiente').strip()
+    empresa_envio = request.form.get('empresa_envio', 'OilSkin Express Logistics').strip()
+    numero_guia = request.form.get('numero_guia', '').strip() or f"OS-GUIA-{id_pedido:05d}"
+    mensaje_transportista = request.form.get('mensaje_transportista', '').strip() or 'Pedido en proceso de despacho.'
+    fecha_estimada_entrega = request.form.get('fecha_estimada_entrega', '2-4 días hábiles').strip()
+
+    exito, mensaje = ModeloAdmin.actualizar_domicilio_pedido(
+        id_pedido=id_pedido,
+        origen_despacho=origen_despacho,
+        lat_origen=lat_origen,
+        lng_origen=lng_origen,
+        estado_envio=estado_envio,
+        empresa_envio=empresa_envio,
+        numero_guia=numero_guia,
+        mensaje_transportista=mensaje_transportista,
+        fecha_estimada_entrega=fecha_estimada_entrega
+    )
+    flash(mensaje, 'success' if exito else 'danger')
+    return redirect(url_for('admin_blueprint.ventas'))
+
 @admin.route('/reportes/ventas/exportar')
 @require_admin
 def exportar_reporte_ventas():
