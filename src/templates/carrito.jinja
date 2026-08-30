@@ -1,213 +1,205 @@
-{% extends 'components/boostrap/layout_boostrap.jinja' %}
+{% extends 'components/tailwind/layout.jinja' %}
 {% block title %}Mi Carrito de Compras - OilSkin Cosmética Natural{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <!-- Header -->
-    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 pb-3 border-bottom border-secondary gap-3">
-        <div>
-            <span class="text-warning text-uppercase fw-bold small letter-spacing-2" style="letter-spacing: 2px;">
-                <i class="fa-solid fa-leaf me-1"></i> Cosmética Botánica
-            </span>
-            <h1 class="text-white fw-bold display-6 mb-0 mt-1">
-                🛒 Mi Carrito de Compras
-                {% if total_items and total_items > 0 %}
-                    <span class="badge rounded-pill text-dark fw-bold fs-6 align-middle ms-2" style="background:#CEB06E;">{{ total_items }} {{ 'producto' if total_items==1 else 'productos' }}</span>
-                {% endif %}
-            </h1>
-        </div>
-        <a href="{{ url_for('main_blueprint.index') }}" class="btn btn-outline-light btn-sm rounded-pill px-4 py-2 text-nowrap align-self-start align-self-md-center">
-            <i class="fa-solid fa-arrow-left me-2"></i> Continuar comprando
-        </a>
-    </div>
-
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="mb-4">
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category if category != 'danger' else 'danger' }} alert-dismissible fade show rounded-3 bg-dark text-white border-{{ 'warning' if category=='success' else 'danger' }} shadow-sm" role="alert">
-                        <i class="fa-solid {{ 'fa-circle-check text-warning' if category=='success' else 'fa-circle-exclamation text-danger' }} me-2"></i>
-                        {{ message }}
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
+<main class="min-h-screen py-12" style="background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('{{ url_for('static', filename='img/fondo_2.png') }}') center/cover no-repeat fixed;">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 mb-8 border-b border-neutral-800 gap-4">
+            <div>
+                <span class="text-gold text-xs font-bold uppercase tracking-widest flex items-center gap-1.5 mb-1">
+                    <i class="fa-solid fa-leaf"></i> Cosmética Botánica
+                </span>
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-white flex items-center gap-3">
+                    <span>🛒 Mi Carrito de Compras</span>
+                    {% if total_items and total_items > 0 %}
+                        <span class="text-xs font-extrabold px-3 py-1 rounded-full bg-gold text-neutral-950 shadow-md align-middle">
+                            {{ total_items }} {{ 'producto' if total_items == 1 else 'productos' }}
+                        </span>
+                    {% endif %}
+                </h1>
             </div>
-        {% endif %}
-    {% endwith %}
-
-    {% if carrito and carrito|length > 0 %}
-        <!-- Shipping Promotion Alert -->
-        <div class="p-3 mb-4 rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-2 border"
-             style="background: rgba(206, 176, 110, 0.08); border-color: rgba(206, 176, 110, 0.3) !important;">
-            <div class="d-flex align-items-center gap-3 text-white">
-                <i class="fa-solid fa-truck-bolt fa-lg text-warning"></i>
-                <span class="small">¡Tu pedido califica para <strong>Envío Gratis</strong> con seguimiento satelital a todo el país!</span>
-            </div>
-            <span class="badge bg-success bg-opacity-25 text-success border border-success px-3 py-1.5 rounded-pill small">
-                Envío Bonificado
-            </span>
+            <a href="{{ url_for('main_blueprint.index') }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-neutral-700 bg-neutral-900/80 text-neutral-300 hover:text-gold hover:border-gold transition text-sm font-semibold self-start md:self-auto">
+                <i class="fa-solid fa-arrow-left"></i> Continuar comprando
+            </a>
         </div>
 
-        <div class="row g-4 align-items-start">
-            <!-- Lista de Productos -->
-            <div class="col-lg-8">
-                <div class="d-flex flex-column gap-3">
-                    {% for item in carrito %}
-                        <div class="card bg-dark text-white border rounded-4 shadow-sm overflow-hidden" 
-                             style="background: #121212 !important; border-color: rgba(255,255,255,0.08) !important; transition: border-color 0.2s;"
-                             onmouseover="this.style.borderColor='rgba(206,176,110,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'">
-                            <div class="card-body p-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
-                                
-                                <!-- Info Item -->
-                                <div class="d-flex align-items-center gap-3 flex-grow-1">
-                                    <div class="p-3 rounded-4 text-warning border flex-shrink-0 d-flex align-items-center justify-content-center"
-                                         style="width: 70px; height: 70px; background: rgba(0,0,0,0.6); border-color: rgba(206,176,110,0.2) !important;">
-                                        <i class="fa-solid fa-spray-can-sparkles fa-2x" style="color: #CEB06E;"></i>
-                                    </div>
-                                    <div class="min-w-0">
-                                        <span class="text-secondary small text-uppercase" style="font-size: 0.7rem; letter-spacing: 1px;">Ref: #OS-PROD-{{ item.id_producto }}</span>
-                                        <h5 class="card-title fw-bold mb-1 text-white text-truncate">{{ item.nombre_producto }}</h5>
-                                        <p class="text-warning mb-0 font-monospace fw-semibold small">
-                                            ${{ "{:,.2f}".format(item.precio_unitario) }} <span class="text-secondary fw-normal">COP c/u</span>
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <!-- Controls & Subtotal -->
-                                <div class="d-flex align-items-center justify-content-between justify-content-md-end gap-4 w-100 w-md-auto pt-3 pt-md-0 border-top border-secondary border-opacity-25 border-md-0">
-                                    
-                                    <!-- Selector Cantidad -->
-                                    <form action="{{ url_for('main_blueprint.actualizar_carrito') }}" method="post" class="d-flex align-items-center gap-1">
-                                        <input type="hidden" name="producto_id" value="{{ item.id_producto }}">
-                                        <div class="input-group input-group-sm" style="width: 120px;">
-                                            <button type="submit" name="cantidad" value="{{ item.cantidad - 1 }}" class="btn btn-outline-secondary text-warning" title="Disminuir">-</button>
-                                            <input type="text" readonly class="form-control text-center bg-black text-white border-secondary font-monospace fw-bold" value="{{ item.cantidad }}">
-                                            <button type="submit" name="cantidad" value="{{ item.cantidad + 1 }}" class="btn btn-outline-secondary text-warning" title="Aumentar">+</button>
-                                        </div>
-                                    </form>
-
-                                    <!-- Subtotal Línea -->
-                                    <div class="text-end" style="min-width: 110px;">
-                                        <span class="text-secondary small d-block" style="font-size: 0.68rem;">Subtotal</span>
-                                        <div class="fw-bold fs-5 font-monospace" style="color: #CEB06E;">
-                                            ${{ "{:,.2f}".format(item.subtotal) }}
-                                        </div>
-                                    </div>
-
-                                    <!-- Eliminar -->
-                                    <a href="{{ url_for('main_blueprint.eliminar_del_carrito', id_producto=item.id_producto) }}" 
-                                       class="btn btn-outline-danger btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" 
-                                       style="width: 36px; height: 36px;" title="Eliminar del carrito"
-                                       onclick="return confirm('¿Deseas retirar este producto de tu carrito?');">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                    </a>
-                                </div>
-                            </div>
+        <!-- Flash Messages (Flowbite Alert) -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-6 space-y-3">
+                    {% for category, message in messages %}
+                        <div class="flex items-center p-4 text-sm rounded-2xl border {% if category == 'success' %}bg-emerald-950/40 text-emerald-300 border-emerald-500/40{% elif category == 'danger' or category == 'error' %}bg-red-950/40 text-red-300 border-red-500/40{% else %}bg-amber-950/40 text-amber-300 border-amber-500/40{% endif %} shadow-lg backdrop-blur-sm" role="alert">
+                            <i class="fa-solid {% if category == 'success' %}fa-circle-check text-emerald-400{% elif category == 'danger' or category == 'error' %}fa-circle-exclamation text-red-400{% else %}fa-circle-info text-amber-400{% endif %} me-3 text-lg"></i>
+                            <div class="flex-1 font-medium">{{ message }}</div>
                         </div>
                     {% endfor %}
                 </div>
+            {% endif %}
+        {% endwith %}
 
-                <!-- Trust Guarantee Bar -->
-                <div class="row g-3 mt-3 text-secondary small">
-                    <div class="col-md-4">
-                        <div class="p-3 rounded-3 bg-dark bg-opacity-50 border border-secondary border-opacity-50 text-center">
-                            <i class="fa-solid fa-shield-halved text-warning me-1"></i> Pago Seguro y Cifrado
-                        </div>
+        {% if carrito and carrito|length > 0 %}
+            <!-- Shipping Promotion Alert -->
+            <div class="p-4 mb-8 rounded-2xl bg-gold/10 border border-gold/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-white">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-gold/20 flex items-center justify-center text-gold shrink-0">
+                        <i class="fa-solid fa-truck-bolt"></i>
                     </div>
-                    <div class="col-md-4">
-                        <div class="p-3 rounded-3 bg-dark bg-opacity-50 border border-secondary border-opacity-50 text-center">
-                            <i class="fa-solid fa-seedling text-warning me-1"></i> 100% Ingredientes Naturales
+                    <span class="text-xs sm:text-sm font-medium">¡Tu pedido califica para <strong class="text-gold">Envío Gratis</strong> con seguimiento satelital a todo el país!</span>
+                </div>
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0">
+                    Envío Bonificado
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                <!-- Lista de Productos (Left) -->
+                <div class="lg:col-span-8 space-y-4">
+                    {% for item in carrito %}
+                        <div class="bg-neutral-900/90 border border-neutral-800 hover:border-gold/40 rounded-2xl p-5 sm:p-6 shadow-lg transition duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                            
+                            <!-- Info Item -->
+                            <div class="flex items-center gap-4 flex-1 min-w-0">
+                                <div class="w-16 h-16 rounded-2xl bg-black border border-gold/30 flex items-center justify-center text-gold shrink-0 shadow-inner">
+                                    <i class="fa-solid fa-spray-can-sparkles text-2xl"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <span class="text-[10px] uppercase font-bold tracking-widest text-neutral-400">Ref: #OS-PROD-{{ item.id_producto }}</span>
+                                    <h3 class="text-white font-bold text-base truncate mt-0.5">{{ item.nombre_producto }}</h3>
+                                    <p class="text-gold font-bold text-sm mt-1">
+                                        ${{ "{:,.2f}".format(item.precio_unitario) }} <span class="text-neutral-400 text-xs font-normal">COP c/u</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Controls & Subtotal -->
+                            <div class="flex items-center justify-between sm:justify-end gap-6 pt-4 sm:pt-0 border-t sm:border-t-0 border-neutral-800">
+                                
+                                <!-- Selector Cantidad -->
+                                <form action="{{ url_for('main_blueprint.actualizar_carrito') }}" method="post" class="flex items-center">
+                                    <input type="hidden" name="producto_id" value="{{ item.id_producto }}">
+                                    <div class="flex items-center rounded-xl bg-black border border-neutral-700 overflow-hidden shadow-inner">
+                                        <button type="submit" name="cantidad" value="{{ item.cantidad - 1 }}" class="px-3 py-1.5 text-gold hover:bg-neutral-800 transition font-bold text-sm" title="Disminuir">-</button>
+                                        <input type="text" readonly class="w-12 text-center bg-transparent text-white border-0 text-xs font-bold focus:ring-0" value="{{ item.cantidad }}">
+                                        <button type="submit" name="cantidad" value="{{ item.cantidad + 1 }}" class="px-3 py-1.5 text-gold hover:bg-neutral-800 transition font-bold text-sm" title="Aumentar">+</button>
+                                    </div>
+                                </form>
+
+                                <!-- Subtotal Línea -->
+                                <div class="text-right min-w-[100px]">
+                                    <span class="text-[10px] text-neutral-400 uppercase font-medium block">Subtotal</span>
+                                    <div class="text-lg font-black text-gold">
+                                        ${{ "{:,.2f}".format(item.subtotal) }}
+                                    </div>
+                                </div>
+
+                                <!-- Eliminar -->
+                                <a href="{{ url_for('main_blueprint.eliminar_del_carrito', id_producto=item.id_producto) }}" 
+                                   class="w-9 h-9 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition flex items-center justify-center text-sm shrink-0" 
+                                   title="Eliminar del carrito"
+                                   onclick="return confirm('¿Deseas retirar este producto de tu carrito?');">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </a>
+                            </div>
+
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="p-3 rounded-3 bg-dark bg-opacity-50 border border-secondary border-opacity-50 text-center">
-                            <i class="fa-solid fa-rotate-left text-warning me-1"></i> Garantía de Satisfacción
+                    {% endfor %}
+
+                    <!-- Trust Guarantee Bar -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+                        <div class="p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800 text-center text-xs text-neutral-400">
+                            <i class="fa-solid fa-shield-halved text-gold me-1.5 text-sm"></i> Pago Seguro y Cifrado
+                        </div>
+                        <div class="p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800 text-center text-xs text-neutral-400">
+                            <i class="fa-solid fa-seedling text-gold me-1.5 text-sm"></i> 100% Extractos Naturales
+                        </div>
+                        <div class="p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800 text-center text-xs text-neutral-400">
+                            <i class="fa-solid fa-rotate-left text-gold me-1.5 text-sm"></i> Garantía de Satisfacción
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Tarjeta Resumen de Pedido -->
-            <div class="col-lg-4">
-                <div class="card text-white rounded-4 shadow-lg sticky-top overflow-hidden border" 
-                     style="top: 100px; background: #141414; border-color: rgba(206, 176, 110, 0.35) !important;">
-                    
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom border-secondary border-opacity-50">
-                            <h4 class="card-title fw-bold mb-0 text-white fs-5">
-                                Resumen del Pedido
-                            </h4>
-                            <i class="fa-solid fa-receipt text-warning"></i>
+                <!-- Tarjeta Resumen de Pedido (Right) -->
+                <div class="lg:col-span-4">
+                    <div class="bg-neutral-900 border border-gold/35 rounded-3xl p-6 shadow-2xl sticky top-24 space-y-6">
+                        
+                        <div class="flex items-center justify-between pb-4 border-b border-neutral-800">
+                            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-receipt text-gold"></i> Resumen del Pedido
+                            </h2>
                         </div>
                         
-                        <div class="d-flex justify-content-between mb-2 text-light small">
-                            <span class="text-secondary">Subtotal de productos:</span>
-                            <span class="fw-bold font-monospace">${{ "{:,.2f}".format(total_precio) }}</span>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between text-neutral-300">
+                                <span>Subtotal de productos:</span>
+                                <span class="font-bold text-white">${{ "{:,.2f}".format(total_precio) }}</span>
+                            </div>
+
+                            <div class="flex justify-between text-neutral-300">
+                                <span>Cantidad de artículos:</span>
+                                <span class="font-bold text-white">{{ total_items }} unidades</span>
+                            </div>
+
+                            <div class="flex justify-between text-neutral-300">
+                                <span>Costo de envío estimado:</span>
+                                <span class="text-emerald-400 font-bold flex items-center gap-1"><i class="fa-solid fa-check text-xs"></i> Gratis</span>
+                            </div>
                         </div>
 
-                        <div class="d-flex justify-content-between mb-2 text-light small">
-                            <span class="text-secondary">Cantidad de artículos:</span>
-                            <span class="fw-bold">{{ total_items }} unidades</span>
-                        </div>
-
-                        <div class="d-flex justify-content-between mb-3 text-light small">
-                            <span class="text-secondary">Costo de envío estimado:</span>
-                            <span class="text-success fw-bold"><i class="fa-solid fa-check me-1"></i>Gratis</span>
-                        </div>
-
-                        <hr class="border-secondary border-opacity-50 my-3">
-
-                        <div class="d-flex justify-content-between align-items-baseline mb-4">
-                            <span class="fs-6 text-uppercase fw-bold text-secondary">Total a Pagar:</span>
-                            <div class="text-end">
-                                <span class="fs-4 fw-bold font-monospace" style="color: #CEB06E;">
+                        <div class="pt-4 border-t border-neutral-800">
+                            <div class="flex justify-between items-baseline mb-6">
+                                <div>
+                                    <span class="text-xs uppercase font-extrabold text-neutral-400 block tracking-wider">Total a Pagar:</span>
+                                    <span class="text-[10px] text-neutral-400">Impuestos (IVA) incluidos</span>
+                                </div>
+                                <span class="text-2xl sm:text-3xl font-black text-gold">
                                     ${{ "{:,.2f}".format(total_precio) }}
                                 </span>
-                                <span class="d-block text-secondary small" style="font-size: 0.7rem;">IVA incluido</span>
                             </div>
+
+                            {% if session.get('user_id') %}
+                                <a href="{{ url_for('user_blueprint.user_checkout') }}" class="w-full py-4 px-6 rounded-xl font-extrabold text-neutral-950 bg-gold hover:bg-gold-light shadow-xl shadow-gold/20 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm">
+                                    <span>Proceder al Checkout</span> <i class="fa-solid fa-arrow-right"></i>
+                                </a>
+                            {% else %}
+                                <a href="{{ url_for('main_blueprint.checkout') }}" class="w-full py-4 px-6 rounded-xl font-extrabold text-neutral-950 bg-gold hover:bg-gold-light shadow-xl shadow-gold/20 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm mb-3">
+                                    <span>Proceder al Checkout</span> <i class="fa-solid fa-arrow-right"></i>
+                                </a>
+                                <div class="text-center">
+                                    <span class="text-xs text-neutral-400">¿Ya tienes cuenta? <a href="{{ url_for('auth_blueprint.login') }}" class="text-gold font-bold hover:underline">Inicia sesión</a></span>
+                                </div>
+                            {% endif %}
                         </div>
 
-                        {% if session.get('user_id') %}
-                            <a href="{{ url_for('user_blueprint.user_checkout') }}" class="btn fw-bold w-100 py-3 rounded-3 text-dark shadow-sm d-flex align-items-center justify-content-center gap-2" 
-                               style="background: #CEB06E; transition: all 0.2s;" onmouseover="this.style.filter='brightness(1.1)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.filter='none'; this.style.transform='none'">
-                                <span>Proceder al Checkout</span> <i class="fa-solid fa-arrow-right"></i>
-                            </a>
-                        {% else %}
-                            <a href="{{ url_for('main_blueprint.checkout') }}" class="btn fw-bold w-100 py-3 rounded-3 text-dark shadow-sm mb-2 d-flex align-items-center justify-content-center gap-2" 
-                               style="background: #CEB06E; transition: all 0.2s;" onmouseover="this.style.filter='brightness(1.1)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.filter='none'; this.style.transform='none'">
-                                <span>Proceder al Checkout</span> <i class="fa-solid fa-arrow-right"></i>
-                            </a>
-                            <div class="text-center mt-2">
-                                <small class="text-secondary">¿Ya tienes cuenta? <a href="{{ url_for('auth_blueprint.login') }}" class="text-warning text-decoration-none fw-semibold">Inicia sesión</a></small>
-                            </div>
-                        {% endif %}
-
-                        <div class="pt-3 mt-3 border-top border-secondary border-opacity-25 text-center">
-                            <span class="text-secondary small d-flex align-items-center justify-content-center gap-2" style="font-size: 0.75rem;">
-                                <i class="fa-solid fa-lock text-warning"></i> Transacción segura con protección SSL
+                        <div class="pt-4 border-t border-neutral-800 text-center">
+                            <span class="text-xs text-neutral-400 inline-flex items-center gap-2">
+                                <i class="fa-solid fa-lock text-gold"></i> Transacción segura con protección SSL
                             </span>
                         </div>
                     </div>
                 </div>
+
             </div>
-        </div>
-    {% else %}
-        <!-- Empty State -->
-        <div class="text-center py-5 rounded-4 my-4 p-5 text-white shadow-lg border"
-             style="background: radial-gradient(circle at center, #1a1a1a 0%, #0c0c0c 100%); border-color: rgba(206, 176, 110, 0.2) !important;">
-            <div class="mx-auto rounded-circle d-flex align-items-center justify-content-center mb-4"
-                 style="width: 110px; height: 110px; background: rgba(206,176,110,0.1); border: 2px solid rgba(206,176,110,0.3);">
-                <i class="fa-solid fa-basket-shopping fa-3x" style="color: #CEB06E;"></i>
+        {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-16 px-6 rounded-3xl max-w-xl mx-auto my-8 bg-neutral-900/90 border border-gold/20 shadow-2xl space-y-6">
+                <div class="w-24 h-24 mx-auto rounded-full bg-gold/10 border-2 border-gold/30 flex items-center justify-center text-gold">
+                    <i class="fa-solid fa-basket-shopping text-4xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-2">Tu carrito de compras está vacío</h2>
+                    <p class="text-neutral-400 text-sm leading-relaxed">
+                        Descubre nuestra exclusiva selección de cosméticos botánicos formulados con extractos puros de palma africana y aceites esenciales.
+                    </p>
+                </div>
+                <a href="{{ url_for('main_blueprint.index') }}" class="inline-flex items-center gap-2 px-8 py-3.5 bg-gold hover:bg-gold-light text-neutral-950 font-bold rounded-xl text-sm shadow-lg shadow-gold/20 transition transform hover:-translate-y-0.5">
+                    <i class="fa-solid fa-store"></i> Explorar Catálogo
+                </a>
             </div>
-            <h3 class="fw-bold mb-2 text-white">Tu carrito de compras está vacío</h3>
-            <p class="text-secondary mb-4 mx-auto" style="max-width: 480px;">
-                Descubre nuestra exclusiva selección de cosméticos botánicos formulados con extractos puros de palma africana y aceites esenciales.
-            </p>
-            <a href="{{ url_for('main_blueprint.index') }}" class="btn fw-bold px-5 py-3 text-dark rounded-pill shadow-sm" style="background:#CEB06E; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='none'">
-                <i class="fa-solid fa-store me-2"></i> Explorar Catálogo
-            </a>
-        </div>
-    {% endif %}
-</div>
+        {% endif %}
+
+    </div>
+</main>
 {% endblock %}

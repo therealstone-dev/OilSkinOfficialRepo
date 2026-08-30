@@ -1,150 +1,160 @@
-{% extends 'components/boostrap/layout_boostrap.jinja' %}
+{% extends 'components/tailwind/layout.jinja' %}
 
-{% block title %}Sobre OilSkin{% endblock %}
+{% block title %}Sobre OilSkin - Esencia Natural y Resultados Reales{% endblock %}
 
 {% block content %}
 
-<header style="background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('{{ url_for('static', filename='img/publicidad.jpg') }}') center/cover no-repeat;">
-    <div class="container py-4 text-center">
-        <img src="{{ url_for('static', filename='img/logo.png') }}"
-             class="rounded-circle"
-             style="width:100px; height:100px; object-fit:cover;">
+<!-- Header Hero -->
+<header class="py-14 border-b border-neutral-800 text-center relative overflow-hidden" style="background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('{{ url_for('static', filename='img/publicidad.jpg') }}') center/cover no-repeat;">
+    <div class="max-w-4xl mx-auto px-4 space-y-4">
+        <div class="relative w-24 h-24 mx-auto">
+            <div class="absolute -inset-1 bg-gold/30 rounded-full blur"></div>
+            <img src="{{ url_for('static', filename='img/logo.png') }}"
+                 class="relative w-24 h-24 rounded-full object-cover border-2 border-gold shadow-xl mx-auto"
+                 alt="OilSkin Logo">
+        </div>
+        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/10 border border-gold/30 text-gold text-xs font-bold uppercase tracking-widest">
+            Nuestra Esencia
+        </span>
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white">
+            OIL SKIN: <span class="text-gold">Esencia Natural</span>, Resultados Reales
+        </h1>
+        <p class="text-neutral-300 text-sm sm:text-base max-w-2xl mx-auto font-light leading-relaxed">
+            Redefiniendo el cuidado personal y dermatológico en Colombia mediante la alquimia de extractos botánicos de palma pura y biotecnología sostenible.
+        </p>
     </div>
 </header>
 
-<main class="bg-light rounded">
+<main class="py-16" style="background: linear-gradient(rgba(0,0,0,0.88), rgba(0,0,0,0.88)), url('{{ url_for('static', filename='img/palmas.png') }}') center/cover no-repeat fixed;">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
 
-    <!-- INFO -->
-    <div class="container my-5">
-        <div class="bg-white rounded-4 p-5 shadow">
+        <!-- CARDS DE VALOR -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-            <h1 class="display-5 fw-bold text-center mb-5">
-                OIL SKIN: <span class="text-secondary">Esencia Natural</span>, Resultados Reales
-            </h1>
-
-            <div class="row g-4">
-
-                <!-- CARD 1 -->
-                <div class="col-lg-4">
-                    <div class="h-100 bg-secondary text-white p-4 rounded-4 shadow-sm">
-                        <h2 class="fw-bold mb-3">Descubre LUMINEA</h2>
-                        <p>
-                            Nuestro <span class="text-success fw-semibold">Tónico Facial LUMINEA</span> revitaliza tu piel al instante.
-                        </p>
-
-                        <h5 class="mt-4">¿Por qué es extraordinario?</h5>
-                        <ul class="list-unstyled mt-3">
-                            <li class="mb-2">
-                                <i class="fa-solid fa-check text-success me-2"></i>
-                                <strong>Vitalidad:</strong> Refresca en segundos
-                            </li>
-                            <li>
-                                <i class="fa-solid fa-check text-success me-2"></i>
-                                <strong>Hidratación:</strong> Sin sensación grasa
-                            </li>
-                        </ul>
+            <!-- CARD 1 -->
+            <div class="bg-neutral-900/90 border border-neutral-800 hover:border-gold/50 rounded-3xl p-8 shadow-xl transition-all duration-300 flex flex-col justify-between group">
+                <div>
+                    <div class="w-12 h-12 rounded-2xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold mb-6 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-sparkles text-xl"></i>
                     </div>
+                    <h2 class="text-xl font-bold text-white mb-3">Descubre LUMINEA</h2>
+                    <p class="text-neutral-300 text-sm leading-relaxed mb-6">
+                        Nuestro <span class="text-gold font-bold">Tónico Facial LUMINEA</span> revitaliza, equilibra el pH y devuelve la luminosidad perdida a tu piel al instante.
+                    </p>
+                </div>
+                <div class="pt-4 border-t border-neutral-800">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-3">¿Por qué es extraordinario?</h4>
+                    <ul class="space-y-2 text-xs text-neutral-300">
+                        <li class="flex items-center gap-2">
+                            <i class="fa-solid fa-check text-gold"></i>
+                            <span><strong>Vitalidad celular:</strong> refresca y regenera en segundos.</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fa-solid fa-check text-gold"></i>
+                            <span><strong>Hidratación pura:</strong> sin sensación grasa ni pesadez.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- CARD 2 -->
+            <div class="bg-neutral-900/90 border border-gold/40 rounded-3xl p-8 shadow-xl transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
+                <div class="absolute -right-8 -top-8 w-28 h-28 bg-gold/10 rounded-full blur-xl"></div>
+                <div>
+                    <div class="w-12 h-12 rounded-2xl bg-gold text-neutral-950 flex items-center justify-center font-bold mb-6 shadow-md shadow-gold/20">
+                        <i class="fa-solid fa-leaf text-xl"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-white mb-3">Nuestra Esencia</h2>
+                    <p class="text-neutral-300 text-sm leading-relaxed mb-4">
+                        En <strong class="text-gold">OIL SKIN</strong>, fusionamos tradición agrícola sostenible y formulación cosmética moderna desde Bogotá, Colombia.
+                    </p>
+                </div>
+                <div class="pt-4 border-t border-neutral-800 text-xs text-neutral-400">
+                    <p class="leading-relaxed">
+                        Creamos soluciones conscientes, éticas, libres de crueldad animal y con trazabilidad limpia desde el cultivo hasta tus manos.
+                    </p>
+                </div>
+            </div>
+
+            <!-- CARD 3 -->
+            <div class="bg-neutral-900/90 border border-neutral-800 hover:border-gold/50 rounded-3xl p-8 shadow-xl transition-all duration-300 flex flex-col justify-between group">
+                <div>
+                    <div class="w-12 h-12 rounded-2xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold mb-6 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-bullseye text-xl"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-white mb-3">Nuestra Misión</h2>
+                    <p class="text-neutral-300 text-sm leading-relaxed mb-6">
+                        Desarrollar productos botánicos de alta eficacia que nutran integralmente la piel respetando la biodiversidad y el medio ambiente.
+                    </p>
+                </div>
+                <div class="pt-4 border-t border-neutral-800">
+                    <blockquote class="border-l-2 border-gold pl-3 text-xs italic text-neutral-400">
+                        "Cosmética honesta, dermatológicamente avanzada y ambientalmente responsable."
+                    </blockquote>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- EQUIPO DE TRABAJO -->
+        <div class="space-y-10">
+            <div class="text-center space-y-2">
+                <span class="text-gold uppercase tracking-widest text-xs font-bold">Talento & Pasión</span>
+                <h2 class="text-3xl font-extrabold text-white">Equipo de Trabajo</h2>
+                <p class="text-neutral-400 text-sm">Los profesionales detrás de la innovación en OilSkin</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+
+                <!-- PERSONA 1 -->
+                <div class="bg-neutral-900/90 border border-neutral-800 hover:border-gold/40 rounded-2xl p-4 text-center shadow-lg transition duration-200 group">
+                    <img src="{{ url_for('static', filename='img/team-program-1.jpg') }}"
+                         class="w-full h-52 object-cover rounded-xl mb-4 border border-neutral-800 group-hover:border-gold/50 transition"
+                         alt="David Lombana">
+                    <h3 class="text-white font-bold text-base">David Lombana</h3>
+                    <p class="text-gold text-xs font-semibold mt-0.5">Analista Principal</p>
                 </div>
 
-                <!-- CARD 2 -->
-                <div class="col-lg-4">
-                    <div class="h-100 bg-light p-4 rounded-4 shadow-sm border">
-                        <h2 class="h4 text-success">Nuestra Esencia</h2>
-                        <p class="text-muted">
-                            En <strong>OIL SKIN</strong>, redefinimos el cuidado personal desde Bogotá, Colombia.
-                        </p>
-                        <p class="text-muted border-top pt-3">
-                            Creamos soluciones conscientes, éticas y efectivas.
-                        </p>
-                    </div>
+                <!-- PERSONA 2 -->
+                <div class="bg-neutral-900/90 border border-neutral-800 hover:border-gold/40 rounded-2xl p-4 text-center shadow-lg transition duration-200 group">
+                    <img src="{{ url_for('static', filename='img/team-program-2.jpg') }}"
+                         class="w-full h-52 object-cover rounded-xl mb-4 border border-neutral-800 group-hover:border-gold/50 transition"
+                         alt="Jesus Barrios">
+                    <h3 class="text-white font-bold text-base">Jesus Barrios</h3>
+                    <p class="text-gold text-xs font-semibold mt-0.5">Programador</p>
                 </div>
 
-                <!-- CARD 3 -->
-                <div class="col-lg-4">
-                    <div class="h-100 bg-secondary text-white p-4 rounded-4 shadow">
-                        <h2 class="fw-bold mb-3">Nuestra Misión</h2>
-                        <p>
-                            Creamos fórmulas naturales que regeneran la piel respetando el medio ambiente.
-                        </p>
-                        <div class="border-start border-4 border-success ps-3 mt-3">
-                            <small class="fst-italic">
-                                "Cosmética honesta y sostenible."
-                            </small>
-                        </div>
-                    </div>
+                <!-- PERSONA 3 -->
+                <div class="bg-neutral-900/90 border border-neutral-800 hover:border-gold/40 rounded-2xl p-4 text-center shadow-lg transition duration-200 group">
+                    <img src="{{ url_for('static', filename='img/team-program-3.jpg') }}"
+                         class="w-full h-52 object-cover rounded-xl mb-4 border border-neutral-800 group-hover:border-gold/50 transition"
+                         alt="Camilo Aroca">
+                    <h3 class="text-white font-bold text-base">Camilo Aroca</h3>
+                    <p class="text-gold text-xs font-semibold mt-0.5">Programador</p>
+                </div>
+
+                <!-- PERSONA 4 -->
+                <div class="bg-neutral-900/90 border border-neutral-800 hover:border-gold/40 rounded-2xl p-4 text-center shadow-lg transition duration-200 group">
+                    <img src="{{ url_for('static', filename='img/team-program-4.jpg') }}"
+                         class="w-full h-52 object-cover rounded-xl mb-4 border border-neutral-800 group-hover:border-gold/50 transition"
+                         alt="Jader Rico">
+                    <h3 class="text-white font-bold text-base">Jader Rico</h3>
+                    <p class="text-gold text-xs font-semibold mt-0.5">Diseñador</p>
+                </div>
+
+                <!-- PERSONA 5 -->
+                <div class="bg-neutral-900/90 border border-neutral-800 hover:border-gold/40 rounded-2xl p-4 text-center shadow-lg transition duration-200 group">
+                    <img src="{{ url_for('static', filename='img/team-program-5.jpg') }}"
+                         class="w-full h-52 object-cover rounded-xl mb-4 border border-neutral-800 group-hover:border-gold/50 transition"
+                         alt="Angie Contreras">
+                    <h3 class="text-white font-bold text-base">Angie Contreras</h3>
+                    <p class="text-gold text-xs font-semibold mt-0.5">Diseñadora</p>
                 </div>
 
             </div>
         </div>
+
     </div>
-
-    <!-- EQUIPO -->
-    <div class="text-center py-4">
-        <h2 class="fw-bold">Equipo de Trabajo</h2>
-    </div>
-
-    <div class="container mb-5">
-        <div class="bg-white rounded-4 p-4 shadow">
-
-            <h3 class="text-center mb-4">La familia</h3>
-
-            <div class="row g-4 justify-content-center">
-
-                <!-- PERSONA -->
-                <div class="col-md-4 col-lg-3">
-                    <div class="card border-0 shadow-sm text-center p-3 h-100">
-                        <img src="{{ url_for('static', filename='img/team-program-1.jpg') }}"
-                             class="img-fluid rounded mb-3"
-                             style="height:250px; object-fit:cover;">
-                        <h5>David Lombana</h5>
-                        <p class="text-muted">Analista Principal</p>
-                    </div>
-                </div>
-
-                <div class="col-md-4 col-lg-3">
-                    <div class="card border-0 shadow-sm text-center p-3 h-100">
-                        <img src="{{ url_for('static', filename='img/team-program-2.jpg') }}"
-                             class="img-fluid rounded mb-3"
-                             style="height:250px; object-fit:cover;">
-                        <h5>Jesus Barrios</h5>
-                        <p class="text-muted">Programador</p>
-                    </div>
-                </div>
-
-                <div class="col-md-4 col-lg-3">
-                    <div class="card border-0 shadow-sm text-center p-3 h-100">
-                        <img src="{{ url_for('static', filename='img/team-program-3.jpg') }}"
-                             class="img-fluid rounded mb-3"
-                             style="height:250px; object-fit:cover;">
-                        <h5>Camilo Aroca</h5>
-                        <p class="text-muted">Programador</p>
-                    </div>
-                </div>
-
-                <div class="col-md-4 col-lg-3">
-                    <div class="card border-0 shadow-sm text-center p-3 h-100">
-                        <img src="{{ url_for('static', filename='img/team-program-4.jpg') }}"
-                             class="img-fluid rounded mb-3"
-                             style="height:250px; object-fit:cover;">
-                        <h5>Jader Rico</h5>
-                        <p class="text-muted">Diseñador</p>
-                    </div>
-                </div>
-
-                <div class="col-md-4 col-lg-3">
-                    <div class="card border-0 shadow-sm text-center p-3 h-100">
-                        <img src="{{ url_for('static', filename='img/team-program-5.jpg') }}"
-                             class="img-fluid rounded mb-3"
-                             style="height:250px; object-fit:cover;">
-                        <h5>Angie Contreras</h5>
-                        <p class="text-muted">Diseñadora</p>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
 </main>
 
 {% endblock %}

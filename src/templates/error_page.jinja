@@ -1,39 +1,41 @@
-{% extends 'components/boostrap/layout_boostrap.jinja' %}
+{% extends 'components/tailwind/layout.jinja' %}
 
 {% block title %}Error - OilSkin{% endblock %}
 
 {% block content %}
 
-<main class="min-vh-100 d-flex align-items-center justify-content-center px-3"
-      style="background: linear-gradient(to bottom right, #fef2f2, #fff7ed);">
+<main class="min-h-screen flex items-center justify-center p-4"
+      style="background: linear-gradient(rgba(0,0,0,0.88), rgba(0,0,0,0.88)), url('{{ url_for('static', filename='img/fondo_2.png') }}') center/cover no-repeat fixed;">
 
-    <div class="card shadow text-center p-4" style="max-width: 400px; width:100%;">
+    <div class="bg-neutral-900/90 border border-neutral-800 rounded-3xl shadow-2xl text-center p-8 sm:p-10 max-w-md w-full backdrop-blur-md space-y-6">
 
         <!-- ICONO -->
-        <div class="mb-4">
-            <i class="fa-solid fa-circle-exclamation fa-4x text-danger"></i>
+        <div class="w-20 h-20 mx-auto rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-500 text-3xl">
+            <i class="fa-solid fa-circle-exclamation"></i>
         </div>
 
         <!-- MENSAJE -->
-        <h1 class="fw-bold mb-2">¡Oops!</h1>
-        <p class="text-muted fs-5 mb-4">
-            Algo salió mal. Por favor intenta nuevamente. ({{ mensaje }})
-        </p>
+        <div>
+            <h1 class="text-3xl font-extrabold text-white mb-2">¡Oops!</h1>
+            <p class="text-neutral-300 text-sm leading-relaxed">
+                Algo no salió como esperábamos. <br>
+                <span class="text-neutral-500 text-xs block mt-1">({{ mensaje }})</span>
+            </p>
+        </div>
 
         <!-- BOTONES -->
-        <div class="d-grid gap-2">
-
+        <div class="space-y-3 pt-2">
             <a href="{{ url_for('main_blueprint.index') }}"
-               class="btn fw-bold"
-               style="background:#CEB06E; color:black;">
-                Volver al Inicio
+               class="w-full inline-flex items-center justify-center gap-2 py-3 px-6 rounded-xl font-bold text-neutral-950 bg-gold hover:bg-gold-light transition shadow-lg shadow-gold/20 text-sm">
+                <i class="fa-solid fa-house"></i>
+                <span>Volver al Inicio</span>
             </a>
 
             <a href="javascript:history.back()"
-               class="btn btn-outline-secondary fw-bold">
-                Atrás
+               class="w-full inline-flex items-center justify-center gap-2 py-3 px-6 rounded-xl font-semibold text-neutral-300 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 transition text-sm">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Regresar a la página anterior</span>
             </a>
-
         </div>
 
     </div>

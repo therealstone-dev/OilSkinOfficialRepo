@@ -1,200 +1,194 @@
-{% extends 'components/boostrap/layout_boostrap.jinja' %}
+{% extends 'components/tailwind/layout.jinja' %}
 {% block title %}Finalizar Compra - Checkout Seguro OilSkin{% endblock %}
 
 {% block content %}
 <!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
-<div class="container py-5">
-    <!-- Header -->
-    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 pb-3 border-bottom border-secondary gap-3">
-        <div>
-            <span class="text-warning text-uppercase fw-bold small letter-spacing-2" style="letter-spacing: 2px;">
-                <i class="fa-solid fa-lock me-1"></i> Checkout Cifrado y Seguro
-            </span>
-            <h1 class="text-white fw-bold display-6 mb-0 mt-1">
-                Finalizar Compra y Envío
-            </h1>
-        </div>
-        <a href="{{ url_for('main_blueprint.carrito') }}" class="btn btn-outline-light btn-sm rounded-pill px-4 py-2 text-nowrap">
-            <i class="fa-solid fa-arrow-left me-2"></i> Volver al Carrito
-        </a>
-    </div>
-
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="mb-4">
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category if category != 'danger' else 'danger' }} alert-dismissible fade show rounded-3 bg-dark text-white border-{{ 'warning' if category=='success' else 'danger' }}" role="alert">
-                        <i class="fa-solid {{ 'fa-circle-check text-warning' if category=='success' else 'fa-circle-exclamation text-danger' }} me-2"></i>
-                        {{ message }}
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
+<main class="min-h-screen py-12" style="background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('{{ url_for('static', filename='img/fondo_2.png') }}') center/cover no-repeat fixed;">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 mb-8 border-b border-neutral-800 gap-4">
+            <div>
+                <span class="text-gold text-xs font-bold uppercase tracking-widest flex items-center gap-1.5 mb-1">
+                    <i class="fa-solid fa-lock"></i> Checkout Cifrado y Seguro
+                </span>
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-white">
+                    Finalizar Compra y Despacho
+                </h1>
             </div>
-        {% endif %}
-    {% endwith %}
-
-    <div class="row g-4 align-items-start">
-        <!-- Formulario de Datos de Entrega y Pago -->
-        <div class="col-lg-7">
-            <form method="POST" id="checkoutForm" class="d-flex flex-column gap-4">
-                <!-- Hidden inputs for coordinates and origin -->
-                <input type="hidden" id="lat_entrega" name="lat_entrega" value="4.6533">
-                <input type="hidden" id="lng_entrega" name="lng_entrega" value="-74.0836">
-                <input type="hidden" id="origen_despacho" name="origen_despacho" value="Centro de Distribución OilSkin - Bogotá D.C.">
-                <input type="hidden" id="lat_origen" name="lat_origen" value="4.6533">
-                <input type="hidden" id="lng_origen" name="lng_origen" value="-74.0836">
-
-                <!-- Bloque 1: Información de Contacto y Entrega -->
-                <div class="card bg-dark text-white border rounded-4 shadow-sm overflow-hidden p-4" 
-                     style="background: #141414 !important; border-color: rgba(206,176,110,0.25) !important;">
-                    
-                    <h4 class="card-title fw-bold text-white mb-4 d-flex align-items-center gap-2 pb-2 border-bottom border-secondary border-opacity-50">
-                        <i class="fa-solid fa-map-location-dot text-warning"></i> 1. Datos de Entrega y Verificación de Dirección
-                    </h4>
-
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label class="form-label text-secondary small fw-bold">Nombre Completo de quien recibe *</label>
-                            <input type="text" class="form-control bg-black text-white border-secondary py-2.5" name="nombre" 
-                                   value="{{ user.nombre if user else '' }}" placeholder="Ej. Carlos Mendoza" required>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label text-secondary small fw-bold">Ciudad de Entrega *</label>
-                            <input type="text" class="form-control bg-black text-white border-secondary py-2.5" id="ciudad" name="ciudad" 
-                                   value="Bogotá" placeholder="Ej. Bogotá, Medellín, Cali" required onchange="verificarDireccionEnMapa()">
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label text-secondary small fw-bold">Teléfono o Celular de Contacto *</label>
-                            <input type="tel" class="form-control bg-black text-white border-secondary py-2.5" name="telefono_contacto" 
-                                   value="{{ user.celular if user else '' }}" placeholder="Ej. 3101234567" required>
-                        </div>
-
-                        <div class="col-12">
-                            <label class="form-label text-secondary small fw-bold">Dirección de Entrega Exacta *</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control bg-black text-white border-secondary py-2.5" id="direccion_entrega" name="direccion_entrega" 
-                                       value="{{ user.direccion if user else '' }}" placeholder="Ej. Calle 26 # 68-50, Apto 402" required onchange="verificarDireccionEnMapa()">
-                                <button type="button" class="btn fw-bold px-3 text-dark d-flex align-items-center gap-2" style="background:#CEB06E;" onclick="verificarDireccionEnMapa()">
-                                    <i class="fa-solid fa-magnifying-glass-location"></i> Verificar
-                                </button>
-                            </div>
-                            <small class="text-secondary mt-1 d-block" style="font-size: 0.72rem;">
-                                Ingresa tu dirección y el sistema verificará automáticamente su localización satelital en el mapa.
-                            </small>
-                        </div>
-                    </div>
-
-                    <!-- Interactive Verification Map Container -->
-                    <div class="mt-4 pt-3 border-top border-secondary border-opacity-50">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-white small fw-bold d-flex align-items-center gap-2">
-                                <i class="fa-solid fa-satellite text-warning"></i> Mapa Interactivo de Verificación
-                            </span>
-                            <span id="map-status" class="badge bg-secondary bg-opacity-50 text-light small px-3 py-1 rounded-pill">
-                                Esperando dirección...
-                            </span>
-                        </div>
-
-                        <!-- Map DIV -->
-                        <div id="checkout-map" class="rounded-3 border border-secondary shadow-inner position-relative overflow-hidden" 
-                             style="height: 280px; width: 100%; z-index: 10; background: #0c0c0c;">
-                        </div>
-
-                        <div class="d-flex justify-content-between align-items-center mt-2">
-                            <span class="text-secondary small" style="font-size: 0.72rem;">
-                                <i class="fa-solid fa-hand-pointer text-warning me-1"></i> Puedes hacer clic o arrastrar el marcador en el mapa para ajustar el punto exacto.
-                            </span>
-                            <span id="coord-badge" class="text-warning small font-monospace" style="font-size: 0.72rem;"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Bloque 2: Método de Pago -->
-                <div class="card bg-dark text-white border rounded-4 shadow-sm overflow-hidden p-4" 
-                     style="background: #141414 !important; border-color: rgba(206,176,110,0.25) !important;">
-                    
-                    <h4 class="card-title fw-bold text-white mb-4 d-flex align-items-center gap-2 pb-2 border-bottom border-secondary border-opacity-50">
-                        <i class="fa-solid fa-credit-card text-warning"></i> 2. Selecciona tu Método de Pago
-                    </h4>
-
-                    <div class="d-flex flex-column gap-3">
-                        <label class="p-3 rounded-3 border d-flex align-items-center justify-content-between cursor-pointer payment-option active-payment" 
-                               style="background: rgba(206,176,110,0.06); border-color: #CEB06E !important; cursor: pointer;">
-                            <div class="d-flex align-items-center gap-3">
-                                <input type="radio" name="metodo_pago" value="efectivo" checked class="form-check-input mt-0 border-warning text-warning" onchange="seleccionarPago(this)">
-                                <div>
-                                    <div class="text-white fw-bold">Pago en Efectivo / Contra Entrega</div>
-                                    <div class="text-secondary small">Cancela al momento de recibir tu paquete en la puerta de tu domicilio</div>
-                                </div>
-                            </div>
-                            <i class="fa-solid fa-hand-holding-dollar fa-2x text-warning"></i>
-                        </label>
-
-                        <label class="p-3 rounded-3 border d-flex align-items-center justify-content-between cursor-pointer payment-option" 
-                               style="background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.1); cursor: pointer;">
-                            <div class="d-flex align-items-center gap-3">
-                                <input type="radio" name="metodo_pago" value="transferencia" class="form-check-input mt-0 border-secondary" onchange="seleccionarPago(this)">
-                                <div>
-                                    <div class="text-white fw-bold">Transferencia Bancaria / PSE / Nequi</div>
-                                    <div class="text-secondary small">Pago digital instantáneo con confirmación automática</div>
-                                </div>
-                            </div>
-                            <i class="fa-solid fa-building-columns fa-2x text-secondary"></i>
-                        </label>
-
-                        <label class="p-3 rounded-3 border d-flex align-items-center justify-content-between cursor-pointer payment-option" 
-                               style="background: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.1); cursor: pointer;">
-                            <div class="d-flex align-items-center gap-3">
-                                <input type="radio" name="metodo_pago" value="tarjeta" class="form-check-input mt-0 border-secondary" onchange="seleccionarPago(this)">
-                                <div>
-                                    <div class="text-white fw-bold">Tarjeta de Crédito / Débito (Visa, Mastercard)</div>
-                                    <div class="text-secondary small">Transacción cifrada protegida con token de seguridad 3DS</div>
-                                </div>
-                            </div>
-                            <i class="fa-brands fa-cc-visa fa-2x text-secondary"></i>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Botón de Envío -->
-                <button type="submit" class="btn fw-bold w-100 py-3 rounded-3 text-dark shadow-lg d-flex align-items-center justify-content-center gap-2 fs-5"
-                        style="background: #CEB06E; transition: all 0.2s;" onmouseover="this.style.filter='brightness(1.1)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.filter='none'; this.style.transform='none'">
-                    <i class="fa-solid fa-shield-check"></i> Confirmar y Realizar Pedido
-                </button>
-            </form>
+            <a href="{{ url_for('main_blueprint.carrito') }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-neutral-700 bg-neutral-900/80 text-neutral-300 hover:text-gold hover:border-gold transition text-sm font-semibold self-start md:self-auto">
+                <i class="fa-solid fa-arrow-left"></i> Volver al Carrito
+            </a>
         </div>
 
-        <!-- Columna Resumen de Compra -->
-        <div class="col-lg-5">
-            <div class="card text-white rounded-4 shadow-lg sticky-top overflow-hidden border" 
-                 style="top: 100px; background: #141414; border-color: rgba(206, 176, 110, 0.35) !important;">
-                
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom border-secondary border-opacity-50">
-                        <h4 class="card-title fw-bold mb-0 text-white fs-5">
-                            <i class="fa-solid fa-basket-shopping text-warning me-2"></i> Resumen de Compra
-                        </h4>
-                        <span class="badge rounded-pill bg-dark border border-warning text-warning">{{ total_items }} artículos</span>
+        <!-- Flash Messages (Flowbite Alerts) -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-6 space-y-3">
+                    {% for category, message in messages %}
+                        <div class="flex items-center p-4 text-sm rounded-2xl border {% if category == 'success' %}bg-emerald-950/40 text-emerald-300 border-emerald-500/40{% elif category == 'danger' or category == 'error' %}bg-red-950/40 text-red-300 border-red-500/40{% else %}bg-amber-950/40 text-amber-300 border-amber-500/40{% endif %} shadow-lg backdrop-blur-sm" role="alert">
+                            <i class="fa-solid {% if category == 'success' %}fa-circle-check text-emerald-400{% elif category == 'danger' or category == 'error' %}fa-circle-exclamation text-red-400{% else %}fa-circle-info text-amber-400{% endif %} me-3 text-lg"></i>
+                            <div class="flex-1 font-medium">{{ message }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Formulario de Datos de Entrega y Pago (Left 7 cols) -->
+            <div class="lg:col-span-7">
+                <form method="POST" id="checkoutForm" class="space-y-6">
+                    <!-- Hidden inputs for coordinates and origin -->
+                    <input type="hidden" id="lat_entrega" name="lat_entrega" value="4.6533">
+                    <input type="hidden" id="lng_entrega" name="lng_entrega" value="-74.0836">
+                    <input type="hidden" id="origen_despacho" name="origen_despacho" value="Centro de Distribución OilSkin - Bogotá D.C.">
+                    <input type="hidden" id="lat_origen" name="lat_origen" value="4.6533">
+                    <input type="hidden" id="lng_origen" name="lng_origen" value="-74.0836">
+
+                    <!-- Bloque 1: Información de Contacto y Entrega -->
+                    <div class="bg-neutral-900/90 border border-neutral-800 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6">
+                        
+                        <div class="flex items-center gap-2 pb-4 border-b border-neutral-800">
+                            <i class="fa-solid fa-map-location-dot text-gold text-lg"></i>
+                            <h2 class="text-lg font-bold text-white">1. Datos de Entrega y Localización</h2>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-neutral-300 uppercase tracking-wider mb-2">Nombre Completo de quien recibe *</label>
+                                <input type="text" class="w-full bg-black border border-neutral-700 focus:border-gold focus:ring-1 focus:ring-gold text-white rounded-xl px-4 py-3 text-sm" name="nombre" 
+                                       value="{{ user.nombre if user else '' }}" placeholder="Ej. Carlos Mendoza" required>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-neutral-300 uppercase tracking-wider mb-2">Ciudad de Entrega *</label>
+                                <input type="text" class="w-full bg-black border border-neutral-700 focus:border-gold focus:ring-1 focus:ring-gold text-white rounded-xl px-4 py-3 text-sm" id="ciudad" name="ciudad" 
+                                       value="Bogotá" placeholder="Ej. Bogotá, Medellín, Cali" required onchange="verificarDireccionEnMapa()">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-neutral-300 uppercase tracking-wider mb-2">Teléfono o Celular *</label>
+                                <input type="tel" class="w-full bg-black border border-neutral-700 focus:border-gold focus:ring-1 focus:ring-gold text-white rounded-xl px-4 py-3 text-sm" name="telefono_contacto" 
+                                       value="{{ user.celular if user else '' }}" placeholder="Ej. 3101234567" required>
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-neutral-300 uppercase tracking-wider mb-2">Dirección de Entrega Exacta *</label>
+                                <div class="flex gap-2">
+                                    <input type="text" class="flex-1 bg-black border border-neutral-700 focus:border-gold focus:ring-1 focus:ring-gold text-white rounded-xl px-4 py-3 text-sm" id="direccion_entrega" name="direccion_entrega" 
+                                           value="{{ user.direccion if user else '' }}" placeholder="Ej. Calle 26 # 68-50, Apto 402" required onchange="verificarDireccionEnMapa()">
+                                    <button type="button" class="px-5 py-3 bg-gold hover:bg-gold-light text-neutral-950 font-bold rounded-xl text-sm transition shrink-0 flex items-center gap-2 shadow-md shadow-gold/20" onclick="verificarDireccionEnMapa()">
+                                        <i class="fa-solid fa-magnifying-glass-location"></i> <span>Verificar</span>
+                                    </button>
+                                </div>
+                                <span class="text-[11px] text-neutral-400 mt-1.5 block">
+                                    El sistema posicionará de forma satelital tu punto de entrega para el transporte oficial.
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Interactive Verification Map Container -->
+                        <div class="pt-4 border-t border-neutral-800 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-satellite text-gold"></i> Mapa Satelital de Cobertura
+                                </span>
+                                <span id="map-status" class="px-3 py-1 rounded-full text-xs font-semibold bg-neutral-800 text-neutral-300">
+                                    Esperando dirección...
+                                </span>
+                            </div>
+
+                            <div id="checkout-map" class="rounded-2xl border border-neutral-700 shadow-inner h-64 w-full relative overflow-hidden bg-black z-10">
+                            </div>
+
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-neutral-400 gap-1">
+                                <span><i class="fa-solid fa-hand-pointer text-gold me-1"></i> Puedes arrastrar el marcador para afinar la ubicación.</span>
+                                <span id="coord-badge" class="text-gold font-mono"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bloque 2: Método de Pago -->
+                    <div class="bg-neutral-900/90 border border-neutral-800 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6">
+                        
+                        <div class="flex items-center gap-2 pb-4 border-b border-neutral-800">
+                            <i class="fa-solid fa-credit-card text-gold text-lg"></i>
+                            <h2 class="text-lg font-bold text-white">2. Selecciona tu Método de Pago</h2>
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="p-4 rounded-2xl border border-gold bg-gold/10 flex items-center justify-between cursor-pointer payment-option transition hover:border-gold">
+                                <div class="flex items-center gap-3">
+                                    <input type="radio" name="metodo_pago" value="efectivo" checked class="w-4 h-4 text-gold bg-black border-neutral-700 focus:ring-gold focus:ring-2" onchange="seleccionarPago(this)">
+                                    <div>
+                                        <div class="text-white text-sm font-bold">Pago en Efectivo / Contra Entrega</div>
+                                        <div class="text-neutral-400 text-xs mt-0.5">Cancela al momento de recibir tu paquete en la puerta</div>
+                                    </div>
+                                </div>
+                                <i class="fa-solid fa-hand-holding-dollar text-2xl text-gold"></i>
+                            </label>
+
+                            <label class="p-4 rounded-2xl border border-neutral-800 bg-neutral-950/60 flex items-center justify-between cursor-pointer payment-option transition hover:border-neutral-700">
+                                <div class="flex items-center gap-3">
+                                    <input type="radio" name="metodo_pago" value="transferencia" class="w-4 h-4 text-gold bg-black border-neutral-700 focus:ring-gold focus:ring-2" onchange="seleccionarPago(this)">
+                                    <div>
+                                        <div class="text-white text-sm font-bold">Transferencia Bancaria / PSE / Nequi</div>
+                                        <div class="text-neutral-400 text-xs mt-0.5">Pago digital instantáneo con comprobante electrónico</div>
+                                    </div>
+                                </div>
+                                <i class="fa-solid fa-building-columns text-2xl text-neutral-400"></i>
+                            </label>
+
+                            <label class="p-4 rounded-2xl border border-neutral-800 bg-neutral-950/60 flex items-center justify-between cursor-pointer payment-option transition hover:border-neutral-700">
+                                <div class="flex items-center gap-3">
+                                    <input type="radio" name="metodo_pago" value="tarjeta" class="w-4 h-4 text-gold bg-black border-neutral-700 focus:ring-gold focus:ring-2" onchange="seleccionarPago(this)">
+                                    <div>
+                                        <div class="text-white text-sm font-bold">Tarjeta de Crédito / Débito (Visa, Mastercard)</div>
+                                        <div class="text-neutral-400 text-xs mt-0.5">Pasarela segura cifrada con token 3D Secure</div>
+                                    </div>
+                                </div>
+                                <i class="fa-brands fa-cc-visa text-2xl text-neutral-400"></i>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Botón de Envío -->
+                    <button type="submit" class="w-full py-4 px-6 rounded-xl font-extrabold text-neutral-950 bg-gold hover:bg-gold-light shadow-2xl shadow-gold/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-base">
+                        <i class="fa-solid fa-shield-check"></i>
+                        <span>Confirmar y Realizar Pedido</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Columna Resumen de Compra (Right 5 cols) -->
+            <div class="lg:col-span-5">
+                <div class="bg-neutral-900 border border-gold/35 rounded-3xl p-6 shadow-2xl sticky top-24 space-y-6">
+                    
+                    <div class="flex items-center justify-between pb-4 border-b border-neutral-800">
+                        <h3 class="text-base font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-basket-shopping text-gold"></i> Resumen de Compra
+                        </h3>
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-neutral-800 text-gold border border-neutral-700">
+                            {{ total_items }} artículos
+                        </span>
                     </div>
 
                     <!-- Items List -->
-                    <div class="d-flex flex-column gap-3 mb-4 max-h-300 overflow-auto pe-1" style="max-height: 280px;">
+                    <div class="space-y-3 max-h-72 overflow-y-auto pr-1">
                         {% for item in carrito %}
-                            <div class="d-flex align-items-center justify-content-between gap-3 p-2 rounded-3 bg-black bg-opacity-40 border border-secondary border-opacity-25">
-                                <div class="p-2 rounded-3 text-warning border border-secondary border-opacity-25 d-flex align-items-center justify-content-center"
-                                     style="width: 48px; height: 48px; background: rgba(206,176,110,0.1);">
-                                    <i class="fa-solid fa-spray-can-sparkles" style="color: #CEB06E;"></i>
+                            <div class="flex items-center justify-between gap-3 p-3 rounded-2xl bg-neutral-950/60 border border-neutral-800">
+                                <div class="w-11 h-11 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-gold shrink-0">
+                                    <i class="fa-solid fa-spray-can-sparkles text-sm"></i>
                                 </div>
-                                <div class="min-w-0 flex-grow-1">
-                                    <div class="fw-bold text-white text-truncate small">{{ item.nombre_producto }}</div>
-                                    <div class="text-secondary small" style="font-size: 0.72rem;">{{ item.cantidad }} x ${{ "{:,.2f}".format(item.precio_unitario) }}</div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="font-bold text-white text-xs truncate">{{ item.nombre_producto }}</div>
+                                    <div class="text-neutral-400 text-[11px]">{{ item.cantidad }} x ${{ "{:,.2f}".format(item.precio_unitario) }}</div>
                                 </div>
-                                <div class="fw-bold text-warning font-monospace small">
+                                <div class="font-bold text-gold text-xs">
                                     ${{ "{:,.2f}".format(item.subtotal) }}
                                 </div>
                             </div>
@@ -202,47 +196,47 @@
                     </div>
 
                     <!-- Subtotales y Total -->
-                    <div class="border-top border-secondary border-opacity-50 pt-3 d-flex flex-column gap-2 text-light small">
-                        <div class="d-flex justify-content-between">
-                            <span class="text-secondary">Subtotal productos:</span>
-                            <span class="font-monospace fw-semibold text-white">${{ "{:,.2f}".format(total_precio) }}</span>
+                    <div class="border-t border-neutral-800 pt-4 space-y-2 text-xs">
+                        <div class="flex justify-between text-neutral-300">
+                            <span>Subtotal productos:</span>
+                            <span class="font-bold text-white">${{ "{:,.2f}".format(total_precio) }}</span>
                         </div>
-                        <div class="d-flex justify-content-between">
-                            <span class="text-secondary">Envío a domicilio:</span>
-                            <span class="text-success fw-bold"><i class="fa-solid fa-check me-1"></i>¡Gratis!</span>
+                        <div class="flex justify-between text-neutral-300">
+                            <span>Envío a domicilio:</span>
+                            <span class="text-emerald-400 font-bold flex items-center gap-1"><i class="fa-solid fa-check"></i> ¡Gratis!</span>
                         </div>
-                        <div class="d-flex justify-content-between">
-                            <span class="text-secondary">Empaque ecológico:</span>
-                            <span class="text-warning fw-semibold">Incluido</span>
+                        <div class="flex justify-between text-neutral-300">
+                            <span>Empaque ecológico:</span>
+                            <span class="text-gold font-semibold">Incluido</span>
                         </div>
 
-                        <hr class="border-secondary border-opacity-50 my-2">
-
-                        <div class="d-flex justify-content-between align-items-baseline pt-1">
-                            <span class="fs-6 text-uppercase fw-bold text-secondary">Total a Pagar:</span>
-                            <div class="text-end">
-                                <span class="fs-4 fw-bold font-monospace" style="color: #CEB06E;">
-                                    ${{ "{:,.2f}".format(total_precio) }}
-                                </span>
-                                <span class="d-block text-secondary small" style="font-size: 0.68rem;">COP • IVA incluido</span>
+                        <div class="border-t border-neutral-800 pt-4 mt-3 flex justify-between items-baseline">
+                            <div>
+                                <span class="text-xs uppercase font-extrabold text-neutral-400 block tracking-wider">Total a Pagar:</span>
+                                <span class="text-[10px] text-neutral-400">COP • IVA incluido</span>
                             </div>
+                            <span class="text-2xl font-black text-gold">
+                                ${{ "{:,.2f}".format(total_precio) }}
+                            </span>
                         </div>
                     </div>
 
                     <!-- Garantías -->
-                    <div class="mt-4 pt-3 border-top border-secondary border-opacity-25 d-flex flex-column gap-2 text-secondary small" style="font-size: 0.75rem;">
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="fa-solid fa-shield-check text-warning"></i> Garantía de 30 días con satisfacción 100%
+                    <div class="pt-4 border-t border-neutral-800 space-y-2 text-[11px] text-neutral-400">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-shield-check text-gold"></i> Garantía de 30 días con satisfacción 100%
                         </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="fa-solid fa-truck-fast text-warning"></i> Despacho express con trazabilidad satelital en vivo
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-truck-fast text-gold"></i> Despacho express con trazabilidad satelital en vivo
                         </div>
                     </div>
+
                 </div>
             </div>
+
         </div>
     </div>
-</div>
+</main>
 
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -276,7 +270,7 @@ function normalizarDireccionColombia(dir) {
     d = d.replace(/\bautonorte\b/g, 'autopista norte');
     d = d.replace(/\bautosur\b/g, 'autopista sur');
 
-    // 2. Normalizar cuadrantes y sufijos cardinales (ej. 32s -> 32 sur, 7e -> 7 este)
+    // 2. Normalizar cuadrantes y sufijos cardinales
     d = d.replace(/(\d+)\s*s\b/g, '$1 sur');
     d = d.replace(/(\d+)\s*e\b/g, '$1 este');
     d = d.replace(/(\d+)\s*n\b/g, '$1 norte');
@@ -295,10 +289,8 @@ function generarConsultasGeocodificacion(dirNorm, ciudad) {
     const city = ciudad.trim() || 'Bogotá';
     const queries = [];
 
-    // Consulta 1: Dirección completa normalizada
     queries.push({ q: `${dirNorm}, ${city}, Colombia`, level: 'exact' });
 
-    // Consulta 2 y 3: Desglose de vía principal y cruce (ej. calle 32 sur # 7-06 -> calle 32 sur # 7 / calle 32 sur)
     const matchNum = dirNorm.match(/^(.*?)\s*#\s*(\d+)(?:-\d+)?(.*)$/);
     if (matchNum) {
         const viaPrincipal = matchNum[1].trim();
@@ -310,7 +302,6 @@ function generarConsultasGeocodificacion(dirNorm, ciudad) {
         queries.push({ q: `${dirNorm}, ${city}, Colombia`, level: 'street' });
     }
 
-    // Consulta 4: Centroide de la ciudad como último recurso
     queries.push({ q: `${city}, Colombia`, level: 'city' });
 
     return queries;
@@ -332,23 +323,20 @@ function initMap() {
         draggable: true
     }).addTo(map);
 
-    marker.bindPopup("<b style='color:#000;'>📍 Punto de Entrega</b><br><span style='color:#555;'>Mueve este pin para ajustar tu ubicación exacta</span>").openPopup();
+    marker.bindPopup("<b style='color:#000;'>📍 Punto de Entrega</b><br><span style='color:#555; font-size:11px;'>Mueve este pin para ajustar tu ubicación exacta</span>").openPopup();
 
-    // Arrastre manual del pin con geocodificación inversa
     marker.on('dragend', function (e) {
         const pos = marker.getLatLng();
         actualizarCoordenadas(pos.lat, pos.lng, "Ubicación fijada manualmente");
         obtenerDireccionInversa(pos.lat, pos.lng);
     });
 
-    // Clic en el mapa para posicionar el pin
     map.on('click', function(e) {
         marker.setLatLng(e.latlng);
         actualizarCoordenadas(e.latlng.lat, e.latlng.lng, "Punto fijado en el mapa");
         obtenerDireccionInversa(e.latlng.lat, e.latlng.lng);
     });
 
-    // Verificación inicial si ya hay dirección
     const initialAddress = document.getElementById('direccion_entrega').value.trim();
     if (initialAddress) {
         verificarDireccionEnMapa();
@@ -362,7 +350,7 @@ function actualizarCoordenadas(lat, lng, mensajeEstado = null) {
     
     const statusBadge = document.getElementById('map-status');
     if (mensajeEstado) {
-        statusBadge.className = "badge bg-success text-white small px-3 py-1 rounded-pill shadow-sm";
+        statusBadge.className = "px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm";
         statusBadge.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> ${mensajeEstado}`;
     }
 }
@@ -386,12 +374,12 @@ async function verificarDireccionEnMapa() {
     const statusBadge = document.getElementById('map-status');
 
     if (!direccionInput) {
-        statusBadge.className = "badge bg-secondary text-light small px-3 py-1 rounded-pill";
+        statusBadge.className = "px-3 py-1 rounded-full text-xs font-semibold bg-neutral-800 text-neutral-300";
         statusBadge.innerText = "Ingresa una dirección...";
         return;
     }
 
-    statusBadge.className = "badge bg-warning text-dark small px-3 py-1 rounded-pill";
+    statusBadge.className = "px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40";
     statusBadge.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> Localizando en mapa satelital...`;
 
     const dirNorm = normalizarDireccionColombia(direccionInput);
@@ -439,32 +427,23 @@ async function verificarDireccionEnMapa() {
 
         actualizarCoordenadas(lat, lon, badgeMsg);
     } else {
-        statusBadge.className = "badge bg-info text-dark small px-3 py-1 rounded-pill";
+        statusBadge.className = "px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/20 text-sky-300 border border-sky-500/40";
         statusBadge.innerHTML = `<i class="fa-solid fa-location-crosshairs me-1"></i> Ubicación aproximada - Mueve el pin`;
     }
 }
 
 function seleccionarPago(radio) {
     document.querySelectorAll('.payment-option').forEach(el => {
-        el.style.borderColor = 'rgba(255,255,255,0.1)';
-        el.style.background = 'rgba(0,0,0,0.4)';
+        el.classList.remove('border-gold', 'bg-gold/10');
+        el.classList.add('border-neutral-800', 'bg-neutral-950/60');
     });
     const parent = radio.closest('.payment-option');
     if (parent) {
-        parent.style.borderColor = '#CEB06E';
-        parent.style.background = 'rgba(206,176,110,0.06)';
+        parent.classList.remove('border-neutral-800', 'bg-neutral-950/60');
+        parent.classList.add('border-gold', 'bg-gold/10');
     }
 }
 
 document.addEventListener('DOMContentLoaded', initMap);
 </script>
-
-<style>
-.payment-option:hover {
-    border-color: rgba(206,176,110,0.5) !important;
-}
-.cursor-pointer {
-    cursor: pointer;
-}
-</style>
 {% endblock %}

@@ -1,139 +1,151 @@
-{% extends 'components/boostrap/layout_boostrap.jinja' %}
+{% extends 'components/tailwind/layout.jinja' %}
 
-{% block title %}Inicio - OilSkin{% endblock %}
+{% block title %}Inicio - OilSkin Cosmética Natural{% endblock %}
 
 {% block content %}
 
-<header style="background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('{{ url_for('static', filename='img/fondo_2.png') }}') center/cover no-repeat;">
-    <div class="container py-5">
-        <div class="row align-items-center justify-content-center g-4 text-center text-lg-start">
+<!-- HERO SECTION -->
+<header class="relative overflow-hidden py-16 md:py-24 border-b border-neutral-800" style="background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('{{ url_for('static', filename='img/fondo_2.png') }}') center/cover no-repeat;">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col lg:flex-row items-center justify-between gap-12 text-center lg:text-left">
 
-            <div class="col-lg-auto">
+            <div class="shrink-0 relative group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-gold to-amber-500 rounded-full blur opacity-70 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
                 <img src="{{ url_for('static', filename='img/logo.png') }}"
-                     class="rounded-circle img-fluid"
-                     style="width:160px; height:160px; object-fit:cover;">
+                     class="relative rounded-full w-40 h-40 md:w-48 md:h-48 object-cover border-4 border-gold shadow-2xl"
+                     alt="Logo OilSkin">
             </div>
 
-            <div class="col-lg-6 text-white">
-                <h1 class="display-3 fw-bold">OIL SKIN</h1>
-                <p class="lead text-light">
+            <div class="max-w-2xl text-white space-y-6">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gold/10 border border-gold/30 text-gold text-xs font-bold uppercase tracking-widest">
+                    <i class="fa-solid fa-seedling"></i> 100% Extractos Orgánicos de Palma
+                </div>
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white">
+                    OIL <span class="text-gold">SKIN</span>
+                </h1>
+                <p class="text-lg md:text-xl text-neutral-300 font-light leading-relaxed">
                     Descubre la riqueza de la cosmética natural enriquecida con extractos puros de palma y aceites esenciales 100% orgánicos. Nutrición profunda, suavidad única y cuidado especializado para tu piel.
                 </p>
-                <a href="{{ url_for('main_blueprint.show_category', category_name='Cuidado Corporal') }}" class="btn fw-bold px-4 py-2"
-                   style="background:#CEB06E; color:black;">
-                    ¡Explora nuestros productos!
-                </a>
+                <div class="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                    <a href="{{ url_for('main_blueprint.show_category', category_name='Cuidado Corporal') }}"
+                       class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 text-sm font-bold text-neutral-950 bg-gold hover:bg-gold-light rounded-xl shadow-lg shadow-gold/20 transition-all duration-200 transform hover:-translate-y-0.5">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                        <span>¡Explora nuestros productos!</span>
+                    </a>
+                    <a href="{{ url_for('main_blueprint.about') }}"
+                       class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold text-white bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-700 rounded-xl transition">
+                        <span>Conoce nuestra historia</span>
+                        <i class="fa-solid fa-arrow-right text-xs text-gold"></i>
+                    </a>
+                </div>
             </div>
 
         </div>
     </div>
 </header>
 
-<main style="background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('{{ url_for('static', filename='img/palmas.png') }}') center/cover no-repeat;">
+<main class="py-16 md:py-20" style="background: linear-gradient(rgba(0,0,0,0.88), rgba(0,0,0,0.88)), url('{{ url_for('static', filename='img/palmas.png') }}') center/cover no-repeat fixed;">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    <!-- FEATURES -->
-    <section class="py-5" style="background:#0a0a0a;">
-        <div class="container">
+        <!-- BENEFICIOS CLAVE -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
 
-            <div class="row text-center g-5">
-
-                <!-- ITEM -->
-                <div class="col-md-6 col-lg-3 text-white">
-                    <div class="p-3 border rounded-circle d-inline-block mb-3" style="border-color:#d4af37;">
-                        <i class="fa-solid fa-leaf fa-2x text-warning"></i>
-                    </div>
-                    <h5>100% Orgánico</h5>
-                    <p class="text-secondary small">Ingredientes naturales sin químicos agresivos.</p>
+            <div class="bg-neutral-900/80 backdrop-blur-sm border border-neutral-800 hover:border-gold/50 rounded-2xl p-6 text-center transition-all duration-300 hover:shadow-xl hover:shadow-gold/5">
+                <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold">
+                    <i class="fa-solid fa-leaf text-2xl"></i>
                 </div>
-
-                <div class="col-md-6 col-lg-3 text-white">
-                    <div class="p-3 border rounded-circle d-inline-block mb-3" style="border-color:#d4af37;">
-                        <i class="fa-solid fa-droplet fa-2x text-warning"></i>
-                    </div>
-                    <h5>Nutrición Intensa</h5>
-                    <p class="text-secondary small">Hidratación profunda todo el día.</p>
-                </div>
-
-                <div class="col-md-6 col-lg-3 text-white">
-                    <div class="p-3 border rounded-circle d-inline-block mb-3" style="border-color:#d4af37;">
-                        <i class="fa-solid fa-star fa-2x text-warning"></i>
-                    </div>
-                    <h5>Efecto Glow</h5>
-                    <p class="text-secondary small">Piel radiante y rejuvenecida.</p>
-                </div>
-
-                <div class="col-md-6 col-lg-3 text-white">
-                    <div class="p-3 border rounded-circle d-inline-block mb-3" style="border-color:#d4af37;">
-                        <i class="fa-solid fa-shield-halved fa-2x text-warning"></i>
-                    </div>
-                    <h5>Testeado</h5>
-                    <p class="text-secondary small">Seguro para todo tipo de piel.</p>
-                </div>
-
+                <h3 class="text-white text-lg font-bold mb-1">100% Orgánico</h3>
+                <p class="text-neutral-400 text-sm">Ingredientes naturales y puros sin químicos agresivos.</p>
             </div>
 
-            <!-- TITLE -->
-            <h2 class="text-center text-white fw-bold my-5 display-5">
-                <u>Nuestra Empresa</u>
-            </h2>
-
-            <!-- BLOCK 1 -->
-            <div class="row align-items-center bg-white bg-opacity-10 rounded p-4 mb-4 backdrop-blur">
-
-                <div class="col-md-4 text-center text-white">
-                    <img src="{{ url_for('static', filename='img/publicidad.jpg') }}"
-                         class="rounded-circle img-fluid mb-3"
-                         style="width:150px; height:150px; object-fit:cover;">
-                    <h5>Ingredientes <span class="text-warning">Naturales</span></h5>
+            <div class="bg-neutral-900/80 backdrop-blur-sm border border-neutral-800 hover:border-gold/50 rounded-2xl p-6 text-center transition-all duration-300 hover:shadow-xl hover:shadow-gold/5">
+                <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold">
+                    <i class="fa-solid fa-droplet text-2xl"></i>
                 </div>
-
-                <div class="col-md-8 text-white">
-                    <p class="fs-5 border-start ps-3" style="border-color:#d4af37;">
-                        Aceites <strong class="text-warning">100% orgánicos</strong>, sin químicos agresivos.
-                    </p>
-                </div>
-
+                <h3 class="text-white text-lg font-bold mb-1">Nutrición Intensa</h3>
+                <p class="text-neutral-400 text-sm">Hidratación y restauración celular profunda todo el día.</p>
             </div>
 
-            <!-- BLOCK 2 -->
-            <div class="row align-items-center bg-white bg-opacity-10 rounded p-4 mb-4">
-
-                <div class="col-md-8 text-white">
-                    <p class="fs-5 border-end pe-3 text-end" style="border-color:#d4af37;">
-                        Aceites de <strong class="text-warning">nutrición intensa</strong>, que protegen tu piel.
-                    </p>
+            <div class="bg-neutral-900/80 backdrop-blur-sm border border-neutral-800 hover:border-gold/50 rounded-2xl p-6 text-center transition-all duration-300 hover:shadow-xl hover:shadow-gold/5">
+                <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold">
+                    <i class="fa-solid fa-star text-2xl"></i>
                 </div>
-
-                <div class="col-md-4 text-center text-white">
-                    <img src="{{ url_for('static', filename='img/publicidad.jpg') }}"
-                         class="rounded-circle img-fluid mb-3"
-                         style="width:150px; height:150px; object-fit:cover;">
-                    <h5>Cuidado <span class="text-warning">Profundo</span></h5>
-                </div>
-
+                <h3 class="text-white text-lg font-bold mb-1">Efecto Glow</h3>
+                <p class="text-neutral-400 text-sm">Luminosidad botánica natural, piel suave y rejuvenecida.</p>
             </div>
 
-            <!-- BLOCK 3 -->
-            <div class="row align-items-center bg-white bg-opacity-10 rounded p-4">
-
-                <div class="col-md-4 text-center text-white">
-                    <img src="{{ url_for('static', filename='img/publicidad.jpg') }}"
-                         class="rounded-circle img-fluid mb-3"
-                         style="width:150px; height:150px; object-fit:cover;">
-                    <h5>Resultados <span class="text-warning">Visibles</span></h5>
+            <div class="bg-neutral-900/80 backdrop-blur-sm border border-neutral-800 hover:border-gold/50 rounded-2xl p-6 text-center transition-all duration-300 hover:shadow-xl hover:shadow-gold/5">
+                <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold">
+                    <i class="fa-solid fa-shield-halved text-2xl"></i>
                 </div>
-
-                <div class="col-md-8 text-white">
-                    <p class="fs-5 border-start ps-3" style="border-color:#d4af37;">
-                        Piel más suave, firme y luminosa en semanas.
-                    </p>
-                </div>
-
+                <h3 class="text-white text-lg font-bold mb-1">Testeado & Seguro</h3>
+                <p class="text-neutral-400 text-sm">Fórmulas dermatológicamente probadas para todo tipo de piel.</p>
             </div>
 
         </div>
-    </section>
 
+        <!-- SECCIÓN DE NUESTRA EMPRESA -->
+        <div class="text-center mb-12">
+            <span class="text-gold uppercase tracking-widest text-xs font-bold">Compromiso Botánico</span>
+            <h2 class="text-3xl md:text-4xl font-extrabold text-white mt-2">
+                Nuestra Filosofía y Excelencia
+            </h2>
+            <div class="w-20 h-1 bg-gold mx-auto mt-4 rounded-full"></div>
+        </div>
+
+        <div class="space-y-6 max-w-5xl mx-auto">
+
+            <!-- PILAR 1 -->
+            <div class="bg-neutral-900/70 backdrop-blur-md border border-neutral-800 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-8 transition hover:border-neutral-700">
+                <div class="shrink-0 text-center">
+                    <img src="{{ url_for('static', filename='img/publicidad.jpg') }}"
+                         class="rounded-2xl w-32 h-32 md:w-36 md:h-36 object-cover border-2 border-gold/40 shadow-lg mx-auto"
+                         alt="Ingredientes Naturales">
+                </div>
+                <div class="flex-1 text-center md:text-left space-y-2">
+                    <span class="text-gold text-xs font-bold uppercase tracking-wider">Pilar 01</span>
+                    <h3 class="text-white text-xl font-bold">Ingredientes <span class="text-gold">Naturales y Sostenibles</span></h3>
+                    <p class="text-neutral-300 text-base leading-relaxed pl-0 md:pl-4 md:border-l-2 md:border-gold/40">
+                        Aceites y extractos <strong class="text-gold font-semibold">100% orgánicos</strong>, libres de parabenos, sulfatos y aditivos agresivos para el cuidado más puro.
+                    </p>
+                </div>
+            </div>
+
+            <!-- PILAR 2 -->
+            <div class="bg-neutral-900/70 backdrop-blur-md border border-neutral-800 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row-reverse items-center gap-8 transition hover:border-neutral-700">
+                <div class="shrink-0 text-center">
+                    <img src="{{ url_for('static', filename='img/publicidad.jpg') }}"
+                         class="rounded-2xl w-32 h-32 md:w-36 md:h-36 object-cover border-2 border-gold/40 shadow-lg mx-auto"
+                         alt="Cuidado Profundo">
+                </div>
+                <div class="flex-1 text-center md:text-right space-y-2">
+                    <span class="text-gold text-xs font-bold uppercase tracking-wider">Pilar 02</span>
+                    <h3 class="text-white text-xl font-bold">Cuidado <span class="text-gold">Profundo y Reparador</span></h3>
+                    <p class="text-neutral-300 text-base leading-relaxed pr-0 md:pr-4 md:border-r-2 md:border-gold/40">
+                        Fórmulas de <strong class="text-gold font-semibold">nutrición intensiva</strong> que fortalecen la barrera lipídica y protegen tu piel de factores ambientales.
+                    </p>
+                </div>
+            </div>
+
+            <!-- PILAR 3 -->
+            <div class="bg-neutral-900/70 backdrop-blur-md border border-neutral-800 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-8 transition hover:border-neutral-700">
+                <div class="shrink-0 text-center">
+                    <img src="{{ url_for('static', filename='img/publicidad.jpg') }}"
+                         class="rounded-2xl w-32 h-32 md:w-36 md:h-36 object-cover border-2 border-gold/40 shadow-lg mx-auto"
+                         alt="Resultados Visibles">
+                </div>
+                <div class="flex-1 text-center md:text-left space-y-2">
+                    <span class="text-gold text-xs font-bold uppercase tracking-wider">Pilar 03</span>
+                    <h3 class="text-white text-xl font-bold">Resultados <span class="text-gold">Visibles y Comprobados</span></h3>
+                    <p class="text-neutral-300 text-base leading-relaxed pl-0 md:pl-4 md:border-l-2 md:border-gold/40">
+                        Piel notablemente más suave, firme, luminosa e hidratada desde las primeras semanas de aplicación constante.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
 </main>
 
 {% endblock %}

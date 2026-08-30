@@ -42,40 +42,62 @@
         </div>
     </div>
 
-    <div class="hidden lg:flex flex-1 justify-end gap-5 text-white text-md font-medium">
+    <div class="hidden lg:flex flex-1 justify-end items-center gap-4 text-white text-sm font-medium">
+        <a href="{{ url_for('main_blueprint.carrito') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-white hover:text-gold hover:border-gold/50 transition">
+            <i class="fa-solid fa-cart-shopping text-gold"></i>
+            <span>Carrito</span>
+        </a>
         {% if session.get('user_id') %}
-        <span class="px-4 py-2 rounded-2xl bg-slate-800">Hola, {{ session.get('user_name', 'Usuario') }}</span>
+        <span class="px-3.5 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs font-semibold">Hola, {{ session.get('user_name', 'Usuario') }}</span>
+        {% if session.get('id_rol') == 2 %}
+        <a href="{{ url_for('admin_blueprint.dashboard') }}"
+            class="bg-amber-500/10 border border-amber-500/40 text-amber-400 px-3.5 py-1.5 rounded-xl transition hover:bg-amber-500 hover:text-black font-semibold text-xs flex items-center gap-1.5">
+            <i class="fa-solid fa-shield-halved"></i> Panel Admin
+        </a>
+        {% endif %}
         <a href="{{ url_for('user_blueprint.profile') }}"
-            class="border border-slate-600 px-4 py-2 rounded-2xl transition hover:text-[#CEB06E] hover:border-[#CEB06E]">Mi Perfil</a>
+            class="border border-neutral-700 px-3.5 py-1.5 rounded-xl transition hover:text-gold hover:border-gold">Mi Perfil</a>
         <a href="{{ url_for('auth_blueprint.logout') }}"
-            class="border border-slate-600 px-4 py-2 rounded-2xl transition hover:text-[#CEB06E] hover:border-[#CEB06E]">Cerrar Sesión</a>
+            class="border border-neutral-700 px-3.5 py-1.5 rounded-xl transition hover:text-red-400 hover:border-red-400">Cerrar Sesión</a>
         {% else %}
         <a href="{{ url_for('auth_blueprint.register') }}"
-            class="border border-slate-600 px-4 py-2 rounded-2xl transition hover:text-[#CEB06E] hover:border-[#CEB06E]">Regístrate</a>
+            class="border border-neutral-700 px-3.5 py-1.5 rounded-xl transition hover:text-gold hover:border-gold">Regístrate</a>
         <a href="{{ url_for('auth_blueprint.login') }}"
-            class="border border-slate-600 px-4 py-2 rounded-2xl transition hover:text-[#CEB06E] hover:border-[#CEB06E]">Inicia
-            Sesión</a>
+            class="bg-gold text-neutral-950 font-bold px-4 py-1.5 rounded-xl transition hover:bg-gold-light">Inicia Sesión</a>
         {% endif %}
     </div>
 
     <div id="mobileMenu"
-        class="hidden absolute top-full left-0 w-full bg-black/95 flex-col p-6 gap-4 text-white lg:hidden border-t border-slate-800">
-        <a href="{{ url_for('main_blueprint.index') }}" class="text-lg border-b border-slate-800 pb-2">Inicio</a>
-        <a href="{{ url_for('main_blueprint.about') }}" class="text-lg border-b border-slate-800 pb-2">Sobre Nosotros</a>
+        class="hidden absolute top-full left-0 w-full bg-black/95 flex-col p-6 gap-4 text-white lg:hidden border-t border-neutral-800 backdrop-blur-md">
+        <a href="{{ url_for('main_blueprint.index') }}" class="text-base border-b border-neutral-800 pb-2 flex items-center justify-between">
+            <span>Inicio</span>
+            <i class="fa-solid fa-chevron-right text-xs text-neutral-500"></i>
+        </a>
+        <a href="{{ url_for('main_blueprint.about') }}" class="text-base border-b border-neutral-800 pb-2 flex items-center justify-between">
+            <span>Sobre Nosotros</span>
+            <i class="fa-solid fa-chevron-right text-xs text-neutral-500"></i>
+        </a>
+        <a href="{{ url_for('main_blueprint.carrito') }}" class="text-base border-b border-neutral-800 pb-2 flex items-center justify-between text-gold">
+            <span class="flex items-center gap-2"><i class="fa-solid fa-cart-shopping"></i> Carrito de Compras</span>
+            <i class="fa-solid fa-chevron-right text-xs text-neutral-500"></i>
+        </a>
         <div class="flex flex-col gap-2">
-            <span class="text-slate-400 text-sm uppercase tracking-widest">Categorías</span>
+            <span class="text-neutral-400 text-xs font-bold uppercase tracking-widest">Categorías</span>
             {% for categoria in categorias %}
-            <a href="{{ url_for('main_blueprint.show_category', category_name=categoria.nombre_categoria) }}" class="pl-4 transition duration-300 ease-in-out hover:text-[#CEB06E]">{{ categoria.nombre_categoria }}</a>
+            <a href="{{ url_for('main_blueprint.show_category', category_name=categoria.nombre_categoria) }}" class="pl-3 py-1 text-sm text-neutral-300 transition hover:text-gold">{{ categoria.nombre_categoria }}</a>
             {% endfor %}
         </div>
-        <div class="flex flex-col gap-3 mt-4">
+        <div class="flex flex-col gap-3 mt-3">
             {% if session.get('user_id') %}
-            <span class="text-center bg-slate-800 text-white py-2 rounded-xl font-bold">Hola, {{ session.get('user_name', 'Usuario') }}</span>
-            <a href="{{ url_for('user_blueprint.profile') }}" class="text-center border border-slate-600 py-2 rounded-xl">Mi Perfil</a>
-            <a href="{{ url_for('auth_blueprint.logout') }}" class="text-center border border-slate-600 py-2 rounded-xl">Cerrar Sesión</a>
+            <span class="text-center bg-neutral-900 border border-neutral-800 text-white py-2 rounded-xl text-sm font-semibold">Hola, {{ session.get('user_name', 'Usuario') }}</span>
+            {% if session.get('id_rol') == 2 %}
+            <a href="{{ url_for('admin_blueprint.dashboard') }}" class="text-center bg-amber-500 text-black font-bold py-2 rounded-xl text-sm">Panel Admin</a>
+            {% endif %}
+            <a href="{{ url_for('user_blueprint.profile') }}" class="text-center border border-neutral-700 py-2 rounded-xl text-sm">Mi Perfil</a>
+            <a href="{{ url_for('auth_blueprint.logout') }}" class="text-center border border-red-500/40 text-red-400 py-2 rounded-xl text-sm">Cerrar Sesión</a>
             {% else %}
-            <a href="{{ url_for('auth_blueprint.login') }}" class="text-center bg-[#CEB06E] text-black py-2 rounded-xl font-bold">Inicia Sesión</a>
-            <a href="{{ url_for('auth_blueprint.register') }}" class="text-center border border-slate-600 py-2 rounded-xl">Regístrate</a>
+            <a href="{{ url_for('auth_blueprint.login') }}" class="text-center bg-gold text-black py-2.5 rounded-xl font-bold text-sm">Inicia Sesión</a>
+            <a href="{{ url_for('auth_blueprint.register') }}" class="text-center border border-neutral-700 py-2 rounded-xl text-sm">Regístrate</a>
             {% endif %}
         </div>
     </div>
