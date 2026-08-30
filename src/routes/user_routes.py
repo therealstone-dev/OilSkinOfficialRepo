@@ -16,7 +16,7 @@ from src.models.ModeloCarrito import ModeloCarrito
 from src.models.ModeloPedido import ModeloPedido
 from src.services.facturacion_service import FacturacionService
 from src.database.db_mysql import get_connection
-
+    
 # Blueprint para manejar las rutas
 template_dir = Path(__file__).parent.parent / 'templates' / 'profile'
 user = Blueprint('user_blueprint', __name__, url_prefix='/usuario', template_folder=str(template_dir))

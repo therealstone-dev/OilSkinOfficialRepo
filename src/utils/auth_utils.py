@@ -19,7 +19,6 @@ def require_admin(f):
             flash('Debes iniciar sesión para acceder al panel de administración', 'warning')
             return redirect(url_for('auth_blueprint.login'))
 
-        # Comprobar id_rol en BD (id_rol = 2 es Administrador)
         try:
             conn = get_connection()
             cur = conn.cursor()

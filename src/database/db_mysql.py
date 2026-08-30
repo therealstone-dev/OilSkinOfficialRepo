@@ -1,6 +1,9 @@
 import os
 from decouple import config
 from flask import current_app
+import pymysql
+pymysql.install_as_MySQLdb()
+
 from flask_mysqldb import MySQL
 
 mysql = MySQL()

@@ -1,6 +1,3 @@
--- Vistas Esenciales de MySQL para la Aplicación OilSkin
-
--- 1. Vista de Historial de Pedidos con Domicilio y Factura
 CREATE OR REPLACE VIEW vw_historial_pedidos AS
 SELECT 
     p.id_pedido,
@@ -31,7 +28,6 @@ FROM pedido p
 LEFT JOIN factura f ON f.id_pedido = p.id_pedido
 LEFT JOIN domicilio d ON d.id_pedido = p.id_pedido;
 
--- 2. Vista de Detalle de Productos por Pedido
 CREATE OR REPLACE VIEW vw_detalle_pedidos_productos AS
 SELECT 
     dp.id_detalle,
@@ -46,7 +42,6 @@ SELECT
 FROM detalle_pedido dp
 JOIN producto pr ON pr.id_producto = dp.id_producto;
 
--- 3. Vista de Resumen de Facturas con Usuario
 CREATE OR REPLACE VIEW vw_resumen_factura AS
 SELECT 
     f.id_factura,

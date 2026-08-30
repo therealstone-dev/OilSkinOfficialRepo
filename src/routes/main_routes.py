@@ -11,6 +11,7 @@ from src.database.db_mysql import get_connection
 from src.models.ModeloCarrito import ModeloCarrito
 from src.models.ModeloProductos import ModeloProducto
 from src.models.ModeloCategoria import ModeloCategoria
+from src.utils.auth_utils import require_login
 from src.services.facturacion_service import FacturacionService
 from src.models.ModeloUsuario import ModeloUsuario
 from src.utils.nav_helper import get_nav_data
@@ -231,8 +232,8 @@ def eliminar_del_carrito(id_producto):
     flash('Producto eliminado del carrito', 'info')
     return redirect(url_for('main_blueprint.carrito'))
 
-
 @main.route('/checkout', methods=['GET', 'POST'])
+@require_login
 def checkout():
     carrito = ModeloCarrito.obtener_carrito()
     if not carrito:
@@ -357,4 +358,4 @@ def checkout():
         carrito=carrito,
         total_items=ModeloCarrito.total_items(),
         total_precio=ModeloCarrito.total_precio(),
-    )
+    )

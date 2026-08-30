@@ -41,7 +41,6 @@ def create_app():
     return app
 
 
-# Instancia a nivel de módulo para servidores WSGI
 app = create_app()
 
 if __name__ == '__main__':

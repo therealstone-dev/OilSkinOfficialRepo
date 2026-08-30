@@ -33,11 +33,10 @@ class ModeloUsuario:
     @classmethod
     def create(cls, nombre, email, password, direccion, celular, telefono=None, id_rol=1):
         """
-        Crea un nuevo usuario. Por defecto asigna id_rol=1 (cliente). Ajusta si tu DB usa otro id.
+        Crea un nuevo usuario. Asigna id_rol=1 (cliente).
         """
         try:
             hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-            # Guardar como string
             hashed_str = hashed.decode('utf-8')
 
             conn = get_connection()
@@ -127,4 +126,4 @@ class ModeloUsuario:
         except Exception as ex:
             print(f"Error en update_images: {ex}")
             return False, f"Error al actualizar imágenes: {ex}"
-
+
