@@ -48,7 +48,7 @@
                                     <input type="hidden" name="producto_id" value="{{ item.id_producto }}">
                                     <div class="input-group input-group-sm" style="width: 120px;">
                                         <button type="submit" name="cantidad" value="{{ item.cantidad - 1 }}" class="btn btn-outline-warning">-</button>
-                                        <input type="text" readonly class="form-control text-center bg-black text-white border-warning font-monospace" value="{{ item.cantidad }}">
+                                        <input type="number" readonly min="1" class="form-control text-center bg-black text-white border-warning font-monospace" value="{{ item.cantidad }}">
                                         <button type="submit" name="cantidad" value="{{ item.cantidad + 1 }}" class="btn btn-outline-warning">+</button>
                                     </div>
                                 </form>

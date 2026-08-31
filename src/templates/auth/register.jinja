@@ -11,7 +11,7 @@
                 <form action="{{ url_for('auth_blueprint.register') }}" method="post" class="grid grid-cols-2 gap-4 items-center">
                     {{ form.csrf_token }}
                     <div class="flex flex-col col-span-2">
-                        <label for="nombre" class="text-white">Nombre</label>
+                        <label  for="nombre" class="text-white">Nombre</label>
                         {{ form.nombre(class_='h-10 bg-white rounded-md px-3', placeholder='Tu nombre') }}
                     </div>
                     <div class="flex flex-col">
@@ -19,7 +19,7 @@
                         {{ form.email(class_='h-10 bg-white rounded-md px-3', placeholder='Tu correo electrónico') }}
                     </div>
                     <div class="flex flex-col">
-                        <label for="direccion" class="text-white">Direccion</label>
+                        <label  for="direccion" class="text-white">Direccion</label>
                         {{ form.direccion(class_='h-10 bg-white rounded-md px-3', placeholder='Tu dirección') }}
                     </div>
                     <div class="flex flex-col">

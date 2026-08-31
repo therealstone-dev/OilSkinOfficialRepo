@@ -97,41 +97,41 @@
           <!-- Nombre Completo -->
           <div class="flex flex-col gap-2">
             <label class="text-sm font-semibold text-gray-700">Nombre Completo <span class="text-red-500">*</span></label>
-            <input name="nombre" value="{{ user.nombre if user else '' }}" required
+            <input type="text" name="nombre" value="{{ user.nombre if user else '' }}" required
               class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              type="text" placeholder="Tu nombre completo">
+              placeholder="Tu nombre completo">
           </div>
 
           <!-- Email -->
           <div class="flex flex-col gap-2">
             <label class="text-sm font-semibold text-gray-700">Correo Electrónico <span class="text-red-500">*</span></label>
-            <input name="email" value="{{ user.email if user else '' }}" required
+            <input type="email" name="email" value="{{ user.email if user else '' }}" required
               class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              type="email" placeholder="correo@ejemplo.com">
+              placeholder="correo@ejemplo.com">
           </div>
 
           <!-- Celular -->
           <div class="flex flex-col gap-2">
             <label class="text-sm font-semibold text-gray-700">Número de Celular <span class="text-red-500">*</span></label>
-            <input name="celular" value="{{ user.celular if user else '' }}" required
+            <input type="tel" name="celular" value="{{ user.celular if user else '' }}" required
               class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              type="text" placeholder="Ej: 3001234567">
+              placeholder="Ej: 3001234567">
           </div>
 
           <!-- Teléfono Fijo -->
           <div class="flex flex-col gap-2">
             <label class="text-sm font-semibold text-gray-700">Teléfono Fijo (Opcional)</label>
-            <input name="telefono" value="{{ user.telefono if user and user.telefono else '' }}"
+            <input type="tel" name="telefono" value="{{ user.telefono if user and user.telefono else '' }}"
               class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              type="text" placeholder="Ej: 6017654321">
+              placeholder="Ej: 6017654321">
           </div>
 
           <!-- Dirección de Residencia -->
           <div class="flex flex-col gap-2 lg:col-span-2">
             <label class="text-sm font-semibold text-gray-700">Dirección de Entrega / Residencia <span class="text-red-500">*</span></label>
-            <input name="direccion" value="{{ user.direccion if user else '' }}" required
+            <input type="text" name="direccion" value="{{ user.direccion if user else '' }}" required
               class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              type="text" placeholder="Calle 10 # 2-34, Ciudad">
+              placeholder="Calle 10 # 2-34, Ciudad">
           </div>
         </div>
 
