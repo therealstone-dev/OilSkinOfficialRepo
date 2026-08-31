@@ -1,33 +1,111 @@
 {% extends 'components/tailwind/layout.jinja' %}
 
-{% block title %}Inicio - OilSkin{% endblock %}
+{% block title %}Iniciar Sesión - OilSkin{% endblock %}
 
 {% block content %}
 
-<main>
-        <div class="flex flex-col lg:flex-row justify-center items-stretch lg:p-[2.5rem] p-4">
-            <div class="bg-slate-800/50 lg:w-1/3 p-8 lg:rounded-none rounded-t-xl shadow-lg">
-                <h1 class="text-white font-bold text-2xl mb-4">Iniciar sesión en tu cuenta</h1>
-                <form action="{{ url_for('auth_blueprint.login') }}" method="post" class="flex flex-col gap-y-2">
-                    {{ form.csrf_token }}
-                    <label for="email" class="text-white">Correo electrónico</label>
-                    {{ form.email(class_='h-10 bg-white rounded-md px-3', placeholder='abcdfghi@jklmn.com') }}
-                    <label for="password" class="text-white">Contraseña</label>
-                    {{ form.password(class_='h-10 bg-white rounded-md px-3', placeholder='********') }}
-                    <a href="#" class="text-sky-400 lg:hover:underline">Olvidaste la clave?</a>
-                    <button type="submit" class="bg-green-500 text-white rounded-md py-2 mt-4">Iniciar Sesión</button>
-                </form>
+<main class="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-4xl flex flex-col lg:flex-row justify-center items-stretch rounded-3xl overflow-hidden shadow-2xl border border-neutral-800/80 bg-neutral-950/80 backdrop-blur-md">
+        
+        <!-- Formulario Login -->
+        <div class="lg:w-1/2 p-8 sm:p-10 flex flex-col justify-center">
+            <div class="mb-6">
+                <span class="text-gold text-xs font-bold uppercase tracking-widest flex items-center gap-1.5 mb-1">
+                    <i class="fa-solid fa-sparkles"></i> Cosmética Natural
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-white">Iniciar Sesión</h1>
+                <p class="text-neutral-400 text-xs mt-1">Ingresa a tu cuenta para gestionar tus compras y pedidos.</p>
             </div>
-            <div class="bg-linear-to-t lg:rounded-none rounded-b-xl from-slate-700 to-slate-900 p-8 shadow-lg flex flex-col gap-3 text-center justify-center">
-                <h1 class="text-white text-2xl font-medium">¡Bienvenido de Vuelta!</h1>
-                <p class="text-white leading-relaxed">
-                    Hola viejo, que bueno verte de vuelta, espero no 
-                    estes muerto, ahora inicia sesiom y mira novedades
-                </p>
-                <div onclick="location.href='{{ url_for('auth_blueprint.register') }}'" class="cursor-pointer text-white flex flex-row gap-1 justify-center items-center mx-auto p-4 bg-gray-800/90 rounded-3xl">
-                    <h2>¿No tienes cuenta? <span class="text-blue-500">Regístrate Aqui</span></h2>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="mb-5 space-y-2.5">
+                        {% for category, message in messages %}
+                            <div class="flex items-start p-3.5 text-xs rounded-xl border {% if category == 'success' %}bg-emerald-950/40 text-emerald-300 border-emerald-500/40{% elif category == 'danger' or category == 'error' %}bg-red-950/40 text-red-300 border-red-500/40{% else %}bg-amber-950/40 text-amber-300 border-amber-500/40{% endif %} shadow-sm backdrop-blur-sm" role="alert">
+                                <i class="fa-solid {% if category == 'success' %}fa-circle-check text-emerald-400{% elif category == 'danger' or category == 'error' %}fa-circle-exclamation text-red-400{% else %}fa-circle-info text-amber-400{% endif %} mt-0.5 me-2.5 text-sm"></i>
+                                <div class="flex-1 font-medium">{{ message }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('auth_blueprint.login') }}" method="post" class="space-y-4">
+                {{ form.csrf_token }}
+
+                <div class="space-y-1">
+                    <label for="email" class="block text-xs font-semibold uppercase tracking-wider text-neutral-300">Correo electrónico</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
+                            <i class="fa-regular fa-envelope"></i>
+                        </div>
+                        {{ form.email(
+                            class_='w-full h-11 pl-10 pr-4 bg-neutral-900/90 border border-neutral-700/80 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition text-sm',
+                            placeholder='tu-correo@ejemplo.com',
+                            autocomplete='email'
+                        ) }}
+                    </div>
+                    {% if form.email.errors %}
+                        {% for error in form.email.errors %}
+                            <p class="text-red-400 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
                 </div>
+
+                <div class="space-y-1">
+                    <div class="flex justify-between items-center">
+                        <label for="password" class="block text-xs font-semibold uppercase tracking-wider text-neutral-300">Contraseña</label>
+                        <a href="{{ url_for('auth_blueprint.forgot_password') }}" class="text-xs text-gold hover:text-gold-light hover:underline transition">
+                            ¿Olvidaste tu contraseña?
+                        </a>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
+                            <i class="fa-solid fa-lock"></i>
+                        </div>
+                        {{ form.password(
+                            class_='w-full h-11 pl-10 pr-4 bg-neutral-900/90 border border-neutral-700/80 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition text-sm',
+                            placeholder='••••••••'
+                        ) }}
+                    </div>
+                    {% if form.password.errors %}
+                        {% for error in form.password.errors %}
+                            <p class="text-red-400 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="w-full h-11 bg-gold hover:bg-gold-light text-neutral-950 font-bold rounded-xl transition duration-200 shadow-lg shadow-gold/20 flex items-center justify-center gap-2 cursor-pointer text-sm mt-2">
+                    <span>Iniciar Sesión</span>
+                    <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Panel Lateral Informativo -->
+        <div class="lg:w-1/2 bg-gradient-to-br from-neutral-900 via-neutral-950 to-black p-8 sm:p-10 border-t lg:border-t-0 lg:border-l border-neutral-800 flex flex-col justify-between text-center relative overflow-hidden">
+            <div class="absolute -bottom-16 -right-16 w-60 h-60 bg-gold/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="my-auto space-y-4 z-10">
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gold/10 text-gold border border-gold/20 mb-2">
+                    <i class="fa-solid fa-leaf text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white">¡Bienvenido a OilSkin!</h2>
+                <p class="text-neutral-400 text-sm leading-relaxed max-w-sm mx-auto">
+                    Descubre el cuidado natural para tu piel con nuestros óleos y formulaciones exclusivas de alta pureza.
+                </p>
             </div>
-    </main>
+
+            <div class="mt-8 pt-6 border-t border-neutral-800/80 z-10">
+                <p class="text-neutral-400 text-xs mb-3">¿Aún no tienes una cuenta?</p>
+                <a href="{{ url_for('auth_blueprint.register') }}" class="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl border border-neutral-700 bg-neutral-900/90 text-neutral-200 hover:text-gold hover:border-gold/60 text-xs font-semibold transition">
+                    <i class="fa-solid fa-user-plus"></i> Crear Cuenta Nueva
+                </a>
+            </div>
+        </div>
+
+    </div>
+</main>
 
 {% endblock %}

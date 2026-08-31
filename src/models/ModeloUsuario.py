@@ -127,3 +127,22 @@ class ModeloUsuario:
             print(f"Error en update_images: {ex}")
             return False, f"Error al actualizar imágenes: {ex}"
 
+    @classmethod
+    def update_password(cls, id_usuario, new_password):
+        """Actualiza la contraseña de un usuario mediante su ID con hash seguro bcrypt."""
+        try:
+            hashed = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+            hashed_str = hashed.decode('utf-8')
+
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute("UPDATE usuario SET contrasena = %s WHERE id_usuario = %s", (hashed_str, id_usuario))
+            conn.commit()
+            cur.close()
+            conn.close()
+            return True, "Contraseña restablecida exitosamente."
+        except Exception as ex:
+            print(f"Error en update_password: {ex}")
+            return False, f"Error al actualizar la contraseña: {ex}"
+
+

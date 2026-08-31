@@ -22,3 +22,23 @@ class RegisterForm(FlaskForm):
         existing = ModeloUsuario.get_by_email(field.data)
         if existing:
             raise ValidationError('El correo ya está registrado')
+
+class ForgotPasswordForm(FlaskForm):
+    email = StringField('Correo electrónico', validators=[
+        DataRequired(message='Ingresa tu correo electrónico'),
+        Email(message='Ingresa un formato de correo válido'),
+        Length(max=80)
+    ])
+    submit = SubmitField('Enviar Enlace de Recuperación')
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('Nueva Contraseña', validators=[
+        DataRequired(message='Ingresa tu nueva contraseña'),
+        Length(min=6, message='La contraseña debe tener al menos 6 caracteres')
+    ])
+    confirm = PasswordField('Confirmar Nueva Contraseña', validators=[
+        DataRequired(message='Confirma tu nueva contraseña'),
+        EqualTo('password', message='Las contraseñas no coinciden')
+    ])
+    submit = SubmitField('Restablecer Contraseña')
+
