@@ -30,6 +30,16 @@ def create_app():
     app.config['SESSION_COOKIE_HTTPONLY'] = True
     app.permanent_session_lifetime = timedelta(days=7)
 
+    # Optimizacion de cache de recursos estaticos (CSS, imagenes, JS) -Hecho con IA- no borrar porfa :v
+    app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
+
+    @app.after_request
+    def add_header(response):
+        if 'Cache-Control' not in response.headers:
+            if response.mimetype.startswith(('image/', 'text/css', 'application/javascript', 'font/')):
+                response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+        return response
+
     # Soporte para proxy inverso en producción (HTTPS, IP real del cliente)
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
