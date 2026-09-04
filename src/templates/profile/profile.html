@@ -12,46 +12,51 @@
       <div class="min-w-0 flex-1">
         <span class="text-xs uppercase tracking-widest text-[#CEB06E] font-bold">Panel de Cliente</span>
         <h1 class="text-xl md:text-2xl font-bold truncate text-gray-800 mt-1">
-          Bienvenido, <span class="text-[#CEB06E] font-semibold">{{ user.nombre if user else session.get('user_name', '') }}</span>
+          Bienvenido, <span class="text-[#CEB06E] font-semibold">{{ user.nombre if user else session.get('user_name',
+            '') }}</span>
         </h1>
         <p class="text-xs md:text-sm text-gray-400">Perfil de Usuario y Configuración de Cuenta</p>
       </div>
 
       <div class="flex flex-row items-center gap-3 md:gap-4 shrink-0">
         {% if user and user.foto_perfil %}
-          <img src="{{ user.foto_perfil }}" class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-[#CEB06E] shadow-sm" alt="Avatar">
+        <img src="{{ user.foto_perfil }}"
+          class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-[#CEB06E] shadow-sm" alt="Avatar">
         {% else %}
-          <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#CEB06E] text-neutral-950 flex items-center justify-center font-bold text-lg shadow-sm">
-            {{ (user.nombre[0] if user and user.nombre else 'U') | upper }}
-          </div>
+        <div
+          class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#CEB06E] text-neutral-950 flex items-center justify-center font-bold text-lg shadow-sm">
+          {{ (user.nombre[0] if user and user.nombre else 'U') | upper }}
+        </div>
         {% endif %}
       </div>
     </header>
 
     <!-- Mensajes Flash de Notificación -->
     {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="mb-6 space-y-2">
-          {% for category, message in messages %}
-            <div class="p-4 rounded-xl text-sm font-medium flex items-center justify-between {% if category == 'success' %}bg-green-50 text-green-800 border border-green-200{% elif category == 'danger' or category == 'error' %}bg-red-50 text-red-800 border border-red-200{% else %}bg-amber-50 text-amber-800 border border-amber-200{% endif %} shadow-sm">
-              <div class="flex items-center gap-2">
-                <i class="fa-solid {% if category == 'success' %}fa-circle-check text-green-600{% elif category == 'danger' or category == 'error' %}fa-circle-xmark text-red-600{% else %}fa-circle-info text-amber-600{% endif %} text-base"></i>
-                <span>{{ message }}</span>
-              </div>
-              <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
-                <i class="fa-solid fa-xmark"></i>
-              </button>
-            </div>
-          {% endfor %}
+    {% if messages %}
+    <div class="mb-6 space-y-2">
+      {% for category, message in messages %}
+      <div
+        class="p-4 rounded-xl text-sm font-medium flex items-center justify-between {% if category == 'success' %}bg-green-50 text-green-800 border border-green-200{% elif category == 'danger' or category == 'error' %}bg-red-50 text-red-800 border border-red-200{% else %}bg-amber-50 text-amber-800 border border-amber-200{% endif %} shadow-sm">
+        <div class="flex items-center gap-2">
+          <i
+            class="fa-solid {% if category == 'success' %}fa-circle-check text-green-600{% elif category == 'danger' or category == 'error' %}fa-circle-xmark text-red-600{% else %}fa-circle-info text-amber-600{% endif %} text-base"></i>
+          <span>{{ message }}</span>
         </div>
-      {% endif %}
+        <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
     {% endwith %}
 
     <!-- Banner de Perfil e Imagen del Usuario -->
     <div class="w-full bg-white mt-4 rounded-2xl overflow-hidden shadow-sm border border-gray-200">
       <!-- Banner con posicionamiento relativo para los botones -->
       <div class="relative min-h-48 md:min-h-60 bg-cover bg-center bg-no-repeat flex items-end p-6 md:p-8"
-           style="background-image: url('{{ user.foto_portada if user and user.foto_portada else url_for('static', filename='img/fondo_2.png') }}');">
+        style="background-image: url('{{ user.foto_portada if user and user.foto_portada else url_for('static', filename='img/fondo_2.webp') }}');">
         <!-- Overlay degradado -->
         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10 pointer-events-none"></div>
 
@@ -65,33 +70,37 @@
         </button>
 
         <!-- Contenido del banner: Avatar + datos (sobre el overlay) -->
-        <div class="relative w-full flex flex-col sm:flex-row gap-4 sm:gap-5 items-center sm:items-end" style="z-index:20;">
+        <div class="relative w-full flex flex-col sm:flex-row gap-4 sm:gap-5 items-center sm:items-end"
+          style="z-index:20;">
 
           <!-- Contenedor Avatar con tamaño fijo para anclar el botón de cámara -->
           <div style="position:relative; width:7rem; height:7rem; flex-shrink:0;">
             {% if user and user.foto_perfil %}
-              <img src="{{ user.foto_perfil }}"
-                   style="width:7rem; height:7rem; border-radius:9999px; object-fit:cover; border:4px solid #CEB06E; box-shadow:0 4px 20px rgba(0,0,0,0.3); display:block;"
-                   alt="Avatar">
+            <img src="{{ user.foto_perfil }}"
+              style="width:7rem; height:7rem; border-radius:9999px; object-fit:cover; border:4px solid #CEB06E; box-shadow:0 4px 20px rgba(0,0,0,0.3); display:block;"
+              alt="Avatar">
             {% else %}
-              <div style="width:7rem; height:7rem; border-radius:9999px; background:#CEB06E; color:#0c0c0c; display:flex; align-items:center; justify-content:center; font-size:2.5rem; font-weight:900; border:4px solid white; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
-                {{ (user.nombre[0] if user and user.nombre else 'U') | upper }}
-              </div>
+            <div
+              style="width:7rem; height:7rem; border-radius:9999px; background:#CEB06E; color:#0c0c0c; display:flex; align-items:center; justify-content:center; font-size:2.5rem; font-weight:900; border:4px solid white; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+              {{ (user.nombre[0] if user and user.nombre else 'U') | upper }}
+            </div>
             {% endif %}
 
             <!-- Botón cámara pegado a esquina inferior derecha del avatar -->
             <button type="button" onclick="openImageModal('avatar')"
               style="position:absolute; bottom:4px; right:4px; z-index:40; width:2rem; height:2rem; border-radius:9999px; background:#CEB06E; border:2px solid white; box-shadow:0 2px 8px rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; cursor:pointer;"
-              class="hover:bg-[#dfc98e] transition-colors"
-              title="Cambiar foto de perfil">
+              class="hover:bg-[#dfc98e] transition-colors" title="Cambiar foto de perfil">
               <i class="fa-solid fa-camera" style="color:#0c0c0c; font-size:0.7rem;"></i>
             </button>
           </div>
 
           <!-- Nombre y correo: sin restricción de altura -->
           <div style="color:white; text-align:center; min-width:0; padding-bottom:4px; flex:1;">
-            <h2 style="font-size:1.75rem; font-weight:900; text-shadow:0 2px 8px rgba(0,0,0,0.5); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin:0;">{{ user.nombre if user else '' }}</h2>
-            <p style="color:#dfc98e; font-size:0.85rem; margin-top:4px; display:flex; align-items:center; justify-content:center; gap:6px; text-shadow:0 1px 4px rgba(0,0,0,0.4);">
+            <h2
+              style="font-size:1.75rem; font-weight:900; text-shadow:0 2px 8px rgba(0,0,0,0.5); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin:0;">
+              {{ user.nombre if user else '' }}</h2>
+            <p
+              style="color:#dfc98e; font-size:0.85rem; margin-top:4px; display:flex; align-items:center; justify-content:center; gap:6px; text-shadow:0 1px 4px rgba(0,0,0,0.4);">
               <i class="fa-regular fa-envelope"></i>
               <span>{{ user.email if user else '' }}</span>
             </p>
@@ -109,7 +118,8 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
           <!-- Nombre Completo -->
           <div class="flex flex-col gap-2">
-            <label class="text-sm font-semibold text-gray-700">Nombre Completo <span class="text-red-500">*</span></label>
+            <label class="text-sm font-semibold text-gray-700">Nombre Completo <span
+                class="text-red-500">*</span></label>
             <input name="nombre" value="{{ user.nombre if user else '' }}" required
               class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#CEB06E] transition-all"
               type="text" placeholder="Tu nombre completo">
@@ -117,7 +127,8 @@
 
           <!-- Email -->
           <div class="flex flex-col gap-2">
-            <label class="text-sm font-semibold text-gray-700">Correo Electrónico <span class="text-red-500">*</span></label>
+            <label class="text-sm font-semibold text-gray-700">Correo Electrónico <span
+                class="text-red-500">*</span></label>
             <input name="email" value="{{ user.email if user else '' }}" required
               class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#CEB06E] transition-all"
               type="email" placeholder="correo@ejemplo.com">
@@ -125,7 +136,8 @@
 
           <!-- Celular -->
           <div class="flex flex-col gap-2">
-            <label class="text-sm font-semibold text-gray-700">Número de Celular <span class="text-red-500">*</span></label>
+            <label class="text-sm font-semibold text-gray-700">Número de Celular <span
+                class="text-red-500">*</span></label>
             <input name="celular" value="{{ user.celular if user else '' }}" required
               class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#CEB06E] transition-all"
               type="text" placeholder="Ej: 3001234567">
@@ -141,7 +153,8 @@
 
           <!-- Dirección de Residencia -->
           <div class="flex flex-col gap-2 lg:col-span-2">
-            <label class="text-sm font-semibold text-gray-700">Dirección de Entrega / Residencia <span class="text-red-500">*</span></label>
+            <label class="text-sm font-semibold text-gray-700">Dirección de Entrega / Residencia <span
+                class="text-red-500">*</span></label>
             <input name="direccion" value="{{ user.direccion if user else '' }}" required
               class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#CEB06E] transition-all"
               type="text" placeholder="Calle 10 # 2-34, Ciudad">
@@ -161,13 +174,15 @@
 
 <!-- Modal Personalizar Avatar y Banner -->
 <div id="imageUpdateModal"
-     style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:1rem;"
-     onclick="if(event.target===this) closeImageModal()">
+  style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:1rem;"
+  onclick="if(event.target===this) closeImageModal()">
 
-  <div style="background:#171717; color:#f5f5f5; border-radius:1.25rem; box-shadow:0 25px 60px rgba(0,0,0,0.5); width:100%; max-width:32rem; max-height:90vh; overflow-y:auto; border:1px solid #2e2e2e;">
+  <div
+    style="background:#171717; color:#f5f5f5; border-radius:1.25rem; box-shadow:0 25px 60px rgba(0,0,0,0.5); width:100%; max-width:32rem; max-height:90vh; overflow-y:auto; border:1px solid #2e2e2e;">
 
     <!-- Encabezado -->
-    <div style="display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-bottom:1px solid #2e2e2e; background:#121212; border-radius:1.25rem 1.25rem 0 0;">
+    <div
+      style="display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-bottom:1px solid #2e2e2e; background:#121212; border-radius:1.25rem 1.25rem 0 0;">
       <div style="display:flex; align-items:center; gap:0.625rem; color:#f5f5f5;">
         <i class="fa-solid fa-camera" style="color:#CEB06E; font-size:1.1rem;"></i>
         <span style="font-weight:700; font-size:1rem; color:white;">Personalizar Imagen de Perfil</span>
@@ -193,82 +208,96 @@
     </div>
 
     <!-- Formulario -->
-    <form method="POST" action="{{ url_for('user_blueprint.update_profile_images') }}" enctype="multipart/form-data" style="padding:1.5rem;">
+    <form method="POST" action="{{ url_for('user_blueprint.update_profile_images') }}" enctype="multipart/form-data"
+      style="padding:1.5rem;">
       <input type="hidden" name="active_tab" id="activeTabInput" value="avatar">
 
       <!-- Contenido pestaña Avatar -->
       <div id="tabContentAvatar">
-        <p style="font-size:0.75rem; color:#a3a3a3; margin-bottom:1rem;">Sube una imagen desde tu dispositivo o ingresa un enlace web para actualizar tu foto de perfil.</p>
+        <p style="font-size:0.75rem; color:#a3a3a3; margin-bottom:1rem;">Sube una imagen desde tu dispositivo o ingresa
+          un enlace web para actualizar tu foto de perfil.</p>
 
         <!-- Vista previa Avatar -->
         <div style="display:flex; justify-content:center; margin-bottom:1.25rem;">
-          <div style="width:6rem; height:6rem; border-radius:9999px; overflow:hidden; border:3px solid #CEB06E; box-shadow:0 4px 16px rgba(0,0,0,0.4); position:relative; background:#262626;">
-            <img id="previewAvatarImg"
-                 src="{{ user.foto_perfil if user and user.foto_perfil else '' }}"
-                 style="width:100%; height:100%; object-fit:cover; {% if not (user and user.foto_perfil) %}display:none;{% endif %}"
-                 alt="Vista previa Avatar">
+          <div
+            style="width:6rem; height:6rem; border-radius:9999px; overflow:hidden; border:3px solid #CEB06E; box-shadow:0 4px 16px rgba(0,0,0,0.4); position:relative; background:#262626;">
+            <img id="previewAvatarImg" src="{{ user.foto_perfil if user and user.foto_perfil else '' }}"
+              style="width:100%; height:100%; object-fit:cover; {% if not (user and user.foto_perfil) %}display:none;{% endif %}"
+              alt="Vista previa Avatar">
             <div id="previewAvatarPlaceholder"
-                 style="width:100%; height:100%; background:#CEB06E; color:#0c0c0c; display:{% if user and user.foto_perfil %}none{% else %}flex{% endif %}; align-items:center; justify-content:center; font-size:2rem; font-weight:900;">
+              style="width:100%; height:100%; background:#CEB06E; color:#0c0c0c; display:{% if user and user.foto_perfil %}none{% else %}flex{% endif %}; align-items:center; justify-content:center; font-size:2rem; font-weight:900;">
               {{ (user.nombre[0] if user and user.nombre else 'U') | upper }}
             </div>
           </div>
         </div>
 
         <div style="margin-bottom:1rem;">
-          <label style="display:block; font-size:0.7rem; font-weight:700; color:#d4d4d4; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.4rem;">Subir archivo de imagen</label>
-          <input type="file" name="foto_perfil_file" accept="image/*" onchange="previewFile(this,'previewAvatarImg','previewAvatarPlaceholder')"
+          <label
+            style="display:block; font-size:0.7rem; font-weight:700; color:#d4d4d4; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.4rem;">Subir
+            archivo de imagen</label>
+          <input type="file" name="foto_perfil_file" accept="image/*"
+            onchange="previewFile(this,'previewAvatarImg','previewAvatarPlaceholder')"
             style="width:100%; font-size:0.75rem; color:#d4d4d4; background:#262626; border:1px solid #404040; border-radius:0.75rem; padding:0.4rem; box-sizing:border-box;">
         </div>
 
         <div style="display:flex; align-items:center; gap:0.75rem; margin:1rem 0;">
           <div style="flex:1; height:1px; background:#2e2e2e;"></div>
-          <span style="font-size:0.7rem; color:#737373; font-weight:700; text-transform:uppercase;">o mediante URL</span>
+          <span style="font-size:0.7rem; color:#737373; font-weight:700; text-transform:uppercase;">o mediante
+            URL</span>
           <div style="flex:1; height:1px; background:#2e2e2e;"></div>
         </div>
 
         <div>
-          <label style="display:block; font-size:0.75rem; font-weight:600; color:#a3a3a3; margin-bottom:0.3rem;">URL de la imagen</label>
+          <label style="display:block; font-size:0.75rem; font-weight:600; color:#a3a3a3; margin-bottom:0.3rem;">URL de
+            la imagen</label>
           <input type="url" name="foto_perfil_url" value="{{ user.foto_perfil if user and user.foto_perfil else '' }}"
             oninput="previewUrl(this.value,'previewAvatarImg','previewAvatarPlaceholder')"
-            placeholder="https://ejemplo.com/mi-avatar.jpg"
+            placeholder="https://ejemplo.com/mi-avatar.webp"
             style="width:100%; background:#262626; color:white; border:1px solid #404040; border-radius:0.75rem; padding:0.6rem 0.75rem; font-size:0.875rem; outline:none; box-sizing:border-box;">
         </div>
       </div>
 
       <!-- Contenido pestaña Banner -->
       <div id="tabContentBanner" style="display:none;">
-        <p style="font-size:0.75rem; color:#a3a3a3; margin-bottom:1rem;">Sube una imagen o pega una URL para tu foto de portada/banner.</p>
+        <p style="font-size:0.75rem; color:#a3a3a3; margin-bottom:1rem;">Sube una imagen o pega una URL para tu foto de
+          portada/banner.</p>
 
         <!-- Vista previa Banner -->
-        <div style="width:100%; height:8rem; border-radius:0.75rem; overflow:hidden; border:2px solid #CEB06E; margin-bottom:1rem; background:#262626; box-shadow:0 4px 16px rgba(0,0,0,0.4);">
+        <div
+          style="width:100%; height:8rem; border-radius:0.75rem; overflow:hidden; border:2px solid #CEB06E; margin-bottom:1rem; background:#262626; box-shadow:0 4px 16px rgba(0,0,0,0.4);">
           <img id="previewBannerImg"
-               src="{{ user.foto_portada if user and user.foto_portada else url_for('static', filename='img/fondo_2.png') }}"
-               style="width:100%; height:100%; object-fit:cover;" alt="Vista previa Banner">
+            src="{{ user.foto_portada if user and user.foto_portada else url_for('static', filename='img/fondo_2.webp') }}"
+            style="width:100%; height:100%; object-fit:cover;" alt="Vista previa Banner">
         </div>
 
         <div style="margin-bottom:1rem;">
-          <label style="display:block; font-size:0.7rem; font-weight:700; color:#d4d4d4; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.4rem;">Subir archivo de imagen</label>
+          <label
+            style="display:block; font-size:0.7rem; font-weight:700; color:#d4d4d4; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.4rem;">Subir
+            archivo de imagen</label>
           <input type="file" name="foto_portada_file" accept="image/*" onchange="previewFile(this,'previewBannerImg')"
             style="width:100%; font-size:0.75rem; color:#d4d4d4; background:#262626; border:1px solid #404040; border-radius:0.75rem; padding:0.4rem; box-sizing:border-box;">
         </div>
 
         <div style="display:flex; align-items:center; gap:0.75rem; margin:1rem 0;">
           <div style="flex:1; height:1px; background:#2e2e2e;"></div>
-          <span style="font-size:0.7rem; color:#737373; font-weight:700; text-transform:uppercase;">o mediante URL</span>
+          <span style="font-size:0.7rem; color:#737373; font-weight:700; text-transform:uppercase;">o mediante
+            URL</span>
           <div style="flex:1; height:1px; background:#2e2e2e;"></div>
         </div>
 
         <div>
-          <label style="display:block; font-size:0.75rem; font-weight:600; color:#a3a3a3; margin-bottom:0.3rem;">URL del banner</label>
-          <input type="url" name="foto_portada_url" value="{{ user.foto_portada if user and user.foto_portada else '' }}"
-            oninput="previewUrl(this.value,'previewBannerImg')"
-            placeholder="https://ejemplo.com/mi-banner.jpg"
+          <label style="display:block; font-size:0.75rem; font-weight:600; color:#a3a3a3; margin-bottom:0.3rem;">URL del
+            banner</label>
+          <input type="url" name="foto_portada_url"
+            value="{{ user.foto_portada if user and user.foto_portada else '' }}"
+            oninput="previewUrl(this.value,'previewBannerImg')" placeholder="https://ejemplo.com/mi-banner.webp"
             style="width:100%; background:#262626; color:white; border:1px solid #404040; border-radius:0.75rem; padding:0.6rem 0.75rem; font-size:0.875rem; outline:none; box-sizing:border-box;">
         </div>
       </div>
 
       <!-- Botones de Acción -->
-      <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.5rem; padding-top:1rem; border-top:1px solid #2e2e2e;">
+      <div
+        style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.5rem; padding-top:1rem; border-top:1px solid #2e2e2e;">
         <button type="button" onclick="closeImageModal()"
           style="padding:0.6rem 1.2rem; background:#262626; color:#d4d4d4; border:1px solid #404040; border-radius:0.75rem; font-size:0.75rem; font-weight:700; cursor:pointer;">
           Cancelar
@@ -284,76 +313,76 @@
 </div>
 
 <script>
-function openImageModal(tab = 'avatar') {
-  const modal = document.getElementById('imageUpdateModal');
-  if (modal) {
-    modal.style.display = 'flex';
-    switchImageTab(tab);
-  }
-}
-
-function closeImageModal() {
-  const modal = document.getElementById('imageUpdateModal');
-  if (modal) {
-    modal.style.display = 'none';
-  }
-}
-
-function switchImageTab(tabName) {
-  const btnAvatar = document.getElementById('tabBtnAvatar');
-  const btnBanner = document.getElementById('tabBtnBanner');
-  const contentAvatar = document.getElementById('tabContentAvatar');
-  const contentBanner = document.getElementById('tabContentBanner');
-  const activeInput = document.getElementById('activeTabInput');
-
-  if (activeInput) {
-    activeInput.value = tabName;
+  function openImageModal(tab = 'avatar') {
+    const modal = document.getElementById('imageUpdateModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      switchImageTab(tab);
+    }
   }
 
-  if (tabName === 'avatar') {
-    contentAvatar.style.display = 'block';
-    contentBanner.style.display = 'none';
-    btnAvatar.style.cssText = 'flex:1; padding:0.75rem; font-size:0.85rem; font-weight:700; border:none; border-bottom:2px solid #CEB06E; color:#CEB06E; background:rgba(206,176,110,0.1); cursor:pointer; transition:all 0.15s;';
-    btnBanner.style.cssText = 'flex:1; padding:0.75rem; font-size:0.85rem; font-weight:700; border:none; border-bottom:2px solid transparent; color:#a3a3a3; background:transparent; cursor:pointer; transition:all 0.15s;';
-  } else {
-    contentAvatar.style.display = 'none';
-    contentBanner.style.display = 'block';
-    btnBanner.style.cssText = 'flex:1; padding:0.75rem; font-size:0.85rem; font-weight:700; border:none; border-bottom:2px solid #CEB06E; color:#CEB06E; background:rgba(206,176,110,0.1); cursor:pointer; transition:all 0.15s;';
-    btnAvatar.style.cssText = 'flex:1; padding:0.75rem; font-size:0.85rem; font-weight:700; border:none; border-bottom:2px solid transparent; color:#a3a3a3; background:transparent; cursor:pointer; transition:all 0.15s;';
+  function closeImageModal() {
+    const modal = document.getElementById('imageUpdateModal');
+    if (modal) {
+      modal.style.display = 'none';
+    }
   }
-}
 
-function previewFile(input, previewImgId, placeholderId = null) {
-  const file = input.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
+  function switchImageTab(tabName) {
+    const btnAvatar = document.getElementById('tabBtnAvatar');
+    const btnBanner = document.getElementById('tabBtnBanner');
+    const contentAvatar = document.getElementById('tabContentAvatar');
+    const contentBanner = document.getElementById('tabContentBanner');
+    const activeInput = document.getElementById('activeTabInput');
+
+    if (activeInput) {
+      activeInput.value = tabName;
+    }
+
+    if (tabName === 'avatar') {
+      contentAvatar.style.display = 'block';
+      contentBanner.style.display = 'none';
+      btnAvatar.style.cssText = 'flex:1; padding:0.75rem; font-size:0.85rem; font-weight:700; border:none; border-bottom:2px solid #CEB06E; color:#CEB06E; background:rgba(206,176,110,0.1); cursor:pointer; transition:all 0.15s;';
+      btnBanner.style.cssText = 'flex:1; padding:0.75rem; font-size:0.85rem; font-weight:700; border:none; border-bottom:2px solid transparent; color:#a3a3a3; background:transparent; cursor:pointer; transition:all 0.15s;';
+    } else {
+      contentAvatar.style.display = 'none';
+      contentBanner.style.display = 'block';
+      btnBanner.style.cssText = 'flex:1; padding:0.75rem; font-size:0.85rem; font-weight:700; border:none; border-bottom:2px solid #CEB06E; color:#CEB06E; background:rgba(206,176,110,0.1); cursor:pointer; transition:all 0.15s;';
+      btnAvatar.style.cssText = 'flex:1; padding:0.75rem; font-size:0.85rem; font-weight:700; border:none; border-bottom:2px solid transparent; color:#a3a3a3; background:transparent; cursor:pointer; transition:all 0.15s;';
+    }
+  }
+
+  function previewFile(input, previewImgId, placeholderId = null) {
+    const file = input.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = document.getElementById(previewImgId);
+        if (img) {
+          img.src = e.target.result;
+          img.style.display = 'block';
+        }
+        if (placeholderId) {
+          const ph = document.getElementById(placeholderId);
+          if (ph) ph.style.display = 'none';
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function previewUrl(url, previewImgId, placeholderId = null) {
+    if (url && url.trim() !== '') {
       const img = document.getElementById(previewImgId);
       if (img) {
-        img.src = e.target.result;
+        img.src = url.trim();
         img.style.display = 'block';
       }
       if (placeholderId) {
         const ph = document.getElementById(placeholderId);
         if (ph) ph.style.display = 'none';
       }
-    };
-    reader.readAsDataURL(file);
-  }
-}
-
-function previewUrl(url, previewImgId, placeholderId = null) {
-  if (url && url.trim() !== '') {
-    const img = document.getElementById(previewImgId);
-    if (img) {
-      img.src = url.trim();
-      img.style.display = 'block';
-    }
-    if (placeholderId) {
-      const ph = document.getElementById(placeholderId);
-      if (ph) ph.style.display = 'none';
     }
   }
-}
 </script>
 {% endblock %}

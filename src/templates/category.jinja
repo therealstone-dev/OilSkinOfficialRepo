@@ -5,7 +5,7 @@
 {% block content %}
 
 <main class="min-h-screen w-full py-12 md:py-16"
-      style="background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('{{ url_for('static', filename='img/fondo_2.png') }}') center/cover no-repeat fixed;">
+      style="background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('{{ url_for('static', filename='img/fondo_2.webp') }}') center/cover no-repeat fixed;">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -46,7 +46,7 @@
                 <div class="p-6 text-center space-y-4">
                     <div class="relative w-28 h-28 mx-auto">
                         <div class="absolute -inset-1 bg-gold/20 rounded-full blur-sm group-hover:bg-gold/40 transition duration-300"></div>
-                        <img src="{{ url_for('static', filename='img/logo.png') }}"
+                        <img src="{{ url_for('static', filename='img/logo.webp') }}"
                              class="relative w-28 h-28 rounded-full object-cover border-2 border-gold/50 shadow-md mx-auto"
                              alt="{{ p.nombre_producto }}">
                     </div>
