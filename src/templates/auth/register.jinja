@@ -1,58 +1,223 @@
 {% extends 'components/tailwind/layout.jinja' %}
 
-{% block title %}Inicio - OilSkin{% endblock %}
+{% block title %}Crear Cuenta - OilSkin{% endblock %}
 
 {% block content %}
 
-<main>
-        <div class="flex flex-col lg:flex-row justify-center items-stretch p-[2.5rem]">
-            <div class="bg-slate-800/50 p-8 shadow-lg">
-                <h1 class="text-white text-2xl mb-4 font-bold">Registro de Usuario</h1>
-                <form action="{{ url_for('auth_blueprint.register') }}" method="post" class="grid grid-cols-2 gap-4 items-center">
-                    {{ form.csrf_token }}
-                    <div class="flex flex-col col-span-2">
-                        <label for="nombre" class="text-white">Nombre</label>
-                        {{ form.nombre(class_='h-10 bg-white rounded-md px-3', placeholder='Tu nombre') }}
-                    </div>
-                    <div class="flex flex-col">
-                        <label for="email" class="text-white">Correo electrónico</label>
-                        {{ form.email(class_='h-10 bg-white rounded-md px-3', placeholder='Tu correo electrónico') }}
-                    </div>
-                    <div class="flex flex-col">
-                        <label for="direccion" class="text-white">Direccion</label>
-                        {{ form.direccion(class_='h-10 bg-white rounded-md px-3', placeholder='Tu dirección') }}
-                    </div>
-                    <div class="flex flex-col">
-                        <label for="celular" class="text-white">Número de Celular</label>
-                        {{ form.celular(class_='h-10 bg-white rounded-md px-3', placeholder='Tu número de celular') }}
-                    </div>
-                    <div class="flex flex-col">
-                        <label for="telefono" class="text-white">Número de Telefono</label>
-                        {{ form.telefono(class_='h-10 bg-white rounded-md px-3', placeholder='Tu número de telefono') }}
-                    </div>
-                    <div class="flex flex-col col-span-2 items-center">
-                        <label for="password" class="text-white">Contraseña</label>
-                        {{ form.password(class_='h-10 bg-white rounded-md px-3', placeholder='********') }}
-                        {{ form.confirm(class_='h-10 bg-white rounded-md px-3 mt-2', placeholder='Confirmar contraseña') }}
-                    </div>
-                    <button type="submit"
-                        class="col-span-2 bg-slate-600 hover:bg-green-600 text-white font-bold py-2 rounded-md mt-2 transition-colors">
-                        Crear Cuenta
-                    </button>
-                </form>
+<main class="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-5xl flex flex-col lg:flex-row justify-center items-stretch rounded-3xl overflow-hidden shadow-2xl border border-neutral-800/80 bg-neutral-950/80 backdrop-blur-md">
+        
+        <!-- Formulario Registro -->
+        <div class="lg:w-7/12 p-8 sm:p-10 flex flex-col justify-center">
+            <div class="mb-6">
+                <span class="text-gold text-xs font-bold uppercase tracking-widest flex items-center gap-1.5 mb-1">
+                    <i class="fa-solid fa-sparkles"></i> Cosmética Natural
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-white">Registro de Usuario</h1>
+                <p class="text-neutral-400 text-xs mt-1">Crea tu cuenta para disfrutar de promociones, envíos rápidos y seguimiento en tiempo real.</p>
             </div>
-            <div
-                class="bg-linear-to-t from-slate-700 to-slate-900 p-8 shadow-lg flex flex-col gap-3 text-center justify-center">
-                <h1 class="text-white text-2xl font-medium">¡Bienvenido a Oil Skin!</h1>
-                <p class="text-white">
-                    Hola viejo, que bueno verte de vuelta, espero no <br>
-                    estes muerto, ahora inicia sesiom y mira novedades
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="mb-5 space-y-2.5">
+                        {% for category, message in messages %}
+                            <div class="flex items-start p-3.5 text-xs rounded-xl border {% if category == 'success' %}bg-emerald-950/40 text-emerald-300 border-emerald-500/40{% elif category == 'danger' or category == 'error' %}bg-red-950/40 text-red-300 border-red-500/40{% else %}bg-amber-950/40 text-amber-300 border-amber-500/40{% endif %} shadow-sm backdrop-blur-sm" role="alert">
+                                <i class="fa-solid {% if category == 'success' %}fa-circle-check text-emerald-400{% elif category == 'danger' or category == 'error' %}fa-circle-exclamation text-red-400{% else %}fa-circle-info text-amber-400{% endif %} mt-0.5 me-2.5 text-sm"></i>
+                                <div class="flex-1 font-medium">{{ message }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('auth_blueprint.register') }}" method="post" class="space-y-4">
+                {{ form.csrf_token }}
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Nombre Completo -->
+                    <div class="space-y-1 sm:col-span-2">
+                        <label for="nombre" class="block text-xs font-semibold uppercase tracking-wider text-neutral-300">Nombre Completo *</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
+                                <i class="fa-regular fa-user"></i>
+                            </div>
+                            {{ form.nombre(
+                                class_='w-full h-11 pl-10 pr-4 bg-neutral-900/90 border border-neutral-700/80 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition text-sm',
+                                placeholder='Tu nombre y apellidos',
+                                autocomplete='name'
+                            ) }}
+                        </div>
+                        {% if form.nombre.errors %}
+                            {% for error in form.nombre.errors %}
+                                <p class="text-red-400 text-xs mt-1">{{ error }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Correo Electrónico -->
+                    <div class="space-y-1 sm:col-span-2">
+                        <label for="email" class="block text-xs font-semibold uppercase tracking-wider text-neutral-300">Correo Electrónico *</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
+                                <i class="fa-regular fa-envelope"></i>
+                            </div>
+                            {{ form.email(
+                                class_='w-full h-11 pl-10 pr-4 bg-neutral-900/90 border border-neutral-700/80 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition text-sm',
+                                placeholder='tu-correo@ejemplo.com',
+                                autocomplete='email'
+                            ) }}
+                        </div>
+                        {% if form.email.errors %}
+                            {% for error in form.email.errors %}
+                                <p class="text-red-400 text-xs mt-1">{{ error }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Dirección de Entrega -->
+                    <div class="space-y-1 sm:col-span-2">
+                        <label for="direccion" class="block text-xs font-semibold uppercase tracking-wider text-neutral-300">Dirección de Entrega *</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
+                                <i class="fa-solid fa-location-dot"></i>
+                            </div>
+                            {{ form.direccion(
+                                class_='w-full h-11 pl-10 pr-4 bg-neutral-900/90 border border-neutral-700/80 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition text-sm',
+                                placeholder='Calle / Carrera, Número, Barrio o Ciudad',
+                                autocomplete='street-address'
+                            ) }}
+                        </div>
+                        {% if form.direccion.errors %}
+                            {% for error in form.direccion.errors %}
+                                <p class="text-red-400 text-xs mt-1">{{ error }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Celular -->
+                    <div class="space-y-1">
+                        <label for="celular" class="block text-xs font-semibold uppercase tracking-wider text-neutral-300">Celular Móvil *</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
+                                <i class="fa-solid fa-mobile-screen"></i>
+                            </div>
+                            {{ form.celular(
+                                class_='w-full h-11 pl-10 pr-4 bg-neutral-900/90 border border-neutral-700/80 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition text-sm',
+                                placeholder='300 123 4567',
+                                autocomplete='tel'
+                            ) }}
+                        </div>
+                        {% if form.celular.errors %}
+                            {% for error in form.celular.errors %}
+                                <p class="text-red-400 text-xs mt-1">{{ error }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Teléfono Fijo (Opcional) -->
+                    <div class="space-y-1">
+                        <label for="telefono" class="block text-xs font-semibold uppercase tracking-wider text-neutral-300">Teléfono Fijo <span class="text-neutral-500 normal-case">(Opcional)</span></label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
+                                <i class="fa-solid fa-phone"></i>
+                            </div>
+                            {{ form.telefono(
+                                class_='w-full h-11 pl-10 pr-4 bg-neutral-900/90 border border-neutral-700/80 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition text-sm',
+                                placeholder='601 234 5678'
+                            ) }}
+                        </div>
+                        {% if form.telefono.errors %}
+                            {% for error in form.telefono.errors %}
+                                <p class="text-red-400 text-xs mt-1">{{ error }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Contraseña -->
+                    <div class="space-y-1">
+                        <label for="password" class="block text-xs font-semibold uppercase tracking-wider text-neutral-300">Contraseña *</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
+                                <i class="fa-solid fa-lock"></i>
+                            </div>
+                            {{ form.password(
+                                class_='w-full h-11 pl-10 pr-4 bg-neutral-900/90 border border-neutral-700/80 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition text-sm',
+                                placeholder='••••••••'
+                            ) }}
+                        </div>
+                        {% if form.password.errors %}
+                            {% for error in form.password.errors %}
+                                <p class="text-red-400 text-xs mt-1">{{ error }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- Confirmar Contraseña -->
+                    <div class="space-y-1">
+                        <label for="confirm" class="block text-xs font-semibold uppercase tracking-wider text-neutral-300">Confirmar Contraseña *</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-500">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </div>
+                            {{ form.confirm(
+                                class_='w-full h-11 pl-10 pr-4 bg-neutral-900/90 border border-neutral-700/80 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition text-sm',
+                                placeholder='••••••••'
+                            ) }}
+                        </div>
+                        {% if form.confirm.errors %}
+                            {% for error in form.confirm.errors %}
+                                <p class="text-red-400 text-xs mt-1">{{ error }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full h-11 bg-gold hover:bg-gold-light text-neutral-950 font-bold rounded-xl transition duration-200 shadow-lg shadow-gold/20 flex items-center justify-center gap-2 cursor-pointer text-sm mt-4">
+                    <span>Crear Cuenta</span>
+                    <i class="fa-solid fa-user-plus text-xs"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Panel Lateral Informativo -->
+        <div class="lg:w-5/12 bg-gradient-to-br from-neutral-900 via-neutral-950 to-black p-8 sm:p-10 border-t lg:border-t-0 lg:border-l border-neutral-800 flex flex-col justify-between text-center relative overflow-hidden">
+            <div class="absolute -bottom-16 -right-16 w-60 h-60 bg-gold/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="my-auto space-y-4 z-10">
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gold/10 text-gold border border-gold/20 mb-2">
+                    <i class="fa-solid fa-leaf text-2xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white">¡Únete a OilSkin!</h2>
+                <p class="text-neutral-400 text-sm leading-relaxed max-w-sm mx-auto">
+                    Forma parte de nuestra comunidad de cuidado consciente con productos y óleos 100% naturales.
                 </p>
-                <div onclick="location.href='{{ url_for('auth_blueprint.login') }}'"
-                    class="cursor-pointer text-white flex flex-row gap-1 justify-center items-center mx-auto p-4 bg-gray-800/90 rounded-3xl">
-                    <h2>Ya tienes cuenta? <span class="text-blue-500">Inicia sesión aquí</span></h2>
+
+                <div class="pt-4 flex flex-col gap-2.5 text-left text-xs text-neutral-300 max-w-xs mx-auto">
+                    <div class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-check text-gold shrink-0"></i>
+                        <span>Seguimiento satelital en tiempo real de tus pedidos</span>
+                    </div>
+                    <div class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-check text-gold shrink-0"></i>
+                        <span>Historial y facturación electrónica instantánea</span>
+                    </div>
+                    <div class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-check text-gold shrink-0"></i>
+                        <span>Ofertas exclusivas y lanzamientos anticipados</span>
+                    </div>
                 </div>
             </div>
-    </main>
+
+            <div class="mt-8 pt-6 border-t border-neutral-800/80 z-10">
+                <p class="text-neutral-400 text-xs mb-3">¿Ya tienes una cuenta registrada?</p>
+                <a href="{{ url_for('auth_blueprint.login') }}" class="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl border border-neutral-700 bg-neutral-900/90 text-neutral-200 hover:text-gold hover:border-gold/60 text-xs font-semibold transition">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i> Iniciar Sesión Aquí
+                </a>
+            </div>
+        </div>
+
+    </div>
+</main>
 
 {% endblock %}

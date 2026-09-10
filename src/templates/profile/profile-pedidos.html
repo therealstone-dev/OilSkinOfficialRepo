@@ -4,8 +4,130 @@
 {% block title %}Mis Pedidos y Seguimiento - OilSkin{% endblock %}
 
 {% block content %}
-<!-- Leaflet CSS -->
+<!-- Leaflet CSS & JS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<style>
+@keyframes markerPulse {
+  0% { transform: scale(0.95); opacity: 0.85; }
+  50% { transform: scale(1.35); opacity: 0; }
+  100% { transform: scale(0.95); opacity: 0; }
+}
+.pulse-ring-gold {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(206, 176, 110, 0.45);
+  animation: markerPulse 2s ease-out infinite;
+}
+.pulse-ring-green {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.45);
+  animation: markerPulse 2s ease-out infinite;
+}
+.leaflet-popup-content-wrapper {
+  background: #111827 !important;
+  color: #f3f4f6 !important;
+  border-radius: 12px !important;
+  border: 1px solid #374151 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6) !important;
+}
+.leaflet-popup-tip {
+  background: #111827 !important;
+}
+</style>
+<script>
+window.resolverDireccionColombia = function(dir, ciudadInput = '') {
+    if (!dir) return { dirNormalizada: '', latGrid: null, lngGrid: null };
+    let d = dir.trim().toLowerCase();
+    const ciudad = (ciudadInput || '').toLowerCase();
+
+    // 1. Normalizar prefijos viales colombianos
+    d = d.replace(/\b(cll|cl|c)\.?\b/g, 'calle');
+    d = d.replace(/\b(cra|cr|kra|kr|k)\.?\b/g, 'carrera');
+    d = d.replace(/\b(avda|av|ak)\.?\b/g, 'avenida');
+    d = d.replace(/\b(diag|dg)\.?\b/g, 'diagonal');
+    d = d.replace(/\b(trans|tv)\.?\b/g, 'transversal');
+    d = d.replace(/\bac\b/g, 'avenida calle');
+    d = d.replace(/\bautonorte\b/g, 'autopista norte');
+    d = d.replace(/\bautosur\b/g, 'autopista sur');
+
+    // 2. Normalizar cuadrantes y sufijos cardinales
+    d = d.replace(/(\d+)\s*s\b/g, '$1 sur');
+    d = d.replace(/(\d+)\s*e\b/g, '$1 este');
+    d = d.replace(/(\d+)\s*n\b/g, '$1 norte');
+    d = d.replace(/(\d+)\s*o\b/g, '$1 oeste');
+    d = d.replace(/(\d+)\s*w\b/g, '$1 oeste');
+
+    // 3. Normalizar separadores y símbolos
+    d = d.replace(/(?:no\.?|nro\.?|num\.?|n°)\s*/g, '#');
+    d = d.replace(/\s*#\s*/g, ' # ');
+    d = d.replace(/\s+/g, ' ').trim();
+
+    let tipoVia = null;
+    let numVia = null;
+    let esViaSur = d.includes('sur');
+    let esViaEste = d.includes('este');
+    let numCruce = null;
+    let esCruceSur = d.includes('sur');
+    let esCruceEste = d.includes('este');
+    let placa = '';
+
+    const matchCompleto = d.match(/(calle|carrera|diagonal|transversal|avenida)\s*([0-9]+)[a-z]?(\s*sur|\s*este)?(?:[\s,#noNRO\.\-]+)+([0-9]+)[a-z]?(\s*sur|\s*este)?(?:\s*(?:-|#|\s)\s*([0-9]+))?/);
+    if (matchCompleto) {
+        tipoVia = matchCompleto[1];
+        numVia = parseInt(matchCompleto[2], 10);
+        if (matchCompleto[3] && matchCompleto[3].includes('sur')) esViaSur = true;
+        if (matchCompleto[3] && matchCompleto[3].includes('este')) esViaEste = true;
+        numCruce = parseInt(matchCompleto[4], 10);
+        if (matchCompleto[5] && matchCompleto[5].includes('sur')) esCruceSur = true;
+        if (matchCompleto[5] && matchCompleto[5].includes('este')) esCruceEste = true;
+        if (matchCompleto[6]) placa = matchCompleto[6];
+    } else {
+        const matchSimple = d.match(/(calle|carrera|diagonal|transversal|avenida)\s*([0-9]+)/);
+        if (matchSimple) {
+            tipoVia = matchSimple[1];
+            numVia = parseInt(matchSimple[2], 10);
+        }
+    }
+
+    let latGrid = null;
+    let lngGrid = null;
+
+    if ((!ciudad || ciudad.includes('bogot')) && numVia !== null) {
+        if (tipoVia === 'calle' || tipoVia === 'diagonal') {
+            latGrid = esViaSur ? (4.5980 - (numVia * 0.00095)) : (4.5980 + (numVia * 0.00092));
+            if (numCruce !== null) {
+                lngGrid = (esCruceEste || esViaEste) ? (-74.0720 + (numCruce * 0.0018)) : (-74.0720 - (numCruce * 0.0022));
+            } else {
+                lngGrid = -74.0850;
+            }
+        } else if (tipoVia === 'carrera' || tipoVia === 'transversal' || tipoVia === 'avenida') {
+            lngGrid = (esViaEste) ? (-74.0720 + (numVia * 0.0018)) : (-74.0720 - (numVia * 0.0022));
+            if (numCruce !== null) {
+                latGrid = (esCruceSur || esViaSur) ? (4.5980 - (numCruce * 0.00095)) : (4.5980 + (numCruce * 0.00092));
+            } else {
+                latGrid = esViaSur ? 4.5750 : 4.6300;
+            }
+        }
+    }
+
+    return {
+        dirNormalizada: d,
+        tipoVia,
+        numVia,
+        numCruce,
+        placa,
+        latGrid,
+        lngGrid,
+        esBogota: (!ciudad || ciudad.includes('bogot'))
+    };
+};
+</script>
 
 <body class="min-h-screen bg-neutral-900 text-gray-100 overflow-x-hidden font-sans">
   {{ sidebar(items) }}
@@ -204,7 +326,7 @@
                     <div class="flex flex-wrap justify-between items-center mt-2 text-xs text-neutral-400 gap-2">
                       <div class="flex items-center gap-1.5">
                         <span class="w-2.5 h-2.5 rounded-full bg-[#CEB06E]"></span>
-                        <span><strong>Origen:</strong> {{ pedido.origen_despacho or 'Centro Logístico OilSkin - Bogotá' }}</span>
+                        <span><strong>Origen:</strong> {{ pedido.origen_despacho if (pedido.origen_despacho and 'Colegio' in pedido.origen_despacho) else 'Centro de Distribución OilSkin - Colegio Técnico José Félix Restrepo, Bogotá' }}</span>
                       </div>
                       <div class="flex items-center gap-1.5">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
@@ -326,90 +448,222 @@
 
             <!-- Script de Inicialización de Mapa para este Pedido -->
             <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                try {
-                    const mapId = 'tracking-map-{{ pedido.id_pedido }}';
-                    const container = document.getElementById(mapId);
-                    if (!container) return;
+            (function() {
+                function initTrackingMap() {
+                    if (typeof L === 'undefined') {
+                        setTimeout(initTrackingMap, 100);
+                        return;
+                    }
+                    try {
+                        const mapId = 'tracking-map-{{ pedido.id_pedido }}';
+                        const container = document.getElementById(mapId);
+                        if (!container) return;
 
-                    // Coordenadas Origen (especificado por admin o default)
-                    const latOrigen = {{ pedido.lat_origen or 4.6533 }};
-                    const lngOrigen = {{ pedido.lng_origen or -74.0836 }};
-                    const nombreOrigen = "{{ pedido.origen_despacho or 'Centro de Distribución OilSkin - Bogotá' }}";
+                        // Coordenadas Origen: Colegio Técnico José Félix Restrepo, Bogotá (Cra. 6 # 18A - 20 Sur)
+                        const defaultLatOrigen = 4.57409;
+                        const defaultLngOrigen = -74.08958;
+                        const defaultNombreOrigen = "Centro de Distribución OilSkin - Colegio Técnico José Félix Restrepo, Bogotá";
 
-                    // Coordenadas Destino (dirección del cliente)
-                    // Si no tiene lat_entrega registrada, calcular desplazamiento representativo para visualización
-                    const latDestino = {{ pedido.lat_entrega if pedido.lat_entrega else (4.6533 + (pedido.id_pedido * 0.015) % 0.08) }};
-                    const lngDestino = {{ pedido.lng_entrega if pedido.lng_entrega else (-74.0836 + (pedido.id_pedido * 0.012) % 0.07) }};
-                    const nombreDestino = "{{ pedido.direccion_entrega or user.direccion or 'Dirección de Entrega' }}, {{ pedido.ciudad or 'Colombia' }}";
+                        // Si el valor guardado es nulo o el default antiguo (4.6533, -74.0836), usar Colegio Restrepo
+                        let latOrigen = {{ pedido.lat_origen if pedido.lat_origen is not none else 'null' }};
+                        let lngOrigen = {{ pedido.lng_origen if pedido.lng_origen is not none else 'null' }};
+                        let nombreOrigen = "{{ pedido.origen_despacho or '' }}";
 
-                    const trackingMap = L.map(mapId, {
-                        zoomControl: false,
-                        attributionControl: false
-                    }).setView([(latOrigen + latDestino) / 2, (lngOrigen + lngDestino) / 2], 12);
+                        if (!latOrigen || Math.abs(latOrigen - 4.6533) < 0.0001) latOrigen = defaultLatOrigen;
+                        if (!lngOrigen || Math.abs(lngOrigen - (-74.0836)) < 0.0001) lngOrigen = defaultLngOrigen;
+                        if (!nombreOrigen || (!nombreOrigen.includes('Colegio') && (nombreOrigen.includes('Centro de Distribución') || nombreOrigen.includes('Centro Logístico')))) {
+                            nombreOrigen = defaultNombreOrigen;
+                        }
 
-                    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                        maxZoom: 19
-                    }).addTo(trackingMap);
+                        // Coordenadas Destino (dirección del cliente)
+                        const rawLatEntrega = {{ pedido.lat_entrega if pedido.lat_entrega is not none else 'null' }};
+                        const rawLngEntrega = {{ pedido.lng_entrega if pedido.lng_entrega is not none else 'null' }};
+                        const dirCliente = "{{ pedido.direccion_entrega or user.direccion or '' }}".trim();
+                        const ciudadCliente = "{{ pedido.ciudad or 'Bogotá' }}".trim();
 
-                    // Icono Origen (Bodega / Gold)
-                    const originIcon = L.icon({
-                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
-                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                        iconSize: [22, 36],
-                        iconAnchor: [11, 36],
-                        popupAnchor: [1, -30],
-                        shadowSize: [36, 36]
-                    });
+                        // Resolver dirección mediante la malla matemática de Bogotá
+                        const analisisGrid = (typeof window.resolverDireccionColombia === 'function') 
+                            ? window.resolverDireccionColombia(dirCliente, ciudadCliente) 
+                            : { latGrid: null, lngGrid: null };
 
-                    // Icono Destino (Casa / Verde)
-                    const destIcon = L.icon({
-                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                        iconSize: [22, 36],
-                        iconAnchor: [11, 36],
-                        popupAnchor: [1, -30],
-                        shadowSize: [36, 36]
-                    });
+                        let latDestino = null;
+                        let lngDestino = null;
+                        let isExact = false;
 
-                    // Marcador Origen
-                    L.marker([latOrigen, lngOrigen], { icon: originIcon })
-                        .addTo(trackingMap)
-                        .bindPopup("<b style='color:#000;'>🏭 Centro de Despacho</b><br><span style='color:#444; font-size:11px;'>" + nombreOrigen + "</span>");
+                        // Verificar si las coordenadas de BD son válidas o si son una anomalía/default antiguo
+                        if (rawLatEntrega !== null && rawLngEntrega !== null) {
+                            const isOldCanFallback = (Math.abs(rawLatEntrega - 4.6533) < 0.0001 && Math.abs(rawLngEntrega - (-74.0836)) < 0.0001);
+                            
+                            if (analisisGrid.latGrid && analisisGrid.lngGrid) {
+                                const dist = Math.hypot(rawLatEntrega - analisisGrid.latGrid, rawLngEntrega - analisisGrid.lngGrid);
+                                // Si está en el cuadrante teórico (< ~4 km) y no es el default CAN, es confiable
+                                if (!isOldCanFallback && dist <= 0.035) {
+                                    latDestino = rawLatEntrega;
+                                    lngDestino = rawLngEntrega;
+                                    isExact = true;
+                                } else {
+                                    // Anomalía detectada (ej. desvío a Usme) o default viejo: corregir a posición matemática de la dirección
+                                    latDestino = analisisGrid.latGrid;
+                                    lngDestino = analisisGrid.lngGrid;
+                                    isExact = true;
+                                }
+                            } else if (!isOldCanFallback) {
+                                latDestino = rawLatEntrega;
+                                lngDestino = rawLngEntrega;
+                                isExact = true;
+                            }
+                        }
 
-                    // Marcador Destino
-                    L.marker([latDestino, lngDestino], { icon: destIcon })
-                        .addTo(trackingMap)
-                        .bindPopup("<b style='color:#000;'>🏠 Punto de Entrega</b><br><span style='color:#444; font-size:11px;'>" + nombreDestino + "</span>");
+                        // Si no teníamos coordenadas en BD pero sí la malla matemática
+                        if (!latDestino && analisisGrid.latGrid && analisisGrid.lngGrid) {
+                            latDestino = analisisGrid.latGrid;
+                            lngDestino = analisisGrid.lngGrid;
+                            isExact = true;
+                        }
 
-                    // Trazar línea de ruta Origen ➔ Destino
-                    const latlngs = [
-                        [latOrigen, lngOrigen],
-                        [latDestino, lngDestino]
-                    ];
+                        // Fallback final
+                        if (!latDestino) {
+                            latDestino = defaultLatOrigen + 0.015 + ((({{ pedido.id_pedido }} * 7) % 25) * 0.002);
+                            lngDestino = defaultLngOrigen + 0.012 + ((({{ pedido.id_pedido }} * 5) % 20) * 0.002);
+                        }
 
-                    const polyline = L.polyline(latlngs, {
-                        color: '#CEB06E',
-                        weight: 4,
-                        opacity: 0.85,
-                        dashArray: '8, 8'
-                    }).addTo(trackingMap);
+                        const nombreDestino = "{{ pedido.direccion_entrega or user.direccion or 'Dirección de Entrega' }}, {{ pedido.ciudad or 'Bogotá' }}";
 
-                    // Auto-ajustar vista para que quepan ambos puntos
-                    const bounds = L.latLngBounds(latlngs);
-                    trackingMap.fitBounds(bounds, { padding: [35, 35] });
+                        const trackingMap = L.map(mapId, {
+                            zoomControl: false,
+                            attributionControl: false
+                        }).setView([(latOrigen + latDestino) / 2, (lngOrigen + lngDestino) / 2], 13);
 
-                } catch (err) {
-                    console.error("Error inicializando mapa de tracking:", err);
+                        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                            maxZoom: 19
+                        }).addTo(trackingMap);
+
+                        // Icono Origen (Colegio Técnico José Félix Restrepo - Dorado con Warehouse)
+                        const originIcon = L.divIcon({
+                            className: 'custom-tracking-marker-origin',
+                            html: `
+                                <div style="position:relative; width:36px; height:36px; display:flex; align-items:center; justify-content:center;">
+                                    <div class="pulse-ring-gold"></div>
+                                    <div style="position:relative; width:28px; height:28px; border-radius:50%; background:#CEB06E; color:#0c0a09; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 10px rgba(206,176,110,0.8); border:2px solid #ffffff; font-size:12px; z-index:2;">
+                                        <i class="fa-solid fa-warehouse"></i>
+                                    </div>
+                                </div>
+                            `,
+                            iconSize: [36, 36],
+                            iconAnchor: [18, 18],
+                            popupAnchor: [0, -20]
+                        });
+
+                        // Icono Destino (Punto de Entrega - Verde Esmeralda con Casa)
+                        const destIcon = L.divIcon({
+                            className: 'custom-tracking-marker-dest',
+                            html: `
+                                <div style="position:relative; width:36px; height:36px; display:flex; align-items:center; justify-content:center;">
+                                    <div class="pulse-ring-green"></div>
+                                    <div style="position:relative; width:28px; height:28px; border-radius:50%; background:#10B981; color:#ffffff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 10px rgba(16,185,129,0.8); border:2px solid #ffffff; font-size:12px; z-index:2;">
+                                        <i class="fa-solid fa-house"></i>
+                                    </div>
+                                </div>
+                            `,
+                            iconSize: [36, 36],
+                            iconAnchor: [18, 18],
+                            popupAnchor: [0, -20]
+                        });
+
+                        // Marcador Origen
+                        L.marker([latOrigen, lngOrigen], { icon: originIcon })
+                            .addTo(trackingMap)
+                            .bindPopup(`
+                                <div style="font-family:sans-serif; min-width:210px;">
+                                    <div style="font-weight:700; color:#CEB06E; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; display:flex; align-items:center; gap:5px;">
+                                        <i class="fa-solid fa-warehouse"></i> Centro de Distribución
+                                    </div>
+                                    <div style="font-size:12px; font-weight:700; color:#ffffff; line-height:1.35;">
+                                        ${nombreOrigen}
+                                    </div>
+                                    <div style="font-size:10px; color:#9ca3af; margin-top:4px;">
+                                        <i class="fa-solid fa-location-dot text-[#CEB06E] mr-1"></i> Carrera 6 # 18A - 20 Sur, San Cristóbal, Bogotá
+                                    </div>
+                                </div>
+                            `);
+
+                        // Marcador Destino
+                        const destMarker = L.marker([latDestino, lngDestino], { icon: destIcon })
+                            .addTo(trackingMap)
+                            .bindPopup(`
+                                <div style="font-family:sans-serif; min-width:190px;">
+                                    <div style="font-weight:700; color:#34d399; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; display:flex; align-items:center; gap:5px;">
+                                        <i class="fa-solid fa-house"></i> Punto de Entrega
+                                    </div>
+                                    <div style="font-size:12px; font-weight:700; color:#ffffff; line-height:1.35;">
+                                        ${nombreDestino}
+                                    </div>
+                                    <div style="font-size:10px; color:#9ca3af; margin-top:4px;">
+                                        Destino final del despacho
+                                    </div>
+                                </div>
+                            `);
+
+                        // Trazar línea de ruta Origen ➔ Destino
+                        let latlngs = [
+                            [latOrigen, lngOrigen],
+                            [latDestino, lngDestino]
+                        ];
+
+                        const polyline = L.polyline(latlngs, {
+                            color: '#CEB06E',
+                            weight: 4,
+                            opacity: 0.9,
+                            dashArray: '8, 8'
+                        }).addTo(trackingMap);
+
+                        // Auto-ajustar vista para que quepan ambos puntos
+                        trackingMap.fitBounds(L.latLngBounds(latlngs), { padding: [35, 35], maxZoom: 15 });
+
+                        // Geocodificación complementaria acotada solo si no tenemos certeza
+                        if (!isExact && dirCliente && dirCliente.length >= 4 && !dirCliente.toLowerCase().includes('calle 123') && !dirCliente.toLowerCase().includes('fgdfvx') && !dirCliente.toLowerCase().includes('dhdgjgsa')) {
+                            let bboxParam = "";
+                            if (analisisGrid.latGrid && analisisGrid.lngGrid) {
+                                bboxParam = `&viewbox=${(analisisGrid.lngGrid - 0.03).toFixed(4)},${(analisisGrid.latGrid - 0.03).toFixed(4)},${(analisisGrid.lngGrid + 0.03).toFixed(4)},${(analisisGrid.latGrid + 0.03).toFixed(4)}&bounded=1`;
+                            }
+                            fetch(`https://nominatim.openstreetmap.org/search?format=json&countrycodes=co&q=${encodeURIComponent(dirCliente + ', ' + ciudadCliente + ', Colombia')}${bboxParam}&limit=1`)
+                                .then(r => r.json())
+                                .then(results => {
+                                    if (results && results.length > 0) {
+                                        const nLat = parseFloat(results[0].lat);
+                                        const nLng = parseFloat(results[0].lon);
+                                        if (!isNaN(nLat) && !isNaN(nLng)) {
+                                            if (analisisGrid.latGrid && Math.hypot(nLat - analisisGrid.latGrid, nLng - analisisGrid.lngGrid) > 0.035) return;
+                                            destMarker.setLatLng([nLat, nLng]);
+                                            latlngs = [[latOrigen, lngOrigen], [nLat, nLng]];
+                                            polyline.setLatLngs(latlngs);
+                                            trackingMap.fitBounds(L.latLngBounds(latlngs), { padding: [35, 35], maxZoom: 15 });
+                                        }
+                                    }
+                                })
+                                .catch(err => console.warn('Geocodificación complementaria fallback:', err));
+                        }
+
+                        // Forzar refresco de dimensiones de Leaflet para evitar tiles grises
+                        setTimeout(() => {
+                            trackingMap.invalidateSize();
+                        }, 250);
+
+                    } catch (err) {
+                        console.error("Error inicializando mapa de tracking:", err);
+                    }
                 }
-            });
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initTrackingMap);
+                } else {
+                    initTrackingMap();
+                }
+            })();
             </script>
           {% endfor %}
         {% endif %}
       </div>
     </main>
-
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </body>
 {% endblock %}

@@ -1,145 +1,274 @@
-<nav class="relative flex w-full items-center justify-between p-4 bg-black z-[100]">
+<!-- Header & Navigation Bar -->
+{% set cart_count = (session.get('cart', []) | map(attribute='cantidad') | sum) if session.get('cart') else (cart_items or 0) %}
 
-    <div class="flex flex-1 justify-start">
-        <h2 class="text-white text-[1.5rem] font-bold">OIL SKIN</h2>
-    </div>
+<header class="sticky top-0 z-[100] w-full bg-neutral-950/85 backdrop-blur-md border-b border-neutral-800/80 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20 gap-4">
 
-    <div class="flex lg:hidden">
-        <button id="mobileMenuButton" class="text-white focus:outline-none">
-            <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-            </svg>
-        </button>
-    </div>
+            <!-- Logo & Brand Identity -->
+            <div class="flex items-center justify-start shrink-0">
+                <a href="{{ url_for('main_blueprint.index') }}" class="group flex items-center gap-3 transition">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-gold via-[#dfc98e] to-[#a8903b] flex items-center justify-center text-neutral-950 shadow-lg shadow-gold/20 group-hover:scale-105 group-hover:shadow-gold/30 transition-all duration-300">
+                        <i class="fa-solid fa-droplet text-lg"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-xl font-black tracking-wider text-white group-hover:text-gold transition-colors leading-none">
+                            OIL<span class="text-gold">SKIN</span>
+                        </span>
+                        <span class="text-[10px] uppercase tracking-widest text-neutral-400 font-semibold mt-1">Cosmética Natural</span>
+                    </div>
+                </a>
+            </div>
 
-    <div class="hidden lg:flex flex-1 justify-center">
-        <div class="flex flex-row gap-8 items-center text-white text-md font-medium">
-            <a href="{{ url_for('main_blueprint.index') }}" class="transition duration-300 ease-in-out hover:text-[#CEB06E]">Inicio</a>
-            <a href="{{ url_for('main_blueprint.about') }}"
-                class="whitespace-nowrap transition duration-300 ease-in-out hover:text-[#CEB06E]">Sobre
-                Nosotros</a>
+            <!-- Desktop Navigation Links -->
+            <nav class="hidden lg:flex items-center justify-center gap-1 xl:gap-2">
+                <a href="{{ url_for('main_blueprint.index') }}" 
+                   class="px-3.5 py-2 rounded-xl text-sm font-semibold text-neutral-300 hover:text-gold hover:bg-neutral-900/60 transition-all duration-200">
+                    Inicio
+                </a>
 
-            <div class="relative group">
-                <button id="dropdownButton"
-                    class="flex items-center gap-2 py-2 text-white font-medium focus:outline-none">
-                    <span>Categorías</span>
-                    <svg class="h-4 w-4 transition-transform group-hover:rotate-180" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-                <div id="dropdownMenu"
-                    class="hidden group-hover:block absolute left-0 w-48 rounded-md shadow-lg bg-black border border-slate-700 z-[110]">
-                    <div class="py-1">
-                        {% for categoria in categorias %}
-                        <a href="{{ url_for('main_blueprint.show_category', category_name=categoria.nombre_categoria) }}"
-                            class="block px-4 py-2 text-sm text-white hover:bg-slate-900">{{ categoria.nombre_categoria }}</a>
-                        {% endfor %}
+                <a href="{{ url_for('main_blueprint.about') }}" 
+                   class="px-3.5 py-2 rounded-xl text-sm font-semibold text-neutral-300 hover:text-gold hover:bg-neutral-900/60 transition-all duration-200 whitespace-nowrap">
+                    Sobre Nosotros
+                </a>
+
+                <!-- Dropdown de Categorías -->
+                <div class="relative group" id="categoriesDropdownContainer">
+                    <button id="dropdownButton" type="button"
+                            class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold text-neutral-300 hover:text-gold hover:bg-neutral-900/60 transition-all duration-200 focus:outline-none">
+                        <span>Categorías</span>
+                        <i class="fa-solid fa-chevron-down text-xs transition-transform duration-300 group-hover:rotate-180 text-neutral-400 group-hover:text-gold"></i>
+                    </button>
+
+                    <div id="dropdownMenu" 
+                         class="hidden group-hover:block absolute left-0 top-full pt-2 w-56 z-[110] transition-all duration-200">
+                        <div class="rounded-2xl shadow-2xl bg-neutral-950/95 border border-neutral-800/90 backdrop-blur-xl p-2 divide-y divide-neutral-800/60">
+                            <div class="py-1 space-y-0.5">
+                                {% if categorias %}
+                                    {% for categoria in categorias %}
+                                    <a href="{{ url_for('main_blueprint.show_category', category_name=categoria.nombre_categoria) }}"
+                                       class="flex items-center justify-between px-3 py-2 text-xs font-semibold text-neutral-300 hover:text-gold hover:bg-neutral-900/80 rounded-xl transition-all group/item">
+                                        <span>{{ categoria.nombre_categoria }}</span>
+                                        <i class="fa-solid fa-angle-right text-[10px] text-neutral-600 group-hover/item:text-gold group-hover/item:translate-x-0.5 transition-all"></i>
+                                    </a>
+                                    {% endfor %}
+                                {% else %}
+                                    <a href="{{ url_for('main_blueprint.index') }}" class="block px-3 py-2 text-xs text-neutral-400">Ver catálogo completo</a>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                {% if session.get('user_id') %}
+                <a href="{{ url_for('user_blueprint.user_history') }}" 
+                   class="px-3.5 py-2 rounded-xl text-sm font-semibold text-neutral-300 hover:text-gold hover:bg-neutral-900/60 transition-all duration-200 whitespace-nowrap flex items-center gap-1.5">
+                    <i class="fa-solid fa-route text-gold text-xs"></i>
+                    <span>Mis Pedidos</span>
+                </a>
+                {% endif %}
+            </nav>
+
+            <!-- Desktop Right Actions -->
+            <div class="hidden lg:flex items-center justify-end gap-3 text-sm font-medium">
+                
+                <!-- Botón Carrito con Contador Dinámico -->
+                <a href="{{ url_for('main_blueprint.carrito') }}" 
+                   class="relative flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-neutral-900/80 border border-neutral-800 text-neutral-200 hover:text-gold hover:border-gold/50 hover:bg-neutral-900 transition-all duration-200 shadow-sm group">
+                    <div class="relative flex items-center justify-center">
+                        <i class="fa-solid fa-cart-shopping text-gold text-base group-hover:scale-110 transition-transform"></i>
+                        {% if cart_count > 0 %}
+                        <span class="absolute -top-2.5 -right-2.5 min-w-[18px] h-[18px] px-1 rounded-full bg-gold text-neutral-950 font-black text-[10px] flex items-center justify-center shadow-md shadow-gold/30 ring-2 ring-neutral-950">
+                            {{ cart_count }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    <span class="font-semibold text-xs">Carrito</span>
+                </a>
+
+                <!-- Opciones de Usuario / Sesión -->
+                {% if session.get('user_id') %}
+                    {% if session.get('id_rol') == 2 %}
+                    <a href="{{ url_for('admin_blueprint.dashboard') }}"
+                       class="px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500 hover:text-neutral-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Admin</span>
+                    </a>
+                    {% endif %}
+
+                    <!-- Menú Perfil Usuario -->
+                    <div class="flex items-center gap-2 pl-2 border-l border-neutral-800">
+                        <a href="{{ url_for('user_blueprint.profile') }}" 
+                           class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-900/60 border border-neutral-800 hover:border-gold/50 hover:bg-neutral-900 text-neutral-200 hover:text-gold transition-all duration-200"
+                           title="Ver mi perfil">
+                            <div class="w-6 h-6 rounded-lg bg-gold/20 text-gold flex items-center justify-center text-xs font-bold">
+                                {{ (session.get('user_name', 'U')[0]) | upper }}
+                            </div>
+                            <span class="text-xs font-semibold max-w-[110px] truncate">{{ session.get('user_name', 'Mi Cuenta') }}</span>
+                        </a>
+
+                        <a href="{{ url_for('auth_blueprint.logout') }}" 
+                           class="w-8 h-8 rounded-xl bg-neutral-900/60 border border-neutral-800 hover:border-red-500/50 hover:bg-red-950/40 text-neutral-400 hover:text-red-400 flex items-center justify-center transition-all duration-200"
+                           title="Cerrar Sesión">
+                            <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+                        </a>
+                    </div>
+                {% else %}
+                    <!-- Botones Visitante (Login & Register) -->
+                    <div class="flex items-center gap-2 pl-2 border-l border-neutral-800">
+                        <a href="{{ url_for('auth_blueprint.login') }}"
+                           class="px-3.5 py-2 rounded-xl text-xs font-semibold text-neutral-300 hover:text-gold hover:bg-neutral-900/60 transition-all">
+                            Iniciar Sesión
+                        </a>
+                        <a href="{{ url_for('auth_blueprint.register') }}"
+                           class="px-4 py-2 rounded-xl bg-gold hover:bg-gold-light text-neutral-950 font-bold text-xs transition-all shadow-md shadow-gold/20 hover:shadow-gold/30">
+                            Crear Cuenta
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Mobile Hamburger Button -->
+            <div class="flex lg:hidden items-center gap-2">
+                <a href="{{ url_for('main_blueprint.carrito') }}" class="relative p-2 text-neutral-300 hover:text-gold">
+                    <i class="fa-solid fa-cart-shopping text-lg text-gold"></i>
+                    {% if cart_count > 0 %}
+                    <span class="absolute top-0 right-0 min-w-[16px] h-[16px] px-0.5 rounded-full bg-gold text-neutral-950 font-black text-[9px] flex items-center justify-center">
+                        {{ cart_count }}
+                    </span>
+                    {% endif %}
+                </a>
+
+                <button id="mobileMenuButton" type="button" 
+                        class="p-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-gold hover:border-gold/50 focus:outline-none transition">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
             </div>
 
         </div>
     </div>
 
-    <div class="hidden lg:flex flex-1 justify-end items-center gap-4 text-white text-sm font-medium">
-        <a href="{{ url_for('main_blueprint.carrito') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-white hover:text-gold hover:border-gold/50 transition">
-            <i class="fa-solid fa-cart-shopping text-gold"></i>
-            <span>Carrito</span>
-        </a>
-        {% if session.get('user_id') %}
-        <span class="px-3.5 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs font-semibold">Hola, {{ session.get('user_name', 'Usuario') }}</span>
-        {% if session.get('id_rol') == 2 %}
-        <a href="{{ url_for('admin_blueprint.dashboard') }}"
-            class="bg-amber-500/10 border border-amber-500/40 text-amber-400 px-3.5 py-1.5 rounded-xl transition hover:bg-amber-500 hover:text-black font-semibold text-xs flex items-center gap-1.5">
-            <i class="fa-solid fa-shield-halved"></i> Panel Admin
-        </a>
-        {% endif %}
-        <a href="{{ url_for('user_blueprint.profile') }}"
-            class="border border-neutral-700 px-3.5 py-1.5 rounded-xl transition hover:text-gold hover:border-gold">Mi Perfil</a>
-        <a href="{{ url_for('auth_blueprint.logout') }}"
-            class="border border-neutral-700 px-3.5 py-1.5 rounded-xl transition hover:text-red-400 hover:border-red-400">Cerrar Sesión</a>
-        {% else %}
-        <a href="{{ url_for('auth_blueprint.register') }}"
-            class="border border-neutral-700 px-3.5 py-1.5 rounded-xl transition hover:text-gold hover:border-gold">Regístrate</a>
-        <a href="{{ url_for('auth_blueprint.login') }}"
-            class="bg-gold text-neutral-950 font-bold px-4 py-1.5 rounded-xl transition hover:bg-gold-light">Inicia Sesión</a>
-        {% endif %}
-    </div>
-
+    <!-- Mobile Menu Drawer / Dropdown -->
     <div id="mobileMenu"
-        class="hidden absolute top-full left-0 w-full bg-black/95 flex-col p-6 gap-4 text-white lg:hidden border-t border-neutral-800 backdrop-blur-md">
-        <a href="{{ url_for('main_blueprint.index') }}" class="text-base border-b border-neutral-800 pb-2 flex items-center justify-between">
-            <span>Inicio</span>
-            <i class="fa-solid fa-chevron-right text-xs text-neutral-500"></i>
-        </a>
-        <a href="{{ url_for('main_blueprint.about') }}" class="text-base border-b border-neutral-800 pb-2 flex items-center justify-between">
-            <span>Sobre Nosotros</span>
-            <i class="fa-solid fa-chevron-right text-xs text-neutral-500"></i>
-        </a>
-        <a href="{{ url_for('main_blueprint.carrito') }}" class="text-base border-b border-neutral-800 pb-2 flex items-center justify-between text-gold">
-            <span class="flex items-center gap-2"><i class="fa-solid fa-cart-shopping"></i> Carrito de Compras</span>
-            <i class="fa-solid fa-chevron-right text-xs text-neutral-500"></i>
-        </a>
-        <div class="flex flex-col gap-2">
-            <span class="text-neutral-400 text-xs font-bold uppercase tracking-widest">Categorías</span>
-            {% for categoria in categorias %}
-            <a href="{{ url_for('main_blueprint.show_category', category_name=categoria.nombre_categoria) }}" class="pl-3 py-1 text-sm text-neutral-300 transition hover:text-gold">{{ categoria.nombre_categoria }}</a>
-            {% endfor %}
+         class="hidden w-full bg-neutral-950/95 border-b border-neutral-800 backdrop-blur-xl px-5 py-6 flex-col gap-4 text-white lg:hidden">
+        
+        <!-- Enlaces Principales -->
+        <div class="space-y-1">
+            <span class="text-[11px] uppercase tracking-widest text-neutral-500 font-bold block mb-2 px-2">Navegación</span>
+            <a href="{{ url_for('main_blueprint.index') }}" 
+               class="flex items-center justify-between p-2.5 rounded-xl text-sm font-semibold text-neutral-200 hover:bg-neutral-900 hover:text-gold transition">
+                <span class="flex items-center gap-2.5"><i class="fa-solid fa-house text-gold text-xs"></i> Inicio</span>
+                <i class="fa-solid fa-chevron-right text-[10px] text-neutral-600"></i>
+            </a>
+            <a href="{{ url_for('main_blueprint.about') }}" 
+               class="flex items-center justify-between p-2.5 rounded-xl text-sm font-semibold text-neutral-200 hover:bg-neutral-900 hover:text-gold transition">
+                <span class="flex items-center gap-2.5"><i class="fa-solid fa-leaf text-gold text-xs"></i> Sobre Nosotros</span>
+                <i class="fa-solid fa-chevron-right text-[10px] text-neutral-600"></i>
+            </a>
+            <a href="{{ url_for('main_blueprint.carrito') }}" 
+               class="flex items-center justify-between p-2.5 rounded-xl text-sm font-semibold text-neutral-200 hover:bg-neutral-900 hover:text-gold transition">
+                <span class="flex items-center gap-2.5"><i class="fa-solid fa-cart-shopping text-gold text-xs"></i> Mi Carrito</span>
+                {% if cart_count > 0 %}
+                <span class="px-2 py-0.5 rounded-full bg-gold text-neutral-950 text-xs font-bold">{{ cart_count }}</span>
+                {% endif %}
+            </a>
         </div>
-        <div class="flex flex-col gap-3 mt-3">
+
+        <!-- Categorías -->
+        <div class="pt-3 border-t border-neutral-800/80 space-y-1">
+            <span class="text-[11px] uppercase tracking-widest text-neutral-500 font-bold block mb-2 px-2">Categorías</span>
+            <div class="grid grid-cols-2 gap-1.5">
+                {% for categoria in categorias %}
+                <a href="{{ url_for('main_blueprint.show_category', category_name=categoria.nombre_categoria) }}" 
+                   class="p-2 rounded-xl text-xs font-medium text-neutral-300 hover:bg-neutral-900 hover:text-gold transition truncate">
+                    • {{ categoria.nombre_categoria }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Usuario & Cuenta -->
+        <div class="pt-4 border-t border-neutral-800/80">
             {% if session.get('user_id') %}
-            <span class="text-center bg-neutral-900 border border-neutral-800 text-white py-2 rounded-xl text-sm font-semibold">Hola, {{ session.get('user_name', 'Usuario') }}</span>
-            {% if session.get('id_rol') == 2 %}
-            <a href="{{ url_for('admin_blueprint.dashboard') }}" class="text-center bg-amber-500 text-black font-bold py-2 rounded-xl text-sm">Panel Admin</a>
-            {% endif %}
-            <a href="{{ url_for('user_blueprint.profile') }}" class="text-center border border-neutral-700 py-2 rounded-xl text-sm">Mi Perfil</a>
-            <a href="{{ url_for('auth_blueprint.logout') }}" class="text-center border border-red-500/40 text-red-400 py-2 rounded-xl text-sm">Cerrar Sesión</a>
+            <div class="p-3 rounded-2xl bg-neutral-900/80 border border-neutral-800 flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-gold/20 text-gold flex items-center justify-center font-bold text-xs">
+                        {{ (session.get('user_name', 'U')[0]) | upper }}
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold text-white block">{{ session.get('user_name', 'Usuario') }}</span>
+                        <span class="text-[10px] text-neutral-400 block">{{ session.get('user_email', '') }}</span>
+                    </div>
+                </div>
+                {% if session.get('id_rol') == 2 %}
+                <span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 text-[10px] font-bold">Admin</span>
+                {% endif %}
+            </div>
+
+            <div class="flex flex-col gap-2">
+                {% if session.get('id_rol') == 2 %}
+                <a href="{{ url_for('admin_blueprint.dashboard') }}" 
+                   class="w-full py-2.5 text-center bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold rounded-xl text-xs transition">
+                    <i class="fa-solid fa-shield-halved mr-1.5"></i> Panel Administrativo
+                </a>
+                {% endif %}
+                <a href="{{ url_for('user_blueprint.profile') }}" 
+                   class="w-full py-2.5 text-center bg-neutral-900 hover:bg-neutral-800 text-neutral-200 font-semibold rounded-xl text-xs border border-neutral-700 transition">
+                    <i class="fa-solid fa-user mr-1.5"></i> Mi Perfil
+                </a>
+                <a href="{{ url_for('user_blueprint.user_history') }}" 
+                   class="w-full py-2.5 text-center bg-neutral-900 hover:bg-neutral-800 text-neutral-200 font-semibold rounded-xl text-xs border border-neutral-700 transition">
+                    <i class="fa-solid fa-route mr-1.5 text-gold"></i> Mis Pedidos y Seguimiento
+                </a>
+                <a href="{{ url_for('auth_blueprint.logout') }}" 
+                   class="w-full py-2 text-center text-red-400 hover:text-red-300 font-medium text-xs transition">
+                    Cerrar Sesión
+                </a>
+            </div>
             {% else %}
-            <a href="{{ url_for('auth_blueprint.login') }}" class="text-center bg-gold text-black py-2.5 rounded-xl font-bold text-sm">Inicia Sesión</a>
-            <a href="{{ url_for('auth_blueprint.register') }}" class="text-center border border-neutral-700 py-2 rounded-xl text-sm">Regístrate</a>
+            <div class="flex flex-col gap-2">
+                <a href="{{ url_for('auth_blueprint.login') }}" 
+                   class="w-full py-2.5 text-center bg-gold hover:bg-gold-light text-neutral-950 font-bold rounded-xl text-xs transition shadow-md shadow-gold/20">
+                    Iniciar Sesión
+                </a>
+                <a href="{{ url_for('auth_blueprint.register') }}" 
+                   class="w-full py-2.5 text-center bg-neutral-900 hover:bg-neutral-800 text-neutral-200 font-semibold rounded-xl text-xs border border-neutral-700 transition">
+                    Crear Cuenta Nueva
+                </a>
+            </div>
             {% endif %}
         </div>
     </div>
-</nav>
+</header>
 
 <script>
     // Lógica para abrir/cerrar menú móvil
-    const btn = document.getElementById('mobileMenuButton');
-    const menu = document.getElementById('mobileMenu');
+    const mobileBtn = document.getElementById('mobileMenuButton');
+    const mobileMenu = document.getElementById('mobileMenu');
 
-    btn.addEventListener('click', () => {
-        menu.classList.toggle('hidden');
-        menu.classList.toggle('flex');
-    });
-</script>
-<script>
-    const dropdownButton = document.getElementById('dropdownButton');
+    if (mobileBtn && mobileMenu) {
+        mobileBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            mobileMenu.classList.toggle('flex');
+        });
+    }
+
+    // Toggle dropdown con click en táctil / mobile
+    const dropdownBtn = document.getElementById('dropdownButton');
     const dropdownMenu = document.getElementById('dropdownMenu');
 
-
-    dropdownButton.addEventListener('click', () => {
-        dropdownMenu.classList.toggle('hidden');
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (event) => {
-        if (!dropdownButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
-            dropdownMenu.classList.add('hidden');
-        }
-    });
-
-
-
-
-    dropdownMenu.querySelectorAll('button').forEach(item => {
-        item.addEventListener('click', () => {
-            const url = item.getAttribute('data-html')
-            if (url) {
-                window.location.href = url;
-            }
-
-            dropdownMenu.classList.add('hidden');
+    if (dropdownBtn && dropdownMenu) {
+        dropdownBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('hidden');
         });
-    });
+
+        document.addEventListener('click', (e) => {
+            if (!dropdownBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                dropdownMenu.classList.add('hidden');
+            }
+        });
+    }
 </script>

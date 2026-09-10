@@ -145,9 +145,9 @@ def cambiar_estado_pedido(id_pedido):
 @admin.route('/ventas/<int:id_pedido>/domicilio', methods=['POST'])
 @require_admin
 def actualizar_domicilio_pedido(id_pedido):
-    origen_despacho = request.form.get('origen_despacho', '').strip() or 'Centro de Distribución OilSkin - Bogotá D.C.'
-    lat_origen = request.form.get('lat_origen', default=4.6533, type=float)
-    lng_origen = request.form.get('lng_origen', default=-74.0836, type=float)
+    origen_despacho = request.form.get('origen_despacho', '').strip() or 'Centro de Distribución OilSkin - Colegio Técnico José Félix Restrepo, Bogotá'
+    lat_origen = request.form.get('lat_origen', default=4.57409, type=float)
+    lng_origen = request.form.get('lng_origen', default=-74.08958, type=float)
     estado_envio = request.form.get('estado_envio', 'pendiente').strip()
     empresa_envio = request.form.get('empresa_envio', 'OilSkin Express Logistics').strip()
     numero_guia = request.form.get('numero_guia', '').strip() or f"OS-GUIA-{id_pedido:05d}"

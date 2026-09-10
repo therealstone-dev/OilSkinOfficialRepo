@@ -110,9 +110,9 @@
                                         '{{ v.cliente_nombre or '' }}',
                                         '{{ v.direccion_entrega or '' }}',
                                         '{{ v.ciudad or '' }}',
-                                        '{{ v.origen_despacho or 'Centro de Distribución OilSkin - Bogotá D.C.' }}',
-                                        {{ v.lat_origen or 4.6533 }},
-                                        {{ v.lng_origen or -74.0836 }},
+                                        '{{ v.origen_despacho or 'Centro de Distribución OilSkin - Colegio Técnico José Félix Restrepo, Bogotá' }}',
+                                        {{ v.lat_origen if (v.lat_origen and v.lat_origen != 4.6533) else 4.57409 }},
+                                        {{ v.lng_origen if (v.lng_origen and v.lng_origen != -74.0836) else -74.08958 }},
                                         '{{ v.estado_envio or 'pendiente' }}',
                                         '{{ v.empresa_envio or 'OilSkin Express Logistics' }}',
                                         '{{ v.numero_guia or ('OS-GUIA-' ~ ('%05d'|format(v.id_pedido))) }}',
@@ -239,7 +239,7 @@
 
 <script>
 const sedesPresets = {
-    bogota: { nombre: 'Centro Logístico OilSkin - Bogotá D.C. (Sede Principal)', lat: 4.6533, lng: -74.0836 },
+    bogota: { nombre: 'Centro de Distribución OilSkin - Colegio Técnico José Félix Restrepo, Bogotá', lat: 4.57409, lng: -74.08958 },
     medellin: { nombre: 'Bodega Regional Antioquia - Medellín (El Poblado)', lat: 6.2088, lng: -75.5678 },
     cesar: { nombre: 'Planta Extractora de Palma - San Alberto, Cesar', lat: 7.7612, lng: -73.3934 },
     barranquilla: { nombre: 'Centro Logístico Costa Norte - Barranquilla (Vía 40)', lat: 10.9984, lng: -74.7932 },

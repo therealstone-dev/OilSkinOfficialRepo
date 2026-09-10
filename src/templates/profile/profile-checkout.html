@@ -33,11 +33,11 @@
         <div class="lg:col-span-7 flex flex-col gap-6">
           <form method="POST" action="{{ url_for('user_blueprint.user_checkout') }}" id="profileCheckoutForm" class="flex flex-col gap-6">
             <!-- Hidden inputs -->
-            <input type="hidden" id="lat_entrega" name="lat_entrega" value="4.6533">
-            <input type="hidden" id="lng_entrega" name="lng_entrega" value="-74.0836">
-            <input type="hidden" id="origen_despacho" name="origen_despacho" value="Centro de Distribución OilSkin - Bogotá D.C.">
-            <input type="hidden" id="lat_origen" name="lat_origen" value="4.6533">
-            <input type="hidden" id="lng_origen" name="lng_origen" value="-74.0836">
+            <input type="hidden" id="lat_entrega" name="lat_entrega" value="4.57409">
+            <input type="hidden" id="lng_entrega" name="lng_entrega" value="-74.08958">
+            <input type="hidden" id="origen_despacho" name="origen_despacho" value="Centro de Distribución OilSkin - Colegio Técnico José Félix Restrepo, Bogotá">
+            <input type="hidden" id="lat_origen" name="lat_origen" value="4.57409">
+            <input type="hidden" id="lng_origen" name="lng_origen" value="-74.08958">
 
             <!-- Card 1: Datos de Entrega -->
             <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-md">
@@ -73,6 +73,10 @@
                     <button type="button" onclick="verificarDireccionEnMapa()"
                       class="px-4 py-3 bg-[#CEB06E] hover:bg-[#dfc98e] text-neutral-950 font-bold rounded-xl text-sm transition-all flex items-center gap-1.5 shrink-0">
                       <i class="fa-solid fa-magnifying-glass-location"></i> Verificar
+                    </button>
+                    <button type="button" onclick="obtenerUbicacionGPS()" title="Detectar mi ubicación exacta por GPS"
+                      class="px-3 py-3 bg-neutral-800 hover:bg-neutral-700 text-gold border border-neutral-700 hover:border-gold/60 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0">
+                      <i class="fa-solid fa-location-crosshairs text-sm"></i> Mi GPS
                     </button>
                   </div>
                 </div>
@@ -219,9 +223,10 @@
         shadowSize: [41, 41]
     });
 
-    function normalizarDireccionColombia(dir) {
-        if (!dir) return '';
-        let d = dir.trim().toLowerCase();
+    function resolverDireccionColombia(dirInput, ciudadInput) {
+        if (!dirInput) return null;
+        let d = dirInput.toLowerCase().trim();
+        let ciudad = (ciudadInput || 'Bogotá').toLowerCase().trim();
 
         // 1. Normalizar prefijos viales colombianos
         d = d.replace(/\b(cll|cl|c)\.?\b/g, 'calle');
@@ -230,54 +235,107 @@
         d = d.replace(/\b(diag|dg)\.?\b/g, 'diagonal');
         d = d.replace(/\b(trans|tv)\.?\b/g, 'transversal');
         d = d.replace(/\bac\b/g, 'avenida calle');
-        d = d.replace(/\bautonorte\b/g, 'autopista norte');
-        d = d.replace(/\bautosur\b/g, 'autopista sur');
 
-        // 2. Normalizar cuadrantes y sufijos cardinales (ej. 32s -> 32 sur, 7e -> 7 este)
+        // 2. Normalizar cuadrantes (32s -> 32 sur, 7e -> 7 este)
         d = d.replace(/(\d+)\s*s\b/g, '$1 sur');
         d = d.replace(/(\d+)\s*e\b/g, '$1 este');
         d = d.replace(/(\d+)\s*n\b/g, '$1 norte');
         d = d.replace(/(\d+)\s*o\b/g, '$1 oeste');
         d = d.replace(/(\d+)\s*w\b/g, '$1 oeste');
 
-        // 3. Normalizar símbolos #, No., No, Nro, N°
+        // 3. Normalizar letras en números (ej. 10 i -> 10i, 18 a -> 18a)
+        d = d.replace(/(\d+)\s*([a-z])\b/g, '$1$2');
+
+        // 4. Normalizar símbolos #, No, Nro
         d = d.replace(/(?:no\.?|nro\.?|num\.?|n°)\s*/g, '#');
         d = d.replace(/\s*#\s*/g, ' # ');
         d = d.replace(/\s+/g, ' ').trim();
 
-        return d;
-    }
+        let tipoVia = null;
+        let numVia = null;
+        let esViaSur = d.includes('sur');
+        let esViaEste = d.includes('este');
+        let numCruce = null;
+        let esCruceSur = d.includes('sur');
+        let esCruceEste = d.includes('este');
+        let placa = '';
 
-    function generarConsultasGeocodificacion(dirNorm, ciudad) {
-        const city = ciudad.trim() || 'Bogotá';
-        const queries = [];
-
-        // Consulta 1: Dirección completa normalizada
-        queries.push({ q: `${dirNorm}, ${city}, Colombia`, level: 'exact' });
-
-        // Consulta 2 y 3: Desglose de vía principal y cruce (ej. calle 32 sur # 7-06 -> calle 32 sur # 7 / calle 32 sur)
-        const matchNum = dirNorm.match(/^(.*?)\s*#\s*(\d+)(?:-\d+)?(.*)$/);
-        if (matchNum) {
-            const viaPrincipal = matchNum[1].trim();
-            const numCruce = matchNum[2].trim();
-            queries.push({ q: `${viaPrincipal} #${numCruce}, ${city}, Colombia`, level: 'block' });
-            queries.push({ q: `${viaPrincipal} ${numCruce}, ${city}, Colombia`, level: 'block' });
-            queries.push({ q: `${viaPrincipal}, ${city}, Colombia`, level: 'street' });
+        const matchCompleto = d.match(/(calle|carrera|diagonal|transversal|avenida)\s*([0-9]+)[a-z]?(\s*sur|\s*este)?(?:[\s,#noNRO\.\-]+)+([0-9]+)[a-z]?(\s*sur|\s*este)?(?:\s*(?:-|#|\s)\s*([0-9]+))?/);
+        if (matchCompleto) {
+            tipoVia = matchCompleto[1];
+            numVia = parseInt(matchCompleto[2], 10);
+            if (matchCompleto[3] && matchCompleto[3].includes('sur')) esViaSur = true;
+            if (matchCompleto[3] && matchCompleto[3].includes('este')) esViaEste = true;
+            numCruce = parseInt(matchCompleto[4], 10);
+            if (matchCompleto[5] && matchCompleto[5].includes('sur')) esCruceSur = true;
+            if (matchCompleto[5] && matchCompleto[5].includes('este')) esCruceEste = true;
+            if (matchCompleto[6]) placa = matchCompleto[6];
         } else {
-            queries.push({ q: `${dirNorm}, ${city}, Colombia`, level: 'street' });
+            const matchSimple = d.match(/(calle|carrera|diagonal|transversal|avenida)\s*([0-9]+)/);
+            if (matchSimple) {
+                tipoVia = matchSimple[1];
+                numVia = parseInt(matchSimple[2], 10);
+            }
         }
 
-        // Consulta 4: Centroide de la ciudad como último recurso
-        queries.push({ q: `${city}, Colombia`, level: 'city' });
+        let latGrid = null;
+        let lngGrid = null;
+
+        if (ciudad.includes('bogot') && numVia !== null) {
+            if (tipoVia === 'calle' || tipoVia === 'diagonal') {
+                latGrid = esViaSur ? (4.5980 - (numVia * 0.00095)) : (4.5980 + (numVia * 0.00092));
+                if (numCruce !== null) {
+                    lngGrid = (esCruceEste || esViaEste) ? (-74.0720 + (numCruce * 0.0018)) : (-74.0720 - (numCruce * 0.0022));
+                } else {
+                    lngGrid = -74.0850;
+                }
+            } else if (tipoVia === 'carrera' || tipoVia === 'transversal' || tipoVia === 'avenida') {
+                lngGrid = (esViaEste) ? (-74.0720 + (numVia * 0.0018)) : (-74.0720 - (numVia * 0.0022));
+                if (numCruce !== null) {
+                    latGrid = (esCruceSur || esViaSur) ? (4.5980 - (numCruce * 0.00095)) : (4.5980 + (numCruce * 0.00092));
+                } else {
+                    latGrid = esViaSur ? 4.5750 : 4.6300;
+                }
+            }
+        }
+
+        return {
+            dirNormalizada: d,
+            tipoVia,
+            numVia,
+            numCruce,
+            placa,
+            latGrid,
+            lngGrid,
+            esBogota: ciudad.includes('bogot')
+        };
+    }
+
+    function generarConsultasGeocodificacion(analisis, ciudad) {
+        const city = ciudad.trim() || 'Bogotá';
+        const queries = [];
+        const { dirNormalizada, tipoVia, numVia, numCruce } = analisis;
+
+        if (tipoVia && numVia) {
+            const tipoCruce = (tipoVia === 'calle') ? 'carrera' : 'calle';
+            const surTag = dirNormalizada.includes('sur') ? ' sur' : '';
+            if (numCruce) {
+                queries.push({ q: `${tipoVia} ${numVia}${surTag} con ${tipoCruce} ${numCruce}, ${city}, Colombia`, level: 'exact' });
+                queries.push({ q: `${tipoVia} ${numVia}${surTag} #${numCruce}, ${city}, Colombia`, level: 'exact' });
+                queries.push({ q: `${tipoVia} ${numVia}${surTag} ${numCruce}, ${city}, Colombia`, level: 'exact' });
+            }
+            queries.push({ q: `${tipoVia} ${numVia}${surTag}, ${city}, Colombia`, level: 'street' });
+        }
+        queries.push({ q: `${dirNormalizada}, ${city}, Colombia`, level: 'street' });
 
         return queries;
     }
 
     function initMap() {
-        const defaultLat = 4.6533;
-        const defaultLng = -74.0836;
+        const defaultLat = 4.57409;
+        const defaultLng = -74.08958;
 
-        map = L.map('checkout-map').setView([defaultLat, defaultLng], 12);
+        map = L.map('checkout-map').setView([defaultLat, defaultLng], 13);
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; CARTO | OpenStreetMap',
@@ -329,8 +387,8 @@
             const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
             const data = await resp.json();
             if (data && data.display_name) {
-                const shortName = data.name || data.address.road || data.address.neighbourhood || data.address.suburb || data.display_name.split(',')[0];
-                marker.bindPopup(`<b style='color:#000;'>📍 Ubicación Seleccionada</b><br><span style='color:#444; font-size:11px;'>${shortName} (${data.address.city || data.address.town || 'Colombia'})</span>`).openPopup();
+                const shortName = data.name || (data.address && (data.address.road || data.address.neighbourhood || data.address.suburb)) || data.display_name.split(',')[0];
+                marker.bindPopup(`<b style='color:#000;'>📍 Ubicación Seleccionada</b><br><span style='color:#444; font-size:11px;'>${shortName}</span>`).openPopup();
             }
         } catch (e) {
             console.warn("Reverse geocode silent fallback:", e);
@@ -351,21 +409,43 @@
         statusBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-900/80 text-amber-300 border border-amber-700";
         statusBadge.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Localizando en mapa satelital...`;
 
-        const dirNorm = normalizarDireccionColombia(direccionInput);
-        const queries = generarConsultasGeocodificacion(dirNorm, ciudadInput);
+        const analisis = resolverDireccionColombia(direccionInput, ciudadInput);
+        const queries = generarConsultasGeocodificacion(analisis, ciudadInput);
 
         let matchEncontrado = null;
 
+        // Si tenemos cuadrante teórico de Bogotá, restringir la búsqueda a esa zona geográfica (±3.5 km)
+        let bboxParam = "";
+        if (analisis.latGrid && analisis.lngGrid) {
+            const minLng = (analisis.lngGrid - 0.03).toFixed(4);
+            const minLat = (analisis.latGrid - 0.03).toFixed(4);
+            const maxLng = (analisis.lngGrid + 0.03).toFixed(4);
+            const maxLat = (analisis.latGrid + 0.03).toFixed(4);
+            bboxParam = `&viewbox=${minLng},${minLat},${maxLng},${maxLat}&bounded=1`;
+        }
+
         for (const item of queries) {
             try {
-                const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=co&limit=1&q=${encodeURIComponent(item.q)}`;
+                const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=co&limit=1&q=${encodeURIComponent(item.q)}${bboxParam}`;
                 const response = await fetch(url);
                 const data = await response.json();
 
                 if (data && data.length > 0) {
+                    const candidateLat = parseFloat(data[0].lat);
+                    const candidateLon = parseFloat(data[0].lon);
+
+                    // Validar contra el grid de Bogotá si aplica
+                    if (analisis.latGrid && analisis.lngGrid) {
+                        const dist = Math.hypot(candidateLat - analisis.latGrid, candidateLon - analisis.lngGrid);
+                        // Si está a más de 0.035 grados (~4 km), descartar por ser alucinación de Nominatim
+                        if (dist > 0.035) {
+                            continue;
+                        }
+                    }
+
                     matchEncontrado = {
-                        lat: parseFloat(data[0].lat),
-                        lon: parseFloat(data[0].lon),
+                        lat: candidateLat,
+                        lon: candidateLon,
                         displayName: data[0].display_name,
                         level: item.level
                     };
@@ -376,29 +456,63 @@
             }
         }
 
+        // Si Nominatim no encontró nada válido dentro de la zona o dio un resultado fuera de rango, usar la coordenada calculada teórica
+        if (!matchEncontrado && analisis.latGrid && analisis.lngGrid) {
+            matchEncontrado = {
+                lat: analisis.latGrid,
+                lon: analisis.lngGrid,
+                displayName: `${analisis.dirNormalizada}, ${ciudadInput}`,
+                level: 'exact'
+            };
+        }
+
         if (matchEncontrado) {
             const { lat, lon, displayName, level } = matchEncontrado;
 
             let zoomLevel = 17;
-            let badgeMsg = "Dirección verificada con éxito ✓";
+            let badgeMsg = "Dirección geolocalizada ✓ (Ajusta el pin si deseas)";
 
             if (level === 'street') {
                 zoomLevel = 16;
                 badgeMsg = "Vía localizada • Ajusta el pin a tu predio";
-            } else if (level === 'city') {
-                zoomLevel = 13;
-                badgeMsg = "Ciudad localizada • Mueve el pin a tu ubicación";
             }
 
             map.setView([lat, lon], zoomLevel);
             marker.setLatLng([lat, lon]);
-            marker.bindPopup(`<b style='color:#000;'>📍 ${level === 'exact' ? 'Dirección Exacta' : 'Ubicación Localizada'}</b><br><span style='color:#333; font-size:11px;'>${displayName}</span>`).openPopup();
+            marker.bindPopup(`<b style='color:#000;'>📍 Punto de Entrega</b><br><span style='color:#333; font-size:11px;'>${displayName}</span><br><span style='color:#777; font-size:10px;'>Mueve el pin si deseas ubicar exactamente tu puerta</span>`).openPopup();
 
             actualizarCoordenadas(lat, lon, badgeMsg);
         } else {
             statusBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-900/80 text-sky-300 border border-sky-700";
-            statusBadge.innerHTML = `<i class="fa-solid fa-location-crosshairs mr-1"></i> Ubicación aproximada - Mueve el pin`;
+            statusBadge.innerHTML = `<i class="fa-solid fa-location-crosshairs mr-1"></i> Mueve el pin directamente en el mapa`;
         }
+    }
+
+    function obtenerUbicacionGPS() {
+        if (!navigator.geolocation) {
+            alert("Tu navegador o dispositivo no soporta geolocalización GPS.");
+            return;
+        }
+        const statusBadge = document.getElementById('map-status');
+        statusBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-900/80 text-amber-300 border border-amber-700";
+        statusBadge.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> Obteniendo señal GPS...`;
+
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                map.setView([lat, lng], 18);
+                marker.setLatLng([lat, lng]);
+                actualizarCoordenadas(lat, lng, "Ubicación GPS exacta detectada ✓");
+                obtenerDireccionInversa(lat, lng);
+            },
+            (err) => {
+                alert("No se pudo obtener la señal GPS. Puedes mover el pin manualmente en el mapa hasta tu casa.");
+                statusBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-800 text-neutral-400";
+                statusBadge.innerText = "GPS no disponible • Mueve el pin";
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
     }
 
     function seleccionarPago(radio) {
@@ -423,7 +537,34 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', initMap);
+    document.addEventListener('DOMContentLoaded', () => {
+        initMap();
+        const dirInput = document.getElementById('direccion_entrega');
+        let debounceTimer = null;
+        if (dirInput) {
+            dirInput.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    verificarDireccionEnMapa();
+                }, 800);
+            });
+        }
+        const form = document.getElementById('profileCheckoutForm');
+        if (form) {
+            form.addEventListener('submit', () => {
+                const dir = document.getElementById('direccion_entrega').value.trim();
+                const ciudad = document.getElementById('ciudad').value.trim() || 'Bogotá';
+                const currentLat = parseFloat(document.getElementById('lat_entrega').value);
+                const res = resolverDireccionColombia(dir, ciudad);
+                if (res.latGrid && res.lngGrid) {
+                    if (isNaN(currentLat) || Math.abs(currentLat - 4.57409) < 0.0001 || Math.abs(currentLat - 4.6533) < 0.0001) {
+                        document.getElementById('lat_entrega').value = res.latGrid.toFixed(7);
+                        document.getElementById('lng_entrega').value = res.lngGrid.toFixed(7);
+                    }
+                }
+            });
+        }
+    });
     </script>
 </body>
 {% endblock %}

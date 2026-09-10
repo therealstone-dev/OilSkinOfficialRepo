@@ -295,9 +295,9 @@ def checkout():
 
             lat_entrega = request.form.get('lat_entrega', type=float)
             lng_entrega = request.form.get('lng_entrega', type=float)
-            origen_despacho = request.form.get('origen_despacho', 'Centro de Distribución OilSkin - Bogotá D.C.').strip() or 'Centro de Distribución OilSkin - Bogotá D.C.'
-            lat_origen = request.form.get('lat_origen', default=4.6533, type=float)
-            lng_origen = request.form.get('lng_origen', default=-74.0836, type=float)
+            origen_despacho = request.form.get('origen_despacho', 'Centro de Distribución OilSkin - Colegio Técnico José Félix Restrepo, Bogotá').strip() or 'Centro de Distribución OilSkin - Colegio Técnico José Félix Restrepo, Bogotá'
+            lat_origen = request.form.get('lat_origen', default=4.57409, type=float)
+            lng_origen = request.form.get('lng_origen', default=-74.08958, type=float)
             empresa_envio = 'OilSkin Express Logistics'
             numero_guia = f"OS-GUIA-{pedido_id:05d}"
             mensaje_transportista = "Pedido registrado y confirmado. Paquete en proceso de alistamiento y control de calidad en bodega."
