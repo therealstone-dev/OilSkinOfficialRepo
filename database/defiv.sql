@@ -10,14 +10,19 @@ CREATE TABLE categoria (
 )ENGINE=InnoDB;
 CREATE TABLE usuario (
   id_usuario INT PRIMARY KEY AUTO_INCREMENT,
-  nombre VARCHAR(50) NOT NULL,
-  contrasena VARCHAR(256) NOT NULL,
-  direccion VARCHAR(50) NOT NULL,
-  telefono VARCHAR(15),
-  celular VARCHAR(15) NOT NULL,
+  nombre VARCHAR(100) NOT NULL,
+  contrasena VARCHAR(256) NULL,
+  direccion VARCHAR(150) NULL DEFAULT '',
+  telefono VARCHAR(20) NULL,
+  celular VARCHAR(20) NULL DEFAULT '',
   email VARCHAR(80) NOT NULL UNIQUE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  id_rol INT NOT NULL,
+  id_rol INT NOT NULL DEFAULT 1,
+  foto_perfil VARCHAR(255) NULL,
+  foto_portada VARCHAR(255) NULL,
+  activo TINYINT(1) NOT NULL DEFAULT 1,
+  google_id VARCHAR(100) NULL UNIQUE,
+  auth_provider ENUM('local', 'google') DEFAULT 'local',
   FOREIGN KEY (id_rol) REFERENCES rol(id_rol)
 )ENGINE=InnoDB;
 CREATE TABLE producto (
@@ -85,4 +90,14 @@ CREATE TABLE producto_atributo (
   contenido TEXT NOT NULL,
   orden INT DEFAULT 0,
   FOREIGN KEY (id_producto) REFERENCES producto(id_producto) ON DELETE CASCADE
+)ENGINE=InnoDB;
+CREATE TABLE codigo_recuperacion (
+  id_codigo INT PRIMARY KEY AUTO_INCREMENT,
+  id_usuario INT NOT NULL,
+  codigo_hash VARCHAR(256) NOT NULL,
+  expiracion DATETIME NOT NULL,
+  intentos INT DEFAULT 0,
+  utilizado TINYINT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE
 )ENGINE=InnoDB;

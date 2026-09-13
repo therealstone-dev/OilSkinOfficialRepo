@@ -42,3 +42,10 @@ class ResetPasswordForm(FlaskForm):
     ])
     submit = SubmitField('Restablecer Contraseña')
 
+class VerifyCodeForm(FlaskForm):
+    codigo = StringField('Código de Verificación', validators=[
+        DataRequired(message='Ingresa el código de 6 dígitos'),
+        Length(min=6, max=6, message='El código debe contener exactamente 6 dígitos')
+    ])
+    submit = SubmitField('Verificar Código')
+
