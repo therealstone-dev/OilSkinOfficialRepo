@@ -591,19 +591,32 @@ window.resolverDireccionColombia = function(dir, ciudadInput = '') {
                                 </div>
                             `);
 
-                        // Marcador Destino
+                        // Marcador Destino con Tooltip y Popup de Tracking
                         const destMarker = L.marker([latDestino, lngDestino], { icon: destIcon })
                             .addTo(trackingMap)
+                            .bindTooltip(`<b>{{ (pedido.estado_envio or 'pendiente') | upper }}</b><br><span style="font-size:10px;">Entrega: {{ pedido.fecha_estimada_entrega or '2-4 días' }}</span>`, {
+                                permanent: false,
+                                direction: 'top',
+                                offset: [0, -18]
+                            })
                             .bindPopup(`
-                                <div style="font-family:sans-serif; min-width:190px;">
+                                <div style="font-family:sans-serif; min-width:210px;">
                                     <div style="font-weight:700; color:#34d399; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; display:flex; align-items:center; gap:5px;">
                                         <i class="fa-solid fa-house"></i> Punto de Entrega
                                     </div>
                                     <div style="font-size:12px; font-weight:700; color:#ffffff; line-height:1.35;">
                                         ${nombreDestino}
                                     </div>
+                                    <div style="margin-top:6px; padding-top:6px; border-top:1px solid #374151; font-size:11px; display:flex; justify-content:space-between;">
+                                        <span style="color:#9ca3af;">Estado:</span>
+                                        <span style="color:#CEB06E; font-weight:bold; text-transform:capitalize;">{{ pedido.estado_envio or 'pendiente' }}</span>
+                                    </div>
+                                    <div style="font-size:11px; display:flex; justify-content:space-between; margin-top:3px;">
+                                        <span style="color:#9ca3af;">Entrega Est.:</span>
+                                        <span style="color:#34d399; font-weight:600;">{{ pedido.fecha_estimada_entrega or '2-4 días hábiles' }}</span>
+                                    </div>
                                     <div style="font-size:10px; color:#9ca3af; margin-top:4px;">
-                                        Destino final del despacho
+                                        Guía: <span style="font-family:monospace; color:#fff;">{{ pedido.numero_guia or ('OS-GUIA-' ~ ('%05d'|format(pedido.id_pedido))) }}</span>
                                     </div>
                                 </div>
                             `);

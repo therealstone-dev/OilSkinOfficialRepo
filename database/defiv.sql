@@ -26,6 +26,8 @@ CREATE TABLE producto (
   descripcion TEXT,
   precio DECIMAL(10,2) NOT NULL,
   stock INT NOT NULL,
+  imagenUrl VARCHAR(500) DEFAULT '/static/img/logo.webp',
+  fechaAgregado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   id_categoria INT NOT NULL,
   FOREIGN KEY (id_categoria) REFERENCES categoria(id_categoria)
 )ENGINE=InnoDB;
@@ -74,4 +76,13 @@ CREATE TABLE detalle_pedido (
   subtotal DECIMAL(10,2) NOT NULL,
   FOREIGN KEY (id_pedido) REFERENCES pedido(id_pedido),
   FOREIGN KEY (id_producto) REFERENCES producto(id_producto)
+)ENGINE=InnoDB;
+CREATE TABLE producto_atributo (
+  id_atributo INT PRIMARY KEY AUTO_INCREMENT,
+  id_producto INT NOT NULL,
+  tipo ENUM('beneficio', 'modo_uso', 'ingrediente', 'badge') NOT NULL,
+  titulo VARCHAR(150) NULL,
+  contenido TEXT NOT NULL,
+  orden INT DEFAULT 0,
+  FOREIGN KEY (id_producto) REFERENCES producto(id_producto) ON DELETE CASCADE
 )ENGINE=InnoDB;

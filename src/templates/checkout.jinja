@@ -80,11 +80,16 @@
                                        value="{{ user.celular if user else '' }}" placeholder="Ej. 3101234567" required>
                             </div>
 
-                            <div class="sm:col-span-2">
+                            <div class="sm:col-span-2 relative">
                                 <label class="block text-xs font-bold text-neutral-300 uppercase tracking-wider mb-2">Dirección de Entrega Exacta *</label>
                                 <div class="flex gap-2">
-                                    <input type="text" class="flex-1 bg-black border border-neutral-700 focus:border-gold focus:ring-1 focus:ring-gold text-white rounded-xl px-4 py-3 text-sm" id="direccion_entrega" name="direccion_entrega" 
-                                           value="{{ user.direccion if user else '' }}" placeholder="Ej. Calle 26 # 68-50, Apto 402" required onchange="verificarDireccionEnMapa()">
+                                    <div class="relative flex-1">
+                                        <input type="text" autocomplete="off" class="w-full bg-black border border-neutral-700 focus:border-gold focus:ring-1 focus:ring-gold text-white rounded-xl px-4 py-3 text-sm" id="direccion_entrega" name="direccion_entrega" 
+                                               value="{{ user.direccion if user else '' }}" placeholder="Ej. Calle 26 # 68-50, Apto 402" required onchange="verificarDireccionEnMapa()">
+                                        <!-- Dropdown de autocompletado interactivo -->
+                                        <div id="autocomplete-dropdown" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-neutral-900/95 backdrop-blur-md border border-neutral-700 rounded-xl shadow-2xl z-50 overflow-hidden max-h-60 overflow-y-auto">
+                                        </div>
+                                    </div>
                                     <button type="button" class="px-5 py-3 bg-gold hover:bg-gold-light text-neutral-950 font-bold rounded-xl text-sm transition shrink-0 flex items-center gap-2 shadow-md shadow-gold/20" onclick="verificarDireccionEnMapa()">
                                         <i class="fa-solid fa-magnifying-glass-location"></i> <span>Verificar</span>
                                     </button>
@@ -94,7 +99,7 @@
                                     </button>
                                 </div>
                                 <span class="text-[11px] text-neutral-400 mt-1.5 block">
-                                    El sistema posicionará de forma satelital tu punto de entrega para el transporte oficial.
+                                    Escribe para ver sugerencias satelitales automáticas o afina el marcador interactivo en el mapa.
                                 </span>
                             </div>
                         </div>
@@ -552,6 +557,103 @@ function obtenerUbicacionGPS() {
     );
 }
 
+async function obtenerDireccionInversa(lat, lng) {
+    try {
+        const resp = await fetch(`/api/geocodificar/inverso?lat=${lat}&lng=${lng}`);
+        const data = await resp.json();
+        if (data && data.direccion) {
+            const dirInput = document.getElementById('direccion_entrega');
+            if (dirInput) {
+                dirInput.value = data.direccion;
+            }
+            if (data.ciudad && data.ciudad !== 'Colombia') {
+                const ciudadInput = document.getElementById('ciudad');
+                if (ciudadInput) {
+                    ciudadInput.value = data.ciudad;
+                }
+            }
+            if (marker) {
+                marker.bindPopup(`<b style='color:#000;'>📍 Tu Ubicación GPS</b><br><span style='color:#333; font-size:11px;'>${data.direccion}</span>`).openPopup();
+            }
+        }
+    } catch (e) {
+        console.warn("Error en geocodificación inversa:", e);
+    }
+}
+
+// Lógica de autocompletado
+const autocompleteDropdown = document.getElementById('autocomplete-dropdown');
+
+async function buscarSugerenciasDireccion(query) {
+    const dropdown = document.getElementById('autocomplete-dropdown');
+    if (!dropdown) return;
+    const ciudad = (document.getElementById('ciudad')?.value || 'Bogotá').trim();
+    if (!query || query.length < 3) {
+        dropdown.classList.add('hidden');
+        return;
+    }
+    try {
+        const res = await fetch(`/api/geocodificar/autocompletar?q=${encodeURIComponent(query)}&ciudad=${encodeURIComponent(ciudad)}`);
+        const sugerencias = await res.json();
+        renderSugerenciasDropdown(sugerencias);
+    } catch (err) {
+        console.warn("Error obteniendo sugerencias:", err);
+        dropdown.classList.add('hidden');
+    }
+}
+
+function renderSugerenciasDropdown(lista) {
+    const dropdown = document.getElementById('autocomplete-dropdown');
+    if (!dropdown) return;
+    if (!lista || lista.length === 0) {
+        dropdown.classList.add('hidden');
+        return;
+    }
+    dropdown.innerHTML = '';
+    lista.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'px-4 py-2.5 hover:bg-neutral-800 text-sm text-neutral-200 cursor-pointer border-b border-neutral-800/60 last:border-0 flex items-center justify-between gap-2 transition';
+        div.innerHTML = `
+            <div class="flex items-center gap-2 overflow-hidden">
+                <i class="fa-solid fa-location-dot text-gold text-xs shrink-0"></i>
+                <span class="truncate font-medium">${item.direccion}</span>
+            </div>
+            <span class="text-[10px] text-neutral-400 shrink-0 font-mono">${item.ciudad || ''}</span>
+        `;
+        div.addEventListener('click', () => {
+            seleccionarSugerenciaDireccion(item);
+        });
+        dropdown.appendChild(div);
+    });
+    dropdown.classList.remove('hidden');
+}
+
+function seleccionarSugerenciaDireccion(item) {
+    const dirInput = document.getElementById('direccion_entrega');
+    const dropdown = document.getElementById('autocomplete-dropdown');
+    if (dirInput) dirInput.value = item.direccion;
+    if (item.ciudad && document.getElementById('ciudad')) {
+        document.getElementById('ciudad').value = item.ciudad;
+    }
+    if (dropdown) dropdown.classList.add('hidden');
+
+    if (item.lat && item.lng && map && marker) {
+        map.setView([item.lat, item.lng], 17);
+        marker.setLatLng([item.lat, item.lng]);
+        marker.bindPopup(`<b style='color:#000;'>📍 Punto de Entrega</b><br><span style='color:#333; font-size:11px;'>${item.direccion}</span>`).openPopup();
+        actualizarCoordenadas(item.lat, item.lng, "Dirección autocompletada ✓");
+    } else {
+        verificarDireccionEnMapa();
+    }
+}
+
+document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('autocomplete-dropdown');
+    if (dropdown && !e.target.closest('#direccion_entrega') && !e.target.closest('#autocomplete-dropdown')) {
+        dropdown.classList.add('hidden');
+    }
+});
+
 function seleccionarPago(radio) {
     document.querySelectorAll('.payment-option').forEach(el => {
         el.classList.remove('border-gold', 'bg-gold/10');
@@ -569,11 +671,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const dirInput = document.getElementById('direccion_entrega');
     let debounceTimer = null;
     if (dirInput) {
-        dirInput.addEventListener('input', () => {
+        dirInput.addEventListener('input', (e) => {
             clearTimeout(debounceTimer);
+            const val = e.target.value.trim();
             debounceTimer = setTimeout(() => {
+                buscarSugerenciasDireccion(val);
                 verificarDireccionEnMapa();
-            }, 800);
+            }, 500);
         });
     }
     const form = document.getElementById('checkoutForm');

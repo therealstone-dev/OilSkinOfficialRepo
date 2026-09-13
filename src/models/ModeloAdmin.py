@@ -67,6 +67,7 @@ class ModeloAdmin:
                     v.nombre_categoria,
                     p.id_categoria,
                     p.descripcion,
+                    p.imagenUrl,
                     v.unidades_vendidas,
                     v.ingresos_totales_producto,
                     v.estado_stock
@@ -330,33 +331,41 @@ class ModeloAdmin:
             return []
 
     @classmethod
-    def crear_producto(cls, nombre_producto: str, descripcion: str, precio: float, stock: int, id_categoria: int):
+    def crear_producto(cls, nombre_producto: str, descripcion: str, precio: float, stock: int, id_categoria: int, imagen_url: str = None):
         try:
             conn = get_connection()
             cur = conn.cursor()
+            img_val = imagen_url.strip() if imagen_url and imagen_url.strip() else '/static/img/logo.webp'
             cur.execute("""
-                INSERT INTO producto (nombre_producto, descripcion, precio, stock, id_categoria)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (nombre_producto, descripcion, precio, stock, id_categoria))
+                INSERT INTO producto (nombre_producto, descripcion, precio, stock, id_categoria, imagenUrl)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (nombre_producto, descripcion, precio, stock, id_categoria, img_val))
             conn.commit()
             last_id = cur.lastrowid
             cur.close()
             conn.close()
-            return True, f"Producto creado con éxito (ID: {last_id})."
+            return True, f"Producto creado con éxito (ID: #{last_id}).", last_id
         except Exception as ex:
             print(f"Error en crear_producto: {ex}")
-            return False, f"Error al crear producto: {ex}"
+            return False, f"Error al crear producto: {ex}", None
 
     @classmethod
-    def actualizar_producto(cls, id_producto: int, nombre_producto: str, descripcion: str, precio: float, stock: int, id_categoria: int):
+    def actualizar_producto(cls, id_producto: int, nombre_producto: str, descripcion: str, precio: float, stock: int, id_categoria: int, imagen_url: str = None):
         try:
             conn = get_connection()
             cur = conn.cursor()
-            cur.execute("""
-                UPDATE producto 
-                SET nombre_producto = %s, descripcion = %s, precio = %s, stock = %s, id_categoria = %s
-                WHERE id_producto = %s
-            """, (nombre_producto, descripcion, precio, stock, id_categoria, id_producto))
+            if imagen_url and imagen_url.strip():
+                cur.execute("""
+                    UPDATE producto 
+                    SET nombre_producto = %s, descripcion = %s, precio = %s, stock = %s, id_categoria = %s, imagenUrl = %s
+                    WHERE id_producto = %s
+                """, (nombre_producto, descripcion, precio, stock, id_categoria, imagen_url.strip(), id_producto))
+            else:
+                cur.execute("""
+                    UPDATE producto 
+                    SET nombre_producto = %s, descripcion = %s, precio = %s, stock = %s, id_categoria = %s
+                    WHERE id_producto = %s
+                """, (nombre_producto, descripcion, precio, stock, id_categoria, id_producto))
             conn.commit()
             cur.close()
             conn.close()
@@ -461,16 +470,23 @@ class ModeloAdmin:
     @classmethod
     def actualizar_domicilio_pedido(cls, id_pedido: int, origen_despacho: str, lat_origen: float, lng_origen: float,
                                     estado_envio: str, empresa_envio: str, numero_guia: str, mensaje_transportista: str,
-                                    fecha_estimada_entrega: str = None):
+                                    fecha_estimada_entrega: str = None,
+                                    direccion_entrega: str = None, ciudad: str = None,
+                                    lat_entrega: float = None, lng_entrega: float = None):
         try:
             conn = get_connection()
             cur = conn.cursor()
 
             # Verificar si existe registro de domicilio para el pedido
-            cur.execute("SELECT id_domicilio FROM domicilio WHERE id_pedido = %s", (id_pedido,))
+            cur.execute("SELECT id_domicilio, direccion_entrega, ciudad, lat_entrega, lng_entrega FROM domicilio WHERE id_pedido = %s", (id_pedido,))
             domicilio = cur.fetchone()
 
             if domicilio:
+                dir_final = direccion_entrega if direccion_entrega is not None else domicilio.get('direccion_entrega')
+                ciudad_final = ciudad if ciudad is not None else domicilio.get('ciudad')
+                lat_ent_final = lat_entrega if lat_entrega is not None else domicilio.get('lat_entrega')
+                lng_ent_final = lng_entrega if lng_entrega is not None else domicilio.get('lng_entrega')
+
                 cur.execute("""
                     UPDATE domicilio 
                     SET origen_despacho = %s,
@@ -480,15 +496,19 @@ class ModeloAdmin:
                         empresa_envio = %s,
                         numero_guia = %s,
                         mensaje_transportista = %s,
-                        fecha_estimada_entrega = %s
+                        fecha_estimada_entrega = %s,
+                        direccion_entrega = %s,
+                        ciudad = %s,
+                        lat_entrega = %s,
+                        lng_entrega = %s
                     WHERE id_pedido = %s
-                """, (origen_despacho, lat_origen, lng_origen, estado_envio, empresa_envio, numero_guia, mensaje_transportista, fecha_estimada_entrega, id_pedido))
+                """, (origen_despacho, lat_origen, lng_origen, estado_envio, empresa_envio, numero_guia, mensaje_transportista, fecha_estimada_entrega, dir_final, ciudad_final, lat_ent_final, lng_ent_final, id_pedido))
             else:
                 cur.execute("""
                     INSERT INTO domicilio (id_pedido, direccion_entrega, ciudad, telefono_contacto, costo_envio, estado_envio,
-                                           origen_despacho, lat_origen, lng_origen, empresa_envio, numero_guia, mensaje_transportista, fecha_estimada_entrega)
-                    VALUES (%s, 'Dirección principal', 'Colombia', '0000000000', 0.00, %s, %s, %s, %s, %s, %s, %s, %s)
-                """, (id_pedido, estado_envio, origen_despacho, lat_origen, lng_origen, empresa_envio, numero_guia, mensaje_transportista, fecha_estimada_entrega))
+                                           origen_despacho, lat_origen, lng_origen, lat_entrega, lng_entrega, empresa_envio, numero_guia, mensaje_transportista, fecha_estimada_entrega)
+                    VALUES (%s, %s, %s, '0000000000', 0.00, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (id_pedido, direccion_entrega or 'Dirección principal', ciudad or 'Colombia', estado_envio, origen_despacho, lat_origen, lng_origen, lat_entrega, lng_entrega, empresa_envio, numero_guia, mensaje_transportista, fecha_estimada_entrega))
 
             # Si el estado de envío pasa a entregado o cancelado, sincronizar estado del pedido si corresponde
             if estado_envio == 'entregado':

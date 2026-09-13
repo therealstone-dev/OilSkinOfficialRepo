@@ -53,26 +53,43 @@
             <div class="lg:col-span-6">
                 <div class="relative p-8 sm:p-12 rounded-3xl text-center overflow-hidden shadow-2xl border border-gold/25 bg-radial from-neutral-900 via-neutral-950 to-black">
                     
-                    <!-- Floating Eco Badges (Flowbite) -->
+                    <!-- Floating Badges Dinámicos -->
                     <div class="absolute top-4 left-4 flex flex-col gap-2 z-10 items-start">
-                        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-extrabold bg-gold text-neutral-950 shadow-md">
-                            <i class="fa-solid fa-leaf me-1.5"></i> 100% Orgánico
-                        </span>
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-neutral-900/90 text-gold border border-gold/40">
-                            <i class="fa-solid fa-droplet me-1.5"></i> Palma Pura
-                        </span>
+                        {% if atributos and atributos.badge and atributos.badge|length > 0 %}
+                            {% for b in atributos.badge[:2] %}
+                            <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-extrabold {% if loop.first %}bg-gold text-neutral-950 shadow-md{% else %}bg-neutral-900/90 text-gold border border-gold/40{% endif %}">
+                                <i class="fa-solid fa-sparkles me-1.5"></i> {{ b.contenido }}
+                            </span>
+                            {% endfor %}
+                        {% else %}
+                            <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-extrabold bg-gold text-neutral-950 shadow-md">
+                                <i class="fa-solid fa-leaf me-1.5"></i> 100% Orgánico
+                            </span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-neutral-900/90 text-gold border border-gold/40">
+                                <i class="fa-solid fa-droplet me-1.5"></i> Palma Pura
+                            </span>
+                        {% endif %}
                     </div>
 
                     <div class="absolute top-4 right-4 z-10">
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-neutral-900/80 text-neutral-300 border border-neutral-700">
-                            <i class="fa-solid fa-shield-halved text-gold me-1.5"></i> Testeado
-                        </span>
+                        {% if atributos and atributos.badge and atributos.badge|length > 2 %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-neutral-900/80 text-neutral-300 border border-neutral-700">
+                                <i class="fa-solid fa-shield-halved text-gold me-1.5"></i> {{ atributos.badge[2].contenido }}
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-neutral-900/80 text-neutral-300 border border-neutral-700">
+                                <i class="fa-solid fa-shield-halved text-gold me-1.5"></i> Testeado
+                            </span>
+                        {% endif %}
                     </div>
 
-                    <!-- Product Icon / Hero Representation -->
-                    <div class="my-8 py-6 relative flex justify-center">
-                        <div class="relative w-48 h-48 sm:w-56 sm:h-56 rounded-full flex items-center justify-center border-2 border-gold shadow-[0_0_50px_rgba(206,176,110,0.25)] bg-gradient-to-tr from-gold/20 via-neutral-900/80 to-black">
-                            <i class="fa-solid fa-pump-soap text-6xl sm:text-7xl text-gold filter drop-shadow-[0_0_20px_rgba(206,176,110,0.5)]"></i>
+                    <!-- Product Image / Hero Representation -->
+                    <div class="my-8 py-4 relative flex justify-center">
+                        <div class="relative w-56 h-56 sm:w-64 sm:h-64 rounded-3xl overflow-hidden flex items-center justify-center border-2 border-gold shadow-[0_0_50px_rgba(206,176,110,0.25)] bg-gradient-to-tr from-gold/20 via-neutral-900/80 to-black group">
+                            <img src="{{ producto.imagenUrl or url_for('static', filename='img/logo.webp') }}" 
+                                 alt="{{ producto.nombre_producto }}"
+                                 onerror="this.src='{{ url_for('static', filename='img/logo.webp') }}'"
+                                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                         </div>
                     </div>
 
@@ -218,18 +235,33 @@
 
             <div id="prodTabContent" class="text-neutral-300">
                 <!-- TAB 1: Beneficios -->
-                <div class="p-4 rounded-2xl bg-neutral-950/50 border border-neutral-800" id="tab-desc" role="tabpanel" aria-labelledby="desc-tab">
+                <div class="p-4 sm:p-6 rounded-2xl bg-neutral-950/50 border border-neutral-800" id="tab-desc" role="tabpanel" aria-labelledby="desc-tab">
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
                         <div class="md:col-span-7 space-y-4">
-                            <h3 class="text-xl font-bold text-gold">La Fuerza Antioxidante de la Palma Africana</h3>
-                            <p class="text-neutral-300 text-sm leading-relaxed">
-                                El aceite de palma es la fuente natural más rica del planeta en <strong>Tocotrienoles</strong> (una forma de Vitamina E hasta 60 veces más potente que los tocoferoles convencionales) y <strong>Carotenoides</strong>.
-                            </p>
-                            <ul class="space-y-2.5 text-sm">
-                                <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-gold mt-1"></i> <span><strong>Anti-envejecimiento:</strong> neutraliza los radicales libres causados por el sol y la polución.</span></li>
-                                <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-gold mt-1"></i> <span><strong>Restauración de barrera:</strong> lípidos naturales biocompatibles con el manto hidrolipídico humano.</span></li>
-                                <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-gold mt-1"></i> <span><strong>Cero sensación grasa:</strong> rápida absorción cutánea con acabado sedoso mate.</span></li>
-                            </ul>
+                            {% if atributos and atributos.beneficio and atributos.beneficio|length > 0 %}
+                                <h3 class="text-xl font-bold text-gold">Beneficios Comprobados</h3>
+                                <ul class="space-y-3 text-sm">
+                                    {% for ben in atributos.beneficio %}
+                                    <li class="flex items-start gap-2.5">
+                                        <i class="fa-solid fa-circle-check text-gold mt-1 shrink-0"></i>
+                                        <div>
+                                            {% if ben.titulo %}<strong class="text-white">{{ ben.titulo }}:</strong>{% endif %}
+                                            <span class="text-neutral-300 leading-relaxed">{{ ben.contenido }}</span>
+                                        </div>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <h3 class="text-xl font-bold text-gold">La Fuerza Antioxidante de la Palma Africana</h3>
+                                <p class="text-neutral-300 text-sm leading-relaxed">
+                                    El aceite de palma es la fuente natural más rica del planeta en <strong>Tocotrienoles</strong> (una forma de Vitamina E hasta 60 veces más potente que los tocoferoles convencionales) y <strong>Carotenoides</strong>.
+                                </p>
+                                <ul class="space-y-2.5 text-sm">
+                                    <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-gold mt-1"></i> <span><strong>Anti-envejecimiento:</strong> neutraliza los radicales libres causados por el sol y la polución.</span></li>
+                                    <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-gold mt-1"></i> <span><strong>Restauración de barrera:</strong> lípidos naturales biocompatibles con el manto hidrolipídico humano.</span></li>
+                                    <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-gold mt-1"></i> <span><strong>Cero sensación grasa:</strong> rápida absorción cutánea con acabado sedoso mate.</span></li>
+                                </ul>
+                            {% endif %}
                         </div>
                         <div class="md:col-span-5">
                             <div class="p-6 rounded-2xl bg-neutral-900 border border-neutral-800 text-center space-y-2">
@@ -242,33 +274,53 @@
                 </div>
 
                 <!-- TAB 2: Modo de Uso -->
-                <div class="hidden p-4 rounded-2xl bg-neutral-950/50 border border-neutral-800" id="tab-uso" role="tabpanel" aria-labelledby="uso-tab">
+                <div class="hidden p-4 sm:p-6 rounded-2xl bg-neutral-950/50 border border-neutral-800" id="tab-uso" role="tabpanel" aria-labelledby="uso-tab">
                     <h3 class="text-xl font-bold text-gold mb-6">Rutina Recomendada para Máxima Efectividad</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="p-5 bg-neutral-900 rounded-2xl border border-neutral-800 space-y-2">
-                            <span class="w-7 h-7 rounded-full bg-gold text-neutral-950 font-black text-xs flex items-center justify-center mb-3">1</span>
-                            <h4 class="text-white font-bold text-sm">Limpieza Previa</h4>
-                            <p class="text-neutral-400 text-xs leading-relaxed">Limpia suavemente el rostro o área del cuerpo con agua tibia para abrir los poros.</p>
-                        </div>
-                        <div class="p-5 bg-neutral-900 rounded-2xl border border-neutral-800 space-y-2">
-                            <span class="w-7 h-7 rounded-full bg-gold text-neutral-950 font-black text-xs flex items-center justify-center mb-3">2</span>
-                            <h4 class="text-white font-bold text-sm">Aplicación Suave</h4>
-                            <p class="text-neutral-400 text-xs leading-relaxed">Aplica 2 a 3 gotas o una porción moderada masajeando en movimientos circulares ascendentes.</p>
-                        </div>
-                        <div class="p-5 bg-neutral-900 rounded-2xl border border-neutral-800 space-y-2">
-                            <span class="w-7 h-7 rounded-full bg-gold text-neutral-950 font-black text-xs flex items-center justify-center mb-3">3</span>
-                            <h4 class="text-white font-bold text-sm">Frecuencia</h4>
-                            <p class="text-neutral-400 text-xs leading-relaxed">Uso diario en la mañana antes del bloqueador solar o en la noche como nutrición intensiva.</p>
-                        </div>
+                        {% if atributos and atributos.modo_uso and atributos.modo_uso|length > 0 %}
+                            {% for u in atributos.modo_uso %}
+                            <div class="p-5 bg-neutral-900 rounded-2xl border border-neutral-800 space-y-2">
+                                <span class="w-7 h-7 rounded-full bg-gold text-neutral-950 font-black text-xs flex items-center justify-center mb-3">{{ loop.index }}</span>
+                                <h4 class="text-white font-bold text-sm">{{ u.titulo or ('Paso ' ~ loop.index) }}</h4>
+                                <p class="text-neutral-400 text-xs leading-relaxed">{{ u.contenido }}</p>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="p-5 bg-neutral-900 rounded-2xl border border-neutral-800 space-y-2">
+                                <span class="w-7 h-7 rounded-full bg-gold text-neutral-950 font-black text-xs flex items-center justify-center mb-3">1</span>
+                                <h4 class="text-white font-bold text-sm">Limpieza Previa</h4>
+                                <p class="text-neutral-400 text-xs leading-relaxed">Limpia suavemente el rostro o área del cuerpo con agua tibia para abrir los poros.</p>
+                            </div>
+                            <div class="p-5 bg-neutral-900 rounded-2xl border border-neutral-800 space-y-2">
+                                <span class="w-7 h-7 rounded-full bg-gold text-neutral-950 font-black text-xs flex items-center justify-center mb-3">2</span>
+                                <h4 class="text-white font-bold text-sm">Aplicación Suave</h4>
+                                <p class="text-neutral-400 text-xs leading-relaxed">Aplica 2 a 3 gotas o una porción moderada masajeando en movimientos circulares ascendentes.</p>
+                            </div>
+                            <div class="p-5 bg-neutral-900 rounded-2xl border border-neutral-800 space-y-2">
+                                <span class="w-7 h-7 rounded-full bg-gold text-neutral-950 font-black text-xs flex items-center justify-center mb-3">3</span>
+                                <h4 class="text-white font-bold text-sm">Frecuencia</h4>
+                                <p class="text-neutral-400 text-xs leading-relaxed">Uso diario en la mañana antes del bloqueador solar o en la noche como nutrición intensiva.</p>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
 
                 <!-- TAB 3: Ingredientes -->
-                <div class="hidden p-4 rounded-2xl bg-neutral-950/50 border border-neutral-800" id="tab-ingr" role="tabpanel" aria-labelledby="ingr-tab">
+                <div class="hidden p-4 sm:p-6 rounded-2xl bg-neutral-950/50 border border-neutral-800" id="tab-ingr" role="tabpanel" aria-labelledby="ingr-tab">
                     <h3 class="text-xl font-bold text-gold mb-3">Formulación 100% Limpia y Libre de Tóxicos</h3>
-                    <p class="text-neutral-300 text-xs sm:text-sm italic mb-6">
-                        Elaeis Guineensis (Palm) Fruit Oil Organic Extract, Tocotrienol Complex, Simmondsia Chinensis Seed Oil, Carotenoid Complex, Natural Botanical Essence.
-                    </p>
+                    {% if atributos and atributos.ingrediente and atributos.ingrediente|length > 0 %}
+                        <div class="space-y-3 mb-6">
+                            {% for ing in atributos.ingrediente %}
+                            <p class="text-neutral-300 text-xs sm:text-sm leading-relaxed">
+                                {% if ing.titulo %}<strong class="text-gold">{{ ing.titulo }}:</strong> {% endif %}{{ ing.contenido }}
+                            </p>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-neutral-300 text-xs sm:text-sm italic mb-6">
+                            Elaeis Guineensis (Palm) Fruit Oil Organic Extract, Tocotrienol Complex, Simmondsia Chinensis Seed Oil, Carotenoid Complex, Natural Botanical Essence.
+                        </p>
+                    {% endif %}
                     <div class="flex flex-wrap gap-2">
                         <span class="px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs font-semibold">Sin Parabenos</span>
                         <span class="px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs font-semibold">Sin Sulfatos</span>

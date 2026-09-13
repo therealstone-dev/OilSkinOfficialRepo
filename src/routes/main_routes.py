@@ -4,7 +4,7 @@
 import base64
 import io
 from datetime import datetime
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for, Response
+from flask import Blueprint, flash, redirect, render_template, request, session, url_for, Response, jsonify
 import traceback
 import qrcode
 from src.database.db_mysql import get_connection
@@ -13,6 +13,13 @@ from src.models.ModeloProductos import ModeloProducto
 from src.models.ModeloCategoria import ModeloCategoria
 from src.utils.auth_utils import require_login
 from src.services.facturacion_service import FacturacionService
+from src.services.geolocalizacion_service import (
+    geocodificar_direccion,
+    geocodificar_inverso,
+    buscar_sugerencias,
+    validar_coordenadas,
+    normalizar_direccion
+)
 from src.models.ModeloUsuario import ModeloUsuario
 from src.utils.nav_helper import get_nav_data
 
@@ -55,9 +62,11 @@ def get_product(id):
                 relacionados = cur.fetchall()
                 cur.close()
                 conn.close()
-            except Exception as e:
-                print(f"Error cargando categoria/relacionados: {e}")
-        return _render_with_cart('detalle.jinja', producto=producto, categoria=categoria, relacionados=relacionados)
+            except Exception:
+                categoria = None
+                relacionados = []
+        atributos = ModeloProducto.get_atributos(id)
+        return _render_with_cart('detalle.jinja', producto=producto, categoria=categoria, relacionados=relacionados, atributos=atributos)
     return _render_with_cart('error_page.jinja', mensaje='Producto no encontrado')
 
 # Ruta de categoría por nombre
@@ -232,6 +241,26 @@ def eliminar_del_carrito(id_producto):
     flash('Producto eliminado del carrito', 'info')
     return redirect(url_for('main_blueprint.carrito'))
 
+# ==================== ENDPOINTS DE GEOCODIFICACIÓN Y AUTOCOMPLETADO ====================
+
+@main.route('/api/geocodificar/autocompletar', methods=['GET'])
+def api_geocodificar_autocompletar():
+    query = request.args.get('q', '').strip()
+    ciudad = request.args.get('ciudad', 'Bogotá').strip()
+    sugerencias = buscar_sugerencias(query, ciudad=ciudad)
+    return jsonify(sugerencias)
+
+
+@main.route('/api/geocodificar/inverso', methods=['GET'])
+def api_geocodificar_inverso():
+    lat = request.args.get('lat', type=float)
+    lng = request.args.get('lng', type=float)
+    if lat is None or lng is None:
+        return jsonify({'error': 'Coordenadas lat y lng requeridas'}), 400
+    resultado = geocodificar_inverso(lat, lng)
+    return jsonify(resultado)
+
+
 @main.route('/checkout', methods=['GET', 'POST'])
 @require_login
 def checkout():
@@ -242,8 +271,8 @@ def checkout():
 
     if request.method == 'POST':
         metodo_pago = request.form.get('metodo_pago', 'efectivo')
-        direccion_entrega = request.form.get('direccion_entrega', '').strip()
-        ciudad = request.form.get('ciudad', '').strip()
+        direccion_entrega = normalizar_direccion(request.form.get('direccion_entrega', '').strip())
+        ciudad = request.form.get('ciudad', 'Bogotá').strip() or 'Bogotá'
         telefono_contacto = request.form.get('telefono_contacto', '').strip()
 
         if not direccion_entrega or not ciudad or not telefono_contacto:
@@ -295,6 +324,13 @@ def checkout():
 
             lat_entrega = request.form.get('lat_entrega', type=float)
             lng_entrega = request.form.get('lng_entrega', type=float)
+
+            # Validar si las coordenadas enviadas son válidas o necesitan geocodificación
+            if not validar_coordenadas(lat_entrega, lng_entrega, ciudad):
+                geo_info = geocodificar_direccion(direccion_entrega, ciudad=ciudad)
+                lat_entrega = geo_info['lat']
+                lng_entrega = geo_info['lng']
+
             origen_despacho = request.form.get('origen_despacho', 'Centro de Distribución OilSkin - Colegio Técnico José Félix Restrepo, Bogotá').strip() or 'Centro de Distribución OilSkin - Colegio Técnico José Félix Restrepo, Bogotá'
             lat_origen = request.form.get('lat_origen', default=4.57409, type=float)
             lng_origen = request.form.get('lng_origen', default=-74.08958, type=float)

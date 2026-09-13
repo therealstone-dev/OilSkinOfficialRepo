@@ -3,7 +3,7 @@
 
 {% block title %}Inventario y Catálogo - OilSkin Admin{% endblock %}
 {% block header_title %}Inventario y Catálogo{% endblock %}
-{% block header_subtitle %}Administración de productos, existencias y categorías{% endblock %}
+{% block header_subtitle %}Administración de productos, existencias, imágenes y ficha técnica{% endblock %}
 
 {% block admin_content %}
 <!-- Header con botón -->
@@ -25,7 +25,7 @@
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th style="width:60px;">ID</th>
                     <th>Producto</th>
                     <th>Categoría</th>
                     <th style="text-align:right;">Precio</th>
@@ -39,10 +39,20 @@
                 <tr>
                     <td><span style="font-family:monospace; font-weight:700; font-size:0.75rem; color:var(--gold);">#{{ p.id_producto }}</span></td>
                     <td>
-                        <div style="font-weight:700; color:var(--text-primary); font-size:0.85rem;">{{ p.nombre_producto }}</div>
-                        {% if p.descripcion %}
-                            <div style="font-size:0.7rem; color:var(--text-muted); max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ p.descripcion }}</div>
-                        {% endif %}
+                        <div class="d-flex align-items-center gap-3">
+                            <div style="position:relative; width:40px; height:40px; flex-shrink:0;">
+                                <img src="{{ p.imagenUrl or url_for('static', filename='img/logo.webp') }}" 
+                                     alt="{{ p.nombre_producto }}" 
+                                     onerror="this.src='/static/img/logo.webp'"
+                                     style="width:40px; height:40px; border-radius:10px; object-fit:cover; border:1px solid var(--dark-border-gold); background:#111;">
+                            </div>
+                            <div>
+                                <div style="font-weight:700; color:var(--text-primary); font-size:0.85rem;">{{ p.nombre_producto }}</div>
+                                {% if p.descripcion %}
+                                    <div style="font-size:0.7rem; color:var(--text-muted); max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ p.descripcion }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
                     </td>
                     <td><span class="badge-gold">{{ p.nombre_categoria or 'General' }}</span></td>
                     <td style="text-align:right; font-weight:600; color:var(--text-primary);">${{ "{:,.0f}".format(p.precio_venta) }}</td>
@@ -56,7 +66,7 @@
                     <td style="text-align:center;">
                         <form action="{{ url_for('admin_blueprint.ajustar_stock', id_producto=p.id_producto) }}" method="POST" class="d-flex align-items-center justify-content-center gap-1">
                             <input type="number" name="stock" value="{{ p.stock_actual }}" class="admin-input" style="width:60px; text-align:center; padding:5px 8px; font-size:0.78rem;">
-                            <button type="submit" class="btn-dark-subtle" style="padding:5px 10px;">
+                            <button type="submit" class="btn-dark-subtle" style="padding:5px 10px;" title="Actualizar stock">
                                 <i class="fa-solid fa-check" style="font-size:0.7rem;"></i>
                             </button>
                         </form>
@@ -69,11 +79,12 @@
                                 data-descripcion="{{ p.descripcion or '' }}"
                                 data-precio="{{ p.precio_venta }}"
                                 data-stock="{{ p.stock_actual }}"
-                                data-categoria="{{ p.id_categoria or '' }}">
+                                data-categoria="{{ p.id_categoria or '' }}"
+                                data-imagen="{{ p.imagenUrl or '' }}">
                                 <i class="fa-solid fa-pen-to-square"></i> Editar
                             </button>
                             <form action="{{ url_for('admin_blueprint.eliminar_producto', id_producto=p.id_producto) }}" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar este producto?');">
-                                <button type="submit" class="btn-danger-subtle" style="padding:7px 10px;">
+                                <button type="submit" class="btn-danger-subtle" style="padding:7px 10px;" title="Eliminar producto">
                                     <i class="fa-solid fa-trash" style="font-size:0.72rem;"></i>
                                 </button>
                             </form>
@@ -88,85 +99,185 @@
 
 <!-- Modal Nuevo Producto -->
 <div id="modalNuevoProducto" class="admin-modal-overlay" style="display:none;">
-    <div class="admin-modal">
+    <div class="admin-modal" style="max-width: 620px;">
         <div class="admin-modal-header">
             <h3><i class="fa-solid fa-plus me-2" style="color:var(--gold);"></i>Nuevo Producto</h3>
             <button type="button" id="btnCerrarCrear" style="border:none; background:none; color:var(--text-muted); cursor:pointer; font-size:1.1rem;"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <form action="{{ url_for('admin_blueprint.crear_producto') }}" method="POST">
-            <div class="mb-3">
-                <label class="admin-label">Nombre del Producto</label>
-                <input type="text" name="nombre_producto" required class="admin-input" placeholder="Ej. Serum Anti-Edad 30ml">
-            </div>
-            <div class="mb-3">
-                <label class="admin-label">Descripción</label>
-                <textarea name="descripcion" rows="2" class="admin-input" style="resize:vertical;" placeholder="Detalles del producto..."></textarea>
-            </div>
-            <div class="row g-3 mb-3">
-                <div class="col-6">
-                    <label class="admin-label">Precio ($ COP)</label>
-                    <input type="number" step="0.01" name="precio" required class="admin-input" placeholder="45000">
+        <div class="admin-modal-body">
+            <form action="{{ url_for('admin_blueprint.crear_producto') }}" method="POST" enctype="multipart/form-data">
+                <!-- SECCIÓN 1: DATOS GENERALES -->
+                <div class="mb-3">
+                    <label class="admin-label">Nombre del Producto *</label>
+                    <input type="text" name="nombre_producto" required class="admin-input" placeholder="Ej. Sérum Anti-Edad 30ml con Aceite de Palma">
                 </div>
-                <div class="col-6">
-                    <label class="admin-label">Stock Inicial</label>
-                    <input type="number" name="stock" required class="admin-input" placeholder="50">
+                <div class="mb-3">
+                    <label class="admin-label">Descripción Breve</label>
+                    <textarea name="descripcion" rows="2" class="admin-input" style="resize:vertical;" placeholder="Fórmula magistral nutritiva para piel suave y revitalizada..."></textarea>
                 </div>
-            </div>
-            <div class="mb-3">
-                <label class="admin-label">Categoría</label>
-                <select name="id_categoria" required class="admin-select">
-                    {% for cat in todas_categorias %}
-                        <option value="{{ cat.id_categoria }}">{{ cat.nombre_categoria }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="d-flex justify-content-end gap-2 mt-4">
-                <button type="button" id="btnCancelarCrear" class="btn-dark-subtle">Cancelar</button>
-                <button type="submit" class="btn-gold">Guardar Producto</button>
-            </div>
-        </form>
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <label class="admin-label">Precio ($ COP) *</label>
+                        <input type="number" step="0.01" name="precio" required class="admin-input" placeholder="45000">
+                    </div>
+                    <div class="col-6">
+                        <label class="admin-label">Stock Inicial *</label>
+                        <input type="number" name="stock" required class="admin-input" placeholder="50">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="admin-label">Categoría *</label>
+                    <select name="id_categoria" required class="admin-select">
+                        {% for cat in todas_categorias %}
+                            <option value="{{ cat.id_categoria }}">{{ cat.nombre_categoria }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- SECCIÓN 2: IMAGEN DE PRESENTACIÓN -->
+                <div class="p-3 rounded-3 mb-4" style="background: rgba(206,176,110,0.04); border: 1px solid var(--dark-border-gold);">
+                    <label class="admin-label d-flex align-items-center gap-2" style="color:var(--gold);">
+                        <i class="fa-solid fa-image"></i> Imagen de Presentación (WebP / PNG / JPG)
+                    </label>
+                    <div class="d-flex align-items-center gap-3 mt-2">
+                        <div style="width: 70px; height: 70px; border-radius: 12px; overflow: hidden; border: 2px solid var(--dark-border-gold); background: #000; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                            <img id="preview_crear_img" src="{{ url_for('static', filename='img/logo.webp') }}" alt="Vista previa" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <div class="flex-grow-1">
+                            <input type="file" name="imagen_file" id="file_crear_img" accept="image/*" class="admin-input mb-2" style="padding: 6px; font-size: 0.75rem;">
+                            <input type="text" name="imagen_url" id="url_crear_img" placeholder="O ingresa enlace /static/img/..." class="admin-input" style="font-size: 0.75rem;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 3: ATRIBUTOS CONFIGURABLES (FICHA DETALLE) -->
+                <div class="p-3 rounded-3 mb-3" style="background: rgba(255,255,255,0.02); border: 1px solid var(--dark-border);">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <label class="admin-label mb-0" style="color:var(--text-primary); font-size:0.8rem;">
+                            <i class="fa-solid fa-sliders me-1.5" style="color:var(--gold);"></i> Ficha Técnica y Características
+                        </label>
+                        <span style="font-size:0.7rem; color:var(--text-muted);">Personalizable</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="admin-label" style="font-size:0.72rem;">Badges / Etiquetas (separados por coma)</label>
+                        <input type="text" name="atributos_badges" class="admin-input" style="font-size:0.78rem;" placeholder="100% Orgánico, Palma Pura, Testeado, Cruelty Free">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="admin-label" style="font-size:0.72rem;">Beneficios Destacados</label>
+                        <textarea name="atributo_beneficio_general" rows="2" class="admin-input" style="font-size:0.78rem;" placeholder="Nutrición celular profunda, efecto antioxidante de tocotrienoles y alta absorción sin brillo graso."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="admin-label" style="font-size:0.72rem;">Modo de Uso y Rutina</label>
+                        <textarea name="atributo_modo_uso_general" rows="2" class="admin-input" style="font-size:0.78rem;" placeholder="Aplicar 2 a 3 gotas sobre la piel limpia por la mañana y noche con suaves masajes ascendentes."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="admin-label" style="font-size:0.72rem;">Ingredientes Clave / Fórmula</label>
+                        <textarea name="atributo_ingredientes" rows="2" class="admin-input" style="font-size:0.78rem;" placeholder="Elaeis Guineensis (Palm) Fruit Oil Organic Extract, Vitamina E, Complejo de Carotenoides."></textarea>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-2 border-top border-neutral-800">
+                    <button type="button" id="btnCancelarCrear" class="btn-dark-subtle">Cancelar</button>
+                    <button type="submit" class="btn-gold">Guardar Producto</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
 <!-- Modal Editar Producto -->
 <div id="modalEditarProducto" class="admin-modal-overlay" style="display:none;">
-    <div class="admin-modal">
+    <div class="admin-modal" style="max-width: 620px;">
         <div class="admin-modal-header">
             <h3><i class="fa-solid fa-pen-to-square me-2" style="color:var(--gold);"></i>Editar Producto</h3>
             <button type="button" id="btnCerrarEditar" style="border:none; background:none; color:var(--text-muted); cursor:pointer; font-size:1.1rem;"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <form id="formEditarProducto" method="POST">
-            <div class="mb-3">
-                <label class="admin-label">Nombre del Producto</label>
-                <input type="text" id="edit_nombre" name="nombre_producto" required class="admin-input">
-            </div>
-            <div class="mb-3">
-                <label class="admin-label">Descripción</label>
-                <textarea id="edit_descripcion" name="descripcion" rows="2" class="admin-input" style="resize:vertical;"></textarea>
-            </div>
-            <div class="row g-3 mb-3">
-                <div class="col-6">
-                    <label class="admin-label">Precio ($ COP)</label>
-                    <input type="number" step="0.01" id="edit_precio" name="precio" required class="admin-input">
+        <div class="admin-modal-body">
+            <form id="formEditarProducto" method="POST" enctype="multipart/form-data">
+                <!-- SECCIÓN 1: DATOS GENERALES -->
+                <div class="mb-3">
+                    <label class="admin-label">Nombre del Producto *</label>
+                    <input type="text" id="edit_nombre" name="nombre_producto" required class="admin-input">
                 </div>
-                <div class="col-6">
-                    <label class="admin-label">Stock</label>
-                    <input type="number" id="edit_stock" name="stock" required class="admin-input">
+                <div class="mb-3">
+                    <label class="admin-label">Descripción Breve</label>
+                    <textarea id="edit_descripcion" name="descripcion" rows="2" class="admin-input" style="resize:vertical;"></textarea>
                 </div>
-            </div>
-            <div class="mb-3">
-                <label class="admin-label">Categoría</label>
-                <select id="edit_categoria" name="id_categoria" required class="admin-select">
-                    {% for cat in todas_categorias %}
-                        <option value="{{ cat.id_categoria }}">{{ cat.nombre_categoria }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="d-flex justify-content-end gap-2 mt-4">
-                <button type="button" id="btnCancelarEditar" class="btn-dark-subtle">Cancelar</button>
-                <button type="submit" class="btn-gold">Guardar Cambios</button>
-            </div>
-        </form>
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <label class="admin-label">Precio ($ COP) *</label>
+                        <input type="number" step="0.01" id="edit_precio" name="precio" required class="admin-input">
+                    </div>
+                    <div class="col-6">
+                        <label class="admin-label">Stock *</label>
+                        <input type="number" id="edit_stock" name="stock" required class="admin-input">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="admin-label">Categoría *</label>
+                    <select id="edit_categoria" name="id_categoria" required class="admin-select">
+                        {% for cat in todas_categorias %}
+                            <option value="{{ cat.id_categoria }}">{{ cat.nombre_categoria }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- SECCIÓN 2: IMAGEN DE PRESENTACIÓN -->
+                <div class="p-3 rounded-3 mb-4" style="background: rgba(206,176,110,0.04); border: 1px solid var(--dark-border-gold);">
+                    <label class="admin-label d-flex align-items-center gap-2" style="color:var(--gold);">
+                        <i class="fa-solid fa-image"></i> Imagen de Presentación (Reemplazar o mantener)
+                    </label>
+                    <div class="d-flex align-items-center gap-3 mt-2">
+                        <div style="width: 70px; height: 70px; border-radius: 12px; overflow: hidden; border: 2px solid var(--dark-border-gold); background: #000; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                            <img id="preview_editar_img" src="{{ url_for('static', filename='img/logo.webp') }}" alt="Vista previa actual" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='/static/img/logo.webp'">
+                        </div>
+                        <div class="flex-grow-1">
+                            <input type="file" name="imagen_file" id="file_editar_img" accept="image/*" class="admin-input mb-2" style="padding: 6px; font-size: 0.75rem;">
+                            <input type="text" name="imagen_url" id="url_editar_img" placeholder="O URL de imagen existente..." class="admin-input" style="font-size: 0.75rem;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 3: ATRIBUTOS CONFIGURABLES (FICHA DETALLE) -->
+                <div class="p-3 rounded-3 mb-3" style="background: rgba(255,255,255,0.02); border: 1px solid var(--dark-border);">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <label class="admin-label mb-0" style="color:var(--text-primary); font-size:0.8rem;">
+                            <i class="fa-solid fa-sliders me-1.5" style="color:var(--gold);"></i> Ficha Técnica y Características
+                        </label>
+                        <span style="font-size:0.7rem; color:var(--gold);">Sincronizada con /producto/&lt;id&gt;</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="admin-label" style="font-size:0.72rem;">Badges / Etiquetas (separados por coma)</label>
+                        <input type="text" id="edit_atributos_badges" name="atributos_badges" class="admin-input" style="font-size:0.78rem;" placeholder="100% Orgánico, Palma Pura, Testeado">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="admin-label" style="font-size:0.72rem;">Beneficios Destacados</label>
+                        <textarea id="edit_atributo_beneficio" name="atributo_beneficio_general" rows="2" class="admin-input" style="font-size:0.78rem;" placeholder="Beneficios principales del producto..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="admin-label" style="font-size:0.72rem;">Modo de Uso y Rutina</label>
+                        <textarea id="edit_atributo_modo_uso" name="atributo_modo_uso_general" rows="2" class="admin-input" style="font-size:0.78rem;" placeholder="Instrucciones paso a paso para el cliente..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="admin-label" style="font-size:0.72rem;">Ingredientes Clave / Fórmula</label>
+                        <textarea id="edit_atributo_ingredientes" name="atributo_ingredientes" rows="2" class="admin-input" style="font-size:0.78rem;" placeholder="Lista de ingredientes limpios y extractos..."></textarea>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-2 border-top border-neutral-800">
+                    <button type="button" id="btnCancelarEditar" class="btn-dark-subtle">Cancelar</button>
+                    <button type="submit" class="btn-gold">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -177,6 +288,48 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalCrear = document.getElementById('modalNuevoProducto');
     const modalEditar = document.getElementById('modalEditarProducto');
     const formEditar = document.getElementById('formEditarProducto');
+
+    // Previsualización de imágenes Crear
+    const fileCrear = document.getElementById('file_crear_img');
+    const urlCrear = document.getElementById('url_crear_img');
+    const previewCrear = document.getElementById('preview_crear_img');
+
+    if (fileCrear) {
+        fileCrear.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (evt) => previewCrear.src = evt.target.result;
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    if (urlCrear) {
+        urlCrear.addEventListener('input', function() {
+            if (this.value.trim()) previewCrear.src = this.value.trim();
+        });
+    }
+
+    // Previsualización de imágenes Editar
+    const fileEditar = document.getElementById('file_editar_img');
+    const urlEditar = document.getElementById('url_editar_img');
+    const previewEditar = document.getElementById('preview_editar_img');
+
+    if (fileEditar) {
+        fileEditar.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (evt) => previewEditar.src = evt.target.result;
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    if (urlEditar) {
+        urlEditar.addEventListener('input', function() {
+            if (this.value.trim()) previewEditar.src = this.value.trim();
+        });
+    }
 
     // Abrir/Cerrar modal crear
     document.getElementById('btnAbrirCrear').addEventListener('click', () => modalCrear.style.display = 'flex');
@@ -190,13 +343,44 @@ document.addEventListener('DOMContentLoaded', function() {
     // Botones editar producto
     document.querySelectorAll('.btn-editar-prod').forEach(btn => {
         btn.addEventListener('click', function() {
-            formEditar.action = '/admin/inventario/' + this.dataset.id + '/editar';
+            const prodId = this.dataset.id;
+            formEditar.action = '/admin/inventario/' + prodId + '/editar';
             document.getElementById('edit_nombre').value = this.dataset.nombre || '';
             document.getElementById('edit_descripcion').value = this.dataset.descripcion || '';
             document.getElementById('edit_precio').value = this.dataset.precio || '';
             document.getElementById('edit_stock').value = this.dataset.stock || '';
             const cat = document.getElementById('edit_categoria');
             if (this.dataset.categoria) cat.value = this.dataset.categoria;
+
+            const currentImg = this.dataset.imagen || '/static/img/logo.webp';
+            urlEditar.value = this.dataset.imagen || '';
+            previewEditar.src = currentImg;
+
+            // Reset campos atributos
+            document.getElementById('edit_atributos_badges').value = '';
+            document.getElementById('edit_atributo_beneficio').value = '';
+            document.getElementById('edit_atributo_modo_uso').value = '';
+            document.getElementById('edit_atributo_ingredientes').value = '';
+
+            // Cargar atributos existentes vía API
+            fetch('/admin/inventario/' + prodId + '/atributos')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.badge && data.badge.length > 0) {
+                        document.getElementById('edit_atributos_badges').value = data.badge.map(b => b.contenido).join(', ');
+                    }
+                    if (data.beneficio && data.beneficio.length > 0) {
+                        document.getElementById('edit_atributo_beneficio').value = data.beneficio.map(b => b.contenido).join('\n');
+                    }
+                    if (data.modo_uso && data.modo_uso.length > 0) {
+                        document.getElementById('edit_atributo_modo_uso').value = data.modo_uso.map(u => u.contenido).join('\n');
+                    }
+                    if (data.ingrediente && data.ingrediente.length > 0) {
+                        document.getElementById('edit_atributo_ingredientes').value = data.ingrediente.map(i => i.contenido).join('\n');
+                    }
+                })
+                .catch(err => console.log('Error cargando atributos:', err));
+
             modalEditar.style.display = 'flex';
         });
     });

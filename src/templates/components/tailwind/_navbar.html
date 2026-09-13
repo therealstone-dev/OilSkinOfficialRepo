@@ -41,20 +41,36 @@
                     </button>
 
                     <div id="dropdownMenu" 
-                         class="hidden group-hover:block absolute left-0 top-full pt-2 w-56 z-[110] transition-all duration-200">
-                        <div class="rounded-2xl shadow-2xl bg-neutral-950/95 border border-neutral-800/90 backdrop-blur-xl p-2 divide-y divide-neutral-800/60">
-                            <div class="py-1 space-y-0.5">
+                         class="hidden group-hover:block absolute left-0 top-full pt-2 w-64 z-[110] transition-all duration-200">
+                        <div class="rounded-2xl shadow-2xl bg-neutral-950/95 border border-neutral-800/90 backdrop-blur-xl p-2.5 space-y-2">
+                            <!-- Buscador Rápido de Categorías -->
+                            <div class="relative px-1">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 text-[10px]"></i>
+                                <input type="text" id="navCategorySearch" placeholder="Buscar categoría..." 
+                                       class="w-full bg-neutral-900/90 border border-neutral-800 rounded-xl pl-7 pr-2.5 py-1.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition">
+                            </div>
+
+                            <!-- Lista con scroll interno -->
+                            <div class="py-1 space-y-0.5 max-h-56 overflow-y-auto pr-1" id="navCategoriesList">
                                 {% if categorias %}
                                     {% for categoria in categorias %}
                                     <a href="{{ url_for('main_blueprint.show_category', category_name=categoria.nombre_categoria) }}"
-                                       class="flex items-center justify-between px-3 py-2 text-xs font-semibold text-neutral-300 hover:text-gold hover:bg-neutral-900/80 rounded-xl transition-all group/item">
-                                        <span>{{ categoria.nombre_categoria }}</span>
+                                       class="nav-cat-item flex items-center justify-between px-3 py-2 text-xs font-semibold text-neutral-300 hover:text-gold hover:bg-neutral-900/80 rounded-xl transition-all group/item"
+                                       data-name="{{ categoria.nombre_categoria|lower }}">
+                                        <span class="truncate">{{ categoria.nombre_categoria }}</span>
                                         <i class="fa-solid fa-angle-right text-[10px] text-neutral-600 group-hover/item:text-gold group-hover/item:translate-x-0.5 transition-all"></i>
                                     </a>
                                     {% endfor %}
                                 {% else %}
                                     <a href="{{ url_for('main_blueprint.index') }}" class="block px-3 py-2 text-xs text-neutral-400">Ver catálogo completo</a>
                                 {% endif %}
+                            </div>
+
+                            <!-- Footer del dropdown -->
+                            <div class="pt-2 border-t border-neutral-800/60">
+                                <a href="{{ url_for('main_blueprint.index') }}" class="flex items-center justify-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-gold hover:bg-gold/10 rounded-xl transition-all">
+                                    <i class="fa-solid fa-boxes-stacked text-[10px]"></i> Ver todo el catálogo
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -176,14 +192,17 @@
             </a>
         </div>
 
-        <!-- Categorías -->
+        <!-- Categorías Móvil -->
         <div class="pt-3 border-t border-neutral-800/80 space-y-1">
-            <span class="text-[11px] uppercase tracking-widest text-neutral-500 font-bold block mb-2 px-2">Categorías</span>
-            <div class="grid grid-cols-2 gap-1.5">
+            <div class="flex items-center justify-between px-2 mb-2">
+                <span class="text-[11px] uppercase tracking-widest text-neutral-500 font-bold">Categorías</span>
+                <span class="text-[10px] text-gold font-semibold">{{ categorias|length }} disponibles</span>
+            </div>
+            <div class="grid grid-cols-2 gap-1.5 max-h-44 overflow-y-auto pr-1">
                 {% for categoria in categorias %}
                 <a href="{{ url_for('main_blueprint.show_category', category_name=categoria.nombre_categoria) }}" 
-                   class="p-2 rounded-xl text-xs font-medium text-neutral-300 hover:bg-neutral-900 hover:text-gold transition truncate">
-                    • {{ categoria.nombre_categoria }}
+                   class="p-2 rounded-xl text-xs font-medium text-neutral-300 hover:bg-neutral-900 hover:text-gold transition truncate flex items-center gap-1.5">
+                    <span class="text-gold">•</span> {{ categoria.nombre_categoria }}
                 </a>
                 {% endfor %}
             </div>
@@ -269,6 +288,18 @@
             if (!dropdownBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
                 dropdownMenu.classList.add('hidden');
             }
+        });
+    }
+
+    // Buscador en tiempo real de categorías en navbar
+    const catSearch = document.getElementById('navCategorySearch');
+    if (catSearch) {
+        catSearch.addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase().trim();
+            document.querySelectorAll('#navCategoriesList .nav-cat-item').forEach(item => {
+                const name = item.getAttribute('data-name') || '';
+                item.style.display = name.includes(query) ? 'flex' : 'none';
+            });
         });
     }
 </script>
