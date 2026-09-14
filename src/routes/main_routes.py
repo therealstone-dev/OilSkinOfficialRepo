@@ -49,7 +49,7 @@ def about():
 @main.route('/producto/<int:id>')
 def get_product(id):
     producto = ModeloProducto.get_by_id(id)
-    if producto:
+    if producto and producto.get('activo', 1) == 1:
         categoria = None
         relacionados = []
         if producto.get('id_categoria'):
@@ -58,7 +58,7 @@ def get_product(id):
                 cur = conn.cursor()
                 cur.execute("SELECT nombre_categoria, descripcion FROM categoria WHERE id_categoria = %s", (producto['id_categoria'],))
                 categoria = cur.fetchone()
-                cur.execute("SELECT * FROM producto WHERE id_categoria = %s AND id_producto != %s LIMIT 3", (producto['id_categoria'], id))
+                cur.execute("SELECT * FROM producto WHERE id_categoria = %s AND id_producto != %s AND activo = 1 LIMIT 3", (producto['id_categoria'], id))
                 relacionados = cur.fetchall()
                 cur.close()
                 conn.close()
@@ -67,7 +67,7 @@ def get_product(id):
                 relacionados = []
         atributos = ModeloProducto.get_atributos(id)
         return _render_with_cart('detalle.jinja', producto=producto, categoria=categoria, relacionados=relacionados, atributos=atributos)
-    return _render_with_cart('error_page.jinja', mensaje='Producto no encontrado')
+    return _render_with_cart('error_page.jinja', mensaje='Producto no disponible')
 
 # Ruta de categoría por nombre
 @main.route('/categoria/<string:category_name>')

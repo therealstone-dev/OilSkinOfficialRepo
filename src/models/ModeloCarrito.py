@@ -19,7 +19,7 @@ class ModeloCarrito:
         conn = get_connection()
         cur = conn.cursor()
         cur.execute(
-            "SELECT id_producto, nombre_producto, precio, stock FROM producto WHERE id_producto = %s",
+            "SELECT id_producto, nombre_producto, precio, stock FROM producto WHERE id_producto = %s AND activo = 1",
             (id_producto,),
         )
         producto = cur.fetchone()

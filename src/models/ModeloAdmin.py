@@ -24,6 +24,7 @@ class ModeloAdmin:
                     COALESCE(SUM(stock * precio), 0) AS valor_total_inventario,
                     COUNT(CASE WHEN stock <= 10 THEN 1 END) AS productos_bajo_stock
                 FROM producto
+                WHERE activo = 1
             """)
             kpi_inventario = cur.fetchone() or {}
 
@@ -68,12 +69,13 @@ class ModeloAdmin:
                     p.id_categoria,
                     p.descripcion,
                     p.imagenUrl,
+                    COALESCE(p.activo, 1) AS activo,
                     v.unidades_vendidas,
                     v.ingresos_totales_producto,
                     v.estado_stock
                 FROM vw_admin_inventario_ventas v
                 LEFT JOIN producto p ON p.id_producto = v.id_producto
-                ORDER BY v.unidades_vendidas DESC, v.stock_actual ASC
+                ORDER BY activo DESC, v.unidades_vendidas DESC, v.stock_actual ASC
             """)
             cur.execute(sql)
             productos = cur.fetchall()
@@ -84,6 +86,7 @@ class ModeloAdmin:
                 p['precio_venta'] = float(p.get('precio_venta', 0))
                 p['unidades_vendidas'] = int(p.get('unidades_vendidas', 0))
                 p['ingresos_totales_producto'] = float(p.get('ingresos_totales_producto', 0))
+                p['activo'] = int(p.get('activo') if p.get('activo') is not None else 1)
             return productos
         except Exception as ex:
             print(f"Error en get_desglose_productos: {ex}")
@@ -390,17 +393,51 @@ class ModeloAdmin:
 
     @classmethod
     def eliminar_producto(cls, id_producto: int):
+        """
+        Elimina físicamente el producto si no tiene compras asociadas.
+        Si tiene compras previas en detalle_pedido, realiza un borrado lógico (activo = 0)
+        para preservar la integridad histórica y contable de los pedidos.
+        """
         try:
             conn = get_connection()
             cur = conn.cursor()
-            cur.execute("DELETE FROM producto WHERE id_producto = %s", (id_producto,))
+            # 1. Comprobar si tiene registros de compras en detalle_pedido
+            cur.execute("SELECT COUNT(*) AS total_pedidos FROM detalle_pedido WHERE id_producto = %s", (id_producto,))
+            res = cur.fetchone()
+            total_pedidos = res['total_pedidos'] if res else 0
+
+            if total_pedidos > 0:
+                # Borrado lógico: desactivar el producto
+                cur.execute("UPDATE producto SET activo = 0 WHERE id_producto = %s", (id_producto,))
+                conn.commit()
+                cur.close()
+                conn.close()
+                return True, f"El producto tiene {total_pedidos} compra(s) asociada(s). Ha sido retirado y archivado del catálogo para proteger el historial de pedidos."
+            else:
+                # Borrado físico completo
+                cur.execute("DELETE FROM producto WHERE id_producto = %s", (id_producto,))
+                conn.commit()
+                cur.close()
+                conn.close()
+                return True, "Producto eliminado exitosamente del catálogo y de la base de datos."
+        except Exception as ex:
+            print(f"Error en eliminar_producto: {ex}")
+            return False, f"Error al procesar la eliminación del producto: {ex}"
+
+    @classmethod
+    def reactivar_producto(cls, id_producto: int):
+        """Reactiva un producto previamente archivado/desactivado."""
+        try:
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute("UPDATE producto SET activo = 1 WHERE id_producto = %s", (id_producto,))
             conn.commit()
             cur.close()
             conn.close()
-            return True, "Producto eliminado exitosamente del catálogo."
+            return True, f"Producto #{id_producto} reactivado exitosamente en el catálogo."
         except Exception as ex:
-            print(f"Error en eliminar_producto: {ex}")
-            return False, f"No se pudo eliminar el producto (puede tener compras/detalles asociados): {ex}"
+            print(f"Error en reactivar_producto: {ex}")
+            return False, f"Error al reactivar el producto: {ex}"
 
     # ==================== GESTIÓN DE VENTAS E INFORMES ====================
 

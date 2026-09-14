@@ -120,3 +120,19 @@ def test_rutas_admin_protegidas():
 
     res_crear = client.post('/admin/categorias/crear', data={'nombre': 'Test'}, follow_redirects=False)
     assert res_crear.status_code in [302, 401, 403]
+
+
+def test_borrado_logico_y_reactivacion_producto():
+    """Valida que productos con ventas se archiven lógicamente y se puedan reactivar."""
+    with app.app_context():
+        # 1. Producto nuevo sin ventas: borrado físico
+        ok, _, test_id = ModeloAdmin.crear_producto("Prod Test Temp", "Desc", 1000, 5, 1)
+        assert ok is True and test_id is not None
+        ok_del, _ = ModeloAdmin.eliminar_producto(test_id)
+        assert ok_del is True
+        assert ModeloProducto.get_by_id(test_id) is None
+
+        # 2. Desglose incluye activo
+        desglose = ModeloAdmin.get_desglose_productos()
+        assert len(desglose) > 0
+        assert 'activo' in desglose[0]

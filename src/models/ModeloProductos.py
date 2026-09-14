@@ -4,10 +4,11 @@ from src.database.db_mysql import get_connection
 class ModeloProducto:
     @classmethod
     # Obtiene todos los productos
-    def get_all(cls):
+    def get_all(cls, solo_activos=True):
         conn = get_connection()
         cur = conn.cursor()
-        cur.execute("SELECT id_producto, nombre_producto, descripcion, precio, stock, imagenUrl, id_categoria from producto ORDER BY nombre_producto ASC")
+        filtro = "WHERE activo = 1" if solo_activos else ""
+        cur.execute(f"SELECT id_producto, nombre_producto, descripcion, precio, stock, imagenUrl, id_categoria, activo FROM producto {filtro} ORDER BY nombre_producto ASC")
         result = cur.fetchall()
         cur.close()
         conn.close()
@@ -28,7 +29,7 @@ class ModeloProducto:
         try:
             conn = get_connection()
             cur = conn.cursor()
-            sql = "SELECT * FROM producto WHERE nombre_categoria = %s"
+            sql = "SELECT * FROM producto WHERE nombre_categoria = %s AND activo = 1"
             cur.execute(sql, (category_name,))
             productos = cur.fetchall()
             cur.close()
@@ -43,7 +44,7 @@ class ModeloProducto:
         try:
             conn = get_connection()
             cur = conn.cursor()
-            sql = "SELECT * FROM producto WHERE id_categoria = %s"
+            sql = "SELECT * FROM producto WHERE id_categoria = %s AND activo = 1"
             cur.execute(sql, (category_id,))
             productos = cur.fetchall()
             cur.close()
@@ -57,7 +58,7 @@ class ModeloProducto:
     def get_categories(cls):
         conn = get_connection()
         cur = conn.cursor()
-        cur.execute("SELECT id_categoria FROM producto")
+        cur.execute("SELECT DISTINCT id_categoria FROM producto WHERE activo = 1")
         categories = cur.fetchall()
         cur.close()
         conn.close()

@@ -34,6 +34,7 @@ CREATE TABLE producto (
   imagenUrl VARCHAR(500) DEFAULT '/static/img/logo.webp',
   fechaAgregado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   id_categoria INT NOT NULL,
+  activo TINYINT(1) NOT NULL DEFAULT 1,
   FOREIGN KEY (id_categoria) REFERENCES categoria(id_categoria)
 )ENGINE=InnoDB;
 CREATE TABLE pedido (

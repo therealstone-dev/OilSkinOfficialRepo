@@ -257,6 +257,13 @@ def eliminar_producto(id_producto):
     flash(mensaje, 'success' if exito else 'danger')
     return redirect(url_for('admin_blueprint.inventario'))
 
+@admin.route('/inventario/<int:id_producto>/reactivar', methods=['POST'])
+@require_admin
+def reactivar_producto(id_producto):
+    exito, mensaje = ModeloAdmin.reactivar_producto(id_producto)
+    flash(mensaje, 'success' if exito else 'danger')
+    return redirect(url_for('admin_blueprint.inventario'))
+
 # ==================== RUTAS DE GESTIÓN DE VENTAS E INFORMES ====================
 
 @admin.route('/ventas/<int:id_pedido>/estado', methods=['POST'])

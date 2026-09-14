@@ -36,7 +36,7 @@
             </thead>
             <tbody>
                 {% for p in productos %}
-                <tr>
+                <tr style="{{ 'opacity: 0.72; background: rgba(239, 68, 68, 0.02);' if p.activo == 0 else '' }}">
                     <td><span style="font-family:monospace; font-weight:700; font-size:0.75rem; color:var(--gold);">#{{ p.id_producto }}</span></td>
                     <td>
                         <div class="d-flex align-items-center gap-3">
@@ -47,7 +47,18 @@
                                      style="width:40px; height:40px; border-radius:10px; object-fit:cover; border:1px solid var(--dark-border-gold); background:#111;">
                             </div>
                             <div>
-                                <div style="font-weight:700; color:var(--text-primary); font-size:0.85rem;">{{ p.nombre_producto }}</div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div style="font-weight:700; color:var(--text-primary); font-size:0.85rem;">{{ p.nombre_producto }}</div>
+                                    {% if p.activo == 0 %}
+                                        <span class="badge" style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); font-size:0.65rem; padding:2px 6px; border-radius:6px; font-weight:700;">
+                                            <i class="fa-solid fa-eye-slash me-1"></i>Archivado
+                                        </span>
+                                    {% else %}
+                                        <span class="badge" style="background:rgba(34,197,94,0.12); color:#22c55e; border:1px solid rgba(34,197,94,0.25); font-size:0.65rem; padding:2px 6px; border-radius:6px; font-weight:700;">
+                                            <i class="fa-solid fa-check me-1"></i>Activo
+                                        </span>
+                                    {% endif %}
+                                </div>
                                 {% if p.descripcion %}
                                     <div style="font-size:0.7rem; color:var(--text-muted); max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ p.descripcion }}</div>
                                 {% endif %}
@@ -83,11 +94,19 @@
                                 data-imagen="{{ p.imagenUrl or '' }}">
                                 <i class="fa-solid fa-pen-to-square"></i> Editar
                             </button>
-                            <form action="{{ url_for('admin_blueprint.eliminar_producto', id_producto=p.id_producto) }}" method="POST" onsubmit="return confirm('¿Seguro que deseas eliminar este producto?');">
-                                <button type="submit" class="btn-danger-subtle" style="padding:7px 10px;" title="Eliminar producto">
-                                    <i class="fa-solid fa-trash" style="font-size:0.72rem;"></i>
-                                </button>
-                            </form>
+                            {% if p.activo == 0 %}
+                                <form action="{{ url_for('admin_blueprint.reactivar_producto', id_producto=p.id_producto) }}" method="POST">
+                                    <button type="submit" class="btn-dark-subtle" style="padding:7px 11px; background:rgba(34,197,94,0.15); color:#22c55e; border:1px solid rgba(34,197,94,0.3);" title="Reactivar producto en catálogo">
+                                        <i class="fa-solid fa-rotate-left"></i> Reactivar
+                                    </button>
+                                </form>
+                            {% else %}
+                                <form action="{{ url_for('admin_blueprint.eliminar_producto', id_producto=p.id_producto) }}" method="POST" onsubmit="return confirm('¿Seguro que deseas retirar o eliminar este producto? Si cuenta con compras asociadas, se archivará de forma segura.');">
+                                    <button type="submit" class="btn-danger-subtle" style="padding:7px 10px;" title="Retirar / Eliminar producto">
+                                        <i class="fa-solid fa-trash" style="font-size:0.72rem;"></i>
+                                    </button>
+                                </form>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>
