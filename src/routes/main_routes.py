@@ -316,12 +316,6 @@ def checkout():
             )
             pedido_id = cur.lastrowid
 
-            for item in carrito:
-                cur.execute(
-                    "INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad, precio_unitario, subtotal) VALUES (%s, %s, %s, %s, %s)",
-                    (pedido_id, item['id_producto'], item['cantidad'], item['precio_unitario'], item['subtotal']),
-                )
-
             lat_entrega = request.form.get('lat_entrega', type=float)
             lng_entrega = request.form.get('lng_entrega', type=float)
 

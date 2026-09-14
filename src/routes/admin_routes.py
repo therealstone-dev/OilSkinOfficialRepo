@@ -2,6 +2,8 @@ from io import StringIO
 import os
 import uuid
 import csv
+import base64
+import re
 from flask import Blueprint, render_template, session, redirect, url_for, flash, request, Response, jsonify, current_app
 from pathlib import Path
 from src.utils.nav_helper import get_nav_data
@@ -15,26 +17,71 @@ from src.services.geolocalizacion_service import (
     normalizar_direccion
 )
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'jfif', 'pjpeg', 'pjp', 'svg', 'avif', 'bmp', 'ico'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def procesar_subida_imagen_producto(req):
-    """Procesa la subida de un archivo de imagen o retorna la URL provista"""
+    """
+    Procesa la subida de un archivo de imagen o retorna la URL provista.
+    Soporta:
+    - Archivos subidos (.png, .jpg, .jpeg, .webp, .gif, .jfif, .avif, .svg, etc.)
+    - URLs directas (http://, https://, /static/...)
+    - Cadenas Base64 (data:image/...) guardándolas directamente como archivos en disco
+    """
+    upload_folder = os.path.join(current_app.static_folder, 'uploads', 'productos')
+    os.makedirs(upload_folder, exist_ok=True)
+
+    # 1. Archivo enviado mediante input type="file"
     if 'imagen_file' in req.files:
         file = req.files['imagen_file']
-        if file and file.filename != '' and allowed_file(file.filename):
-            upload_folder = os.path.join(current_app.static_folder, 'uploads', 'productos')
-            os.makedirs(upload_folder, exist_ok=True)
-            ext = file.filename.rsplit('.', 1)[1].lower()
-            filename = f"prod_{uuid.uuid4().hex[:10]}.{ext}"
-            file.save(os.path.join(upload_folder, filename))
-            return f"/static/uploads/productos/{filename}"
+        if file and file.filename != '':
+            if allowed_file(file.filename):
+                ext = file.filename.rsplit('.', 1)[1].lower()
+                if ext in ('jfif', 'pjpeg', 'pjp'):
+                    ext = 'jpg'
+                filename = f"prod_{uuid.uuid4().hex[:10]}.{ext}"
+                file.save(os.path.join(upload_folder, filename))
+                return f"/static/uploads/productos/{filename}"
+            else:
+                flash(f"El formato del archivo '{file.filename}' no es compatible. Usa formatos comunes (JPG, PNG, WEBP, GIF, JFIF, AVIF, SVG).", "warning")
 
-    # URL manual alternativa
+    # 2. URL o Base64 ingresado manualmente
     url_val = req.form.get('imagen_url', '').strip() or req.form.get('imagenUrl', '').strip()
-    return url_val if url_val else None
+    if url_val:
+        # Detectar si es una cadena Base64 (data:image/...)
+        if url_val.startswith('data:image/'):
+            try:
+                match = re.match(r'^data:image/(\w+);base64,(.+)$', url_val, re.DOTALL)
+                if match:
+                    ext = match.group(1).lower()
+                    if ext in ('jpeg', 'pjpeg', 'jfif'):
+                        ext = 'jpg'
+                    b64_data = match.group(2)
+                    filename = f"prod_{uuid.uuid4().hex[:10]}.{ext}"
+                    filepath = os.path.join(upload_folder, filename)
+                    with open(filepath, 'wb') as f:
+                        f.write(base64.b64decode(b64_data))
+                    return f"/static/uploads/productos/{filename}"
+            except Exception as b64_err:
+                print(f"Error decodificando imagen base64: {b64_err}")
+                flash("No se pudo procesar la imagen en formato Base64.", "warning")
+
+        # Normalizar rutas relativas locales si no tienen slash inicial
+        if not url_val.startswith(('http://', 'https://', '/')):
+            if url_val.startswith('static/'):
+                url_val = '/' + url_val
+            elif url_val.startswith('img/'):
+                url_val = '/static/' + url_val
+            else:
+                posible = os.path.join(current_app.static_folder, 'img', url_val)
+                if os.path.exists(posible):
+                    url_val = f"/static/img/{url_val}"
+
+        return url_val
+
+    return None
 
 def extraer_atributos_desde_form(form):
     """Extrae atributos configurables de la ficha de producto desde el formulario"""

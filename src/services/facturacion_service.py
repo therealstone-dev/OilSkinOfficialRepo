@@ -372,24 +372,30 @@ class FacturacionService:
             )
             id_factura = cur.lastrowid
 
-            for item in items:
-                precio_unitario = cls._to_decimal(item['precio_unitario'])
-                cantidad = int(item['cantidad'])
-                subtotal_linea = precio_unitario * Decimal(cantidad)
-                cur.execute(
-                    """
-                    INSERT INTO detalle_pedido (
-                        id_pedido, id_producto, cantidad, precio_unitario, subtotal
-                    ) VALUES (%s, %s, %s, %s, %s)
-                    """,
-                    (
-                        id_pedido,
-                        item['id_producto'],
-                        cantidad,
-                        precio_unitario,
-                        subtotal_linea,
-                    ),
-                )
+            # Evitar duplicaciones si ya existen líneas de detalle para este pedido
+            cur.execute("SELECT COUNT(*) AS total_lineas FROM detalle_pedido WHERE id_pedido = %s", (id_pedido,))
+            res_dp = cur.fetchone()
+            lineas_existentes = res_dp['total_lineas'] if (res_dp and isinstance(res_dp, dict)) else (res_dp[0] if res_dp else 0)
+
+            if lineas_existentes == 0:
+                for item in items:
+                    precio_unitario = cls._to_decimal(item['precio_unitario'])
+                    cantidad = int(item['cantidad'])
+                    subtotal_linea = precio_unitario * Decimal(cantidad)
+                    cur.execute(
+                        """
+                        INSERT INTO detalle_pedido (
+                            id_pedido, id_producto, cantidad, precio_unitario, subtotal
+                        ) VALUES (%s, %s, %s, %s, %s)
+                        """,
+                        (
+                            id_pedido,
+                            item['id_producto'],
+                            cantidad,
+                            precio_unitario,
+                            subtotal_linea,
+                        ),
+                    )
 
             if owns_connection:
                 conn.commit()

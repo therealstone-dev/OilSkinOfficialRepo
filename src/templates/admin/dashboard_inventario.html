@@ -156,15 +156,16 @@
                 <!-- SECCIÓN 2: IMAGEN DE PRESENTACIÓN -->
                 <div class="p-3 rounded-3 mb-4" style="background: rgba(206,176,110,0.04); border: 1px solid var(--dark-border-gold);">
                     <label class="admin-label d-flex align-items-center gap-2" style="color:var(--gold);">
-                        <i class="fa-solid fa-image"></i> Imagen de Presentación (WebP / PNG / JPG)
+                        <i class="fa-solid fa-image"></i> Imagen de Presentación (Subir archivo o URL)
                     </label>
                     <div class="d-flex align-items-center gap-3 mt-2">
                         <div style="width: 70px; height: 70px; border-radius: 12px; overflow: hidden; border: 2px solid var(--dark-border-gold); background: #000; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
                             <img id="preview_crear_img" src="{{ url_for('static', filename='img/logo.webp') }}" alt="Vista previa" style="width: 100%; height: 100%; object-fit: cover;">
                         </div>
                         <div class="flex-grow-1">
-                            <input type="file" name="imagen_file" id="file_crear_img" accept="image/*" class="admin-input mb-2" style="padding: 6px; font-size: 0.75rem;">
-                            <input type="text" name="imagen_url" id="url_crear_img" placeholder="O ingresa enlace /static/img/..." class="admin-input" style="font-size: 0.75rem;">
+                            <input type="file" name="imagen_file" id="file_crear_img" accept=".png,.jpg,.jpeg,.webp,.gif,.jfif,.pjpeg,.avif,.svg" class="admin-input mb-2" style="padding: 6px; font-size: 0.75rem;">
+                            <input type="text" name="imagen_url" id="url_crear_img" placeholder="O pega URL (https://...), ruta (/static/img/...) o Base64" class="admin-input" style="font-size: 0.75rem;">
+                            <div id="status_crear_img" style="font-size:0.7rem; color:var(--gold); margin-top:4px; display:none;"></div>
                         </div>
                     </div>
                 </div>
@@ -248,15 +249,16 @@
                 <!-- SECCIÓN 2: IMAGEN DE PRESENTACIÓN -->
                 <div class="p-3 rounded-3 mb-4" style="background: rgba(206,176,110,0.04); border: 1px solid var(--dark-border-gold);">
                     <label class="admin-label d-flex align-items-center gap-2" style="color:var(--gold);">
-                        <i class="fa-solid fa-image"></i> Imagen de Presentación (Reemplazar o mantener)
+                        <i class="fa-solid fa-image"></i> Imagen de Presentación (Reemplazar con archivo o URL)
                     </label>
                     <div class="d-flex align-items-center gap-3 mt-2">
                         <div style="width: 70px; height: 70px; border-radius: 12px; overflow: hidden; border: 2px solid var(--dark-border-gold); background: #000; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
                             <img id="preview_editar_img" src="{{ url_for('static', filename='img/logo.webp') }}" alt="Vista previa actual" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='/static/img/logo.webp'">
                         </div>
                         <div class="flex-grow-1">
-                            <input type="file" name="imagen_file" id="file_editar_img" accept="image/*" class="admin-input mb-2" style="padding: 6px; font-size: 0.75rem;">
-                            <input type="text" name="imagen_url" id="url_editar_img" placeholder="O URL de imagen existente..." class="admin-input" style="font-size: 0.75rem;">
+                            <input type="file" name="imagen_file" id="file_editar_img" accept=".png,.jpg,.jpeg,.webp,.gif,.jfif,.pjpeg,.avif,.svg" class="admin-input mb-2" style="padding: 6px; font-size: 0.75rem;">
+                            <input type="text" name="imagen_url" id="url_editar_img" placeholder="O pega URL (https://...), ruta (/static/img/...) o Base64" class="admin-input" style="font-size: 0.75rem;">
+                            <div id="status_editar_img" style="font-size:0.7rem; color:var(--gold); margin-top:4px; display:none;"></div>
                         </div>
                     </div>
                 </div>
@@ -316,16 +318,31 @@ document.addEventListener('DOMContentLoaded', function() {
     if (fileCrear) {
         fileCrear.addEventListener('change', function(e) {
             const file = e.target.files[0];
+            const statusDiv = document.getElementById('status_crear_img');
             if (file) {
                 const reader = new FileReader();
-                reader.onload = (evt) => previewCrear.src = evt.target.result;
+                reader.onload = (evt) => {
+                    previewCrear.src = evt.target.result;
+                    if (statusDiv) {
+                        statusDiv.style.display = 'block';
+                        statusDiv.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> Archivo listo: <strong>' + file.name + '</strong> (' + (file.size / 1024).toFixed(1) + ' KB)';
+                    }
+                };
                 reader.readAsDataURL(file);
+            } else if (statusDiv) {
+                statusDiv.style.display = 'none';
             }
         });
     }
     if (urlCrear) {
         urlCrear.addEventListener('input', function() {
-            if (this.value.trim()) previewCrear.src = this.value.trim();
+            const v = this.value.trim();
+            if (v) {
+                previewCrear.src = v;
+                if (fileCrear) fileCrear.value = '';
+                const statusDiv = document.getElementById('status_crear_img');
+                if (statusDiv) statusDiv.style.display = 'none';
+            }
         });
     }
 
@@ -337,21 +354,41 @@ document.addEventListener('DOMContentLoaded', function() {
     if (fileEditar) {
         fileEditar.addEventListener('change', function(e) {
             const file = e.target.files[0];
+            const statusDiv = document.getElementById('status_editar_img');
             if (file) {
                 const reader = new FileReader();
-                reader.onload = (evt) => previewEditar.src = evt.target.result;
+                reader.onload = (evt) => {
+                    previewEditar.src = evt.target.result;
+                    if (statusDiv) {
+                        statusDiv.style.display = 'block';
+                        statusDiv.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> Archivo listo para reemplazar: <strong>' + file.name + '</strong> (' + (file.size / 1024).toFixed(1) + ' KB)';
+                    }
+                };
                 reader.readAsDataURL(file);
+            } else if (statusDiv) {
+                statusDiv.style.display = 'none';
             }
         });
     }
     if (urlEditar) {
         urlEditar.addEventListener('input', function() {
-            if (this.value.trim()) previewEditar.src = this.value.trim();
+            const v = this.value.trim();
+            if (v) {
+                previewEditar.src = v;
+                if (fileEditar) fileEditar.value = '';
+                const statusDiv = document.getElementById('status_editar_img');
+                if (statusDiv) statusDiv.style.display = 'none';
+            }
         });
     }
 
     // Abrir/Cerrar modal crear
-    document.getElementById('btnAbrirCrear').addEventListener('click', () => modalCrear.style.display = 'flex');
+    document.getElementById('btnAbrirCrear').addEventListener('click', () => {
+        if (fileCrear) fileCrear.value = '';
+        const st = document.getElementById('status_crear_img');
+        if (st) st.style.display = 'none';
+        modalCrear.style.display = 'flex';
+    });
     document.getElementById('btnCerrarCrear').addEventListener('click', () => modalCrear.style.display = 'none');
     document.getElementById('btnCancelarCrear').addEventListener('click', () => modalCrear.style.display = 'none');
 
@@ -374,6 +411,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const currentImg = this.dataset.imagen || '/static/img/logo.webp';
             urlEditar.value = this.dataset.imagen || '';
             previewEditar.src = currentImg;
+
+            if (fileEditar) fileEditar.value = '';
+            const st = document.getElementById('status_editar_img');
+            if (st) st.style.display = 'none';
 
             // Reset campos atributos
             document.getElementById('edit_atributos_badges').value = '';

@@ -11,9 +11,11 @@ class ModeloCarrito:
     def agregar_producto(cls, id_producto, cantidad=1):
         cart = cls._get_cart_session()
         for item in cart:
-            if item['id_producto'] == id_producto:
+            if int(item['id_producto']) == int(id_producto):
                 item['cantidad'] += cantidad
                 item['subtotal'] = round(item['cantidad'] * item['precio_unitario'], 2)
+                session['cart'] = cart
+                session.modified = True
                 return item
 
         conn = get_connection()
@@ -41,6 +43,7 @@ class ModeloCarrito:
         }
         cart.append(item)
         session['cart'] = cart
+        session.modified = True
         return item
 
     @classmethod
@@ -51,10 +54,11 @@ class ModeloCarrito:
     def actualizar_cantidad(cls, id_producto, cantidad):
         cart = cls._get_cart_session()
         for item in cart:
-            if item['id_producto'] == id_producto:
+            if int(item['id_producto']) == int(id_producto):
                 if cantidad <= 0:
                     cart.remove(item)
                     session['cart'] = cart
+                    session.modified = True
                     return True
 
                 conn = get_connection()
@@ -68,6 +72,7 @@ class ModeloCarrito:
                     item['cantidad'] = cantidad
                     item['subtotal'] = round(item['cantidad'] * item['precio_unitario'], 2)
                     session['cart'] = cart
+                    session.modified = True
                     return True
 
                 return False
@@ -76,8 +81,9 @@ class ModeloCarrito:
     @classmethod
     def eliminar_producto(cls, id_producto):
         cart = cls._get_cart_session()
-        new_cart = [item for item in cart if item['id_producto'] != id_producto]
+        new_cart = [item for item in cart if int(item['id_producto']) != int(id_producto)]
         session['cart'] = new_cart
+        session.modified = True
         return True
 
     @classmethod

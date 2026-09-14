@@ -84,7 +84,7 @@
                                 <label class="block text-xs font-bold text-neutral-300 uppercase tracking-wider mb-2">Dirección de Entrega Exacta *</label>
                                 <div class="flex gap-2">
                                     <div class="relative flex-1">
-                                        <input type="text" autocomplete="off" class="w-full bg-black border border-neutral-700 focus:border-gold focus:ring-1 focus:ring-gold text-white rounded-xl px-4 py-3 text-sm" id="direccion_entrega" name="direccion_entrega" 
+                                        <input type="text" autocomplete="off" maxlength="255" class="w-full bg-black border border-neutral-700 focus:border-gold focus:ring-1 focus:ring-gold text-white rounded-xl px-4 py-3 text-sm" id="direccion_entrega" name="direccion_entrega" 
                                                value="{{ user.direccion if user else '' }}" placeholder="Ej. Calle 26 # 68-50, Apto 402" required onchange="verificarDireccionEnMapa()">
                                         <!-- Dropdown de autocompletado interactivo -->
                                         <div id="autocomplete-dropdown" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-neutral-900/95 backdrop-blur-md border border-neutral-700 rounded-xl shadow-2xl z-50 overflow-hidden max-h-60 overflow-y-auto">
