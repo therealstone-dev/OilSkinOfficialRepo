@@ -8,3 +8,8 @@ ca.pem
 .pytest_cache/
 ESTRUCTURA_CODIGO.md
 tailwindcss.exe
+diagrama_clases_oilskin.png
+diagrama_mer_oilskin.png
+modelo_relacional_oilskin.png
+prompt_mejora_panel_admin.md
+prompt_mejora_geolocalizacion.md
