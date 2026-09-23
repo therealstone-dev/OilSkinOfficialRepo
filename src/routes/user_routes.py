@@ -15,6 +15,11 @@ from src.models.ModeloUsuario import ModeloUsuario
 from src.models.ModeloCarrito import ModeloCarrito
 from src.models.ModeloPedido import ModeloPedido
 from src.services.facturacion_service import FacturacionService
+from src.services.geolocalizacion_service import (
+    geocodificar_direccion,
+    validar_coordenadas,
+    normalizar_direccion
+)
 from src.database.db_mysql import get_connection
     
 # Blueprint para manejar las rutas
@@ -184,8 +189,8 @@ def user_checkout():
 
     if request.method == 'POST':
         metodo_pago = request.form.get('metodo_pago', 'efectivo')
-        direccion_entrega = request.form.get('direccion_entrega', '').strip()
-        ciudad = request.form.get('ciudad', 'Bogotá').strip()
+        direccion_entrega = normalizar_direccion(request.form.get('direccion_entrega', '').strip())
+        ciudad = request.form.get('ciudad', 'Bogotá').strip() or 'Bogotá'
         telefono_contacto = request.form.get('telefono_contacto', '').strip()
 
         if not direccion_entrega or not ciudad or not telefono_contacto:
@@ -202,14 +207,15 @@ def user_checkout():
             )
             pedido_id = cur.lastrowid
 
-            for item in carrito:
-                cur.execute(
-                    "INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad, precio_unitario, subtotal) VALUES (%s, %s, %s, %s, %s)",
-                    (pedido_id, item['id_producto'], item['cantidad'], item['precio_unitario'], item['subtotal']),
-                )
-
             lat_entrega = request.form.get('lat_entrega', type=float)
             lng_entrega = request.form.get('lng_entrega', type=float)
+
+            # Validar si las coordenadas enviadas son válidas o necesitan geocodificación
+            if not validar_coordenadas(lat_entrega, lng_entrega, ciudad):
+                geo_info = geocodificar_direccion(direccion_entrega, ciudad=ciudad)
+                lat_entrega = geo_info['lat']
+                lng_entrega = geo_info['lng']
+
             origen_despacho = request.form.get('origen_despacho', 'Centro de Distribución OilSkin - Colegio Técnico José Félix Restrepo, Bogotá').strip() or 'Centro de Distribución OilSkin - Colegio Técnico José Félix Restrepo, Bogotá'
             lat_origen = request.form.get('lat_origen', default=4.57409, type=float)
             lng_origen = request.form.get('lng_origen', default=-74.08958, type=float)

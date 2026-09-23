@@ -99,13 +99,20 @@
                         </a>
                     </li>
                     {% if categorias %}
-                        {% for cat in categorias[:3] %}
+                        {% for cat in categorias[:4] %}
                         <li>
                             <a href="{{ url_for('main_blueprint.show_category', category_name=cat.nombre_categoria) }}" class="hover:text-gold transition flex items-center gap-2">
                                 <i class="fa-solid fa-chevron-right text-[10px] text-neutral-600"></i> {{ cat.nombre_categoria }}
                             </a>
                         </li>
                         {% endfor %}
+                        {% if categorias|length > 4 %}
+                        <li>
+                            <a href="{{ url_for('main_blueprint.index') }}" class="text-gold/90 hover:text-gold transition flex items-center gap-2 font-semibold">
+                                <i class="fa-solid fa-tags text-[10px] text-gold"></i> Ver todas ({{ categorias|length }} categorías)...
+                            </a>
+                        </li>
+                        {% endif %}
                     {% endif %}
                 </ul>
             </div>

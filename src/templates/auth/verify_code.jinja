@@ -1,0 +1,95 @@
+{% extends 'components/tailwind/layout.jinja' %}
+
+{% block title %}Verificar Código - OilSkin{% endblock %}
+
+{% block content %}
+<main class="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-md space-y-6">
+        
+        <!-- Tarjeta Principal -->
+        <div class="bg-neutral-950/80 backdrop-blur-md p-8 sm:p-10 rounded-3xl border border-neutral-800/80 shadow-2xl relative overflow-hidden text-center">
+            <!-- Glow decorativo superior -->
+            <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-32 bg-gold/15 blur-3xl rounded-full pointer-events-none"></div>
+
+            <!-- Encabezado -->
+            <div class="mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-neutral-900 border border-neutral-800 text-gold mb-4 shadow-inner">
+                    <i class="fa-solid fa-shield-halved text-2xl"></i>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Verificar Identidad</h1>
+                <p class="text-neutral-400 text-xs sm:text-sm mt-2 leading-relaxed max-w-sm mx-auto">
+                    Ingresa el código numérico de 6 dígitos que enviamos a tu correo:
+                    <br>
+                    <strong class="text-gold break-all font-medium mt-1 inline-block">{{ email }}</strong>
+                </p>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="mb-6 space-y-3 text-left">
+                        {% for category, message in messages %}
+                            <div class="flex items-start p-3.5 text-xs rounded-xl border {% if category == 'success' %}bg-emerald-950/40 text-emerald-300 border-emerald-500/40{% elif category == 'danger' or category == 'error' %}bg-red-950/40 text-red-300 border-red-500/40{% else %}bg-amber-950/40 text-amber-300 border-amber-500/40{% endif %} shadow-md backdrop-blur-sm" role="alert">
+                                <i class="fa-solid {% if category == 'success' %}fa-circle-check text-emerald-400{% elif category == 'danger' or category == 'error' %}fa-circle-exclamation text-red-400{% else %}fa-circle-info text-amber-400{% endif %} mt-0.5 me-2.5 text-sm"></i>
+                                <div class="flex-1 font-medium">{{ message }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <!-- Formulario de Código OTP -->
+            <form action="{{ url_for('auth_blueprint.verify_code') }}" method="post" class="space-y-6">
+                {{ form.csrf_token }}
+
+                <div class="space-y-2">
+                    <label for="codigo" class="block text-xs font-semibold uppercase tracking-wider text-neutral-300 text-left">
+                        Código de 6 Dígitos
+                    </label>
+                    <div class="relative">
+                        {{ form.codigo(
+                            class_='w-full h-14 text-center font-mono text-2xl font-bold tracking-[0.5em] bg-neutral-900/90 border border-neutral-700/80 rounded-2xl text-gold placeholder-neutral-600 focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/30 transition shadow-inner',
+                            placeholder='------',
+                            maxlength='6',
+                            autocomplete='one-time-code',
+                            inputmode='numeric',
+                            autofocus=True
+                        ) }}
+                    </div>
+                    {% if form.codigo.errors %}
+                        {% for error in form.codigo.errors %}
+                            <p class="text-red-400 text-xs mt-1 text-left flex items-center gap-1">
+                                <i class="fa-solid fa-triangle-exclamation"></i> {{ error }}
+                            </p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="bg-neutral-900/60 border border-neutral-800/80 rounded-xl p-3 text-xs text-neutral-400 flex items-center justify-center gap-2">
+                    <i class="fa-regular fa-clock text-gold"></i>
+                    <span>Válido por <strong>15 minutos</strong> (máx. 5 intentos)</span>
+                </div>
+
+                <button type="submit" class="w-full h-11 bg-gold hover:bg-gold-light text-neutral-950 font-bold rounded-xl transition duration-200 shadow-lg shadow-gold/20 flex items-center justify-center gap-2 cursor-pointer text-sm">
+                    <span>Verificar Código</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </button>
+            </form>
+
+            <div class="mt-8 pt-6 border-t border-neutral-800/80 text-xs text-neutral-400 flex items-center justify-between">
+                <span>¿No recibiste el código?</span>
+                <a href="{{ url_for('auth_blueprint.forgot_password') }}" class="text-gold hover:text-gold-light font-semibold hover:underline transition">
+                    Reenviar código
+                </a>
+            </div>
+
+            <div class="mt-4 text-center">
+                <a href="{{ url_for('auth_blueprint.login') }}" class="text-xs text-neutral-500 hover:text-neutral-300 transition inline-flex items-center gap-1.5">
+                    <i class="fa-solid fa-arrow-left text-[10px]"></i> Volver a Iniciar Sesión
+                </a>
+            </div>
+        </div>
+
+    </div>
+</main>
+{% endblock %}

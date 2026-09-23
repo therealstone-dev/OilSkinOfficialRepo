@@ -2,11 +2,9 @@
 .env
 node_modules/
 __pycache__/
+ca.pem
 *.py[cod]
 
 .pytest_cache/
 ESTRUCTURA_CODIGO.md
 tailwindcss.exe
-diagrama_clases_oilskin.png
-diagrama_mer_oilskin.png
-modelo_relacional_oilskin.png

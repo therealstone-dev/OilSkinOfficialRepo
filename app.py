@@ -23,6 +23,13 @@ def create_app():
 
     init_db(app)
 
+    with app.app_context():
+        try:
+            from src.database.migraciones import ejecutar_migraciones
+            ejecutar_migraciones()
+        except Exception as mig_err:
+            print(f"Aviso de migraciones: {mig_err}")
+
     # Seguridad: clave secreta para sesiones y CSRF
     app.secret_key = config('SECRET_KEY', default='dev-secret-key')
     app.config['WTF_CSRF_ENABLED'] = True

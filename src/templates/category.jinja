@@ -46,8 +46,9 @@
                 <div class="p-6 text-center space-y-4">
                     <div class="relative w-28 h-28 mx-auto">
                         <div class="absolute -inset-1 bg-gold/20 rounded-full blur-sm group-hover:bg-gold/40 transition duration-300"></div>
-                        <img src="{{ url_for('static', filename='img/logo.webp') }}"
-                             class="relative w-28 h-28 rounded-full object-cover border-2 border-gold/50 shadow-md mx-auto"
+                        <img src="{{ p.imagenUrl or url_for('static', filename='img/logo.webp') }}"
+                             onerror="this.src='{{ url_for('static', filename='img/logo.webp') }}'"
+                             class="relative w-28 h-28 rounded-full object-cover border-2 border-gold/50 shadow-md mx-auto bg-neutral-950"
                              alt="{{ p.nombre_producto }}">
                     </div>
 

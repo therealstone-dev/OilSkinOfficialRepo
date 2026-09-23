@@ -24,6 +24,7 @@ class ModeloAdmin:
                     COALESCE(SUM(stock * precio), 0) AS valor_total_inventario,
                     COUNT(CASE WHEN stock <= 10 THEN 1 END) AS productos_bajo_stock
                 FROM producto
+                WHERE activo = 1
             """)
             kpi_inventario = cur.fetchone() or {}
 
@@ -67,12 +68,14 @@ class ModeloAdmin:
                     v.nombre_categoria,
                     p.id_categoria,
                     p.descripcion,
+                    p.imagenUrl,
+                    COALESCE(p.activo, 1) AS activo,
                     v.unidades_vendidas,
                     v.ingresos_totales_producto,
                     v.estado_stock
                 FROM vw_admin_inventario_ventas v
                 LEFT JOIN producto p ON p.id_producto = v.id_producto
-                ORDER BY v.unidades_vendidas DESC, v.stock_actual ASC
+                ORDER BY activo DESC, v.unidades_vendidas DESC, v.stock_actual ASC
             """)
             cur.execute(sql)
             productos = cur.fetchall()
@@ -83,6 +86,7 @@ class ModeloAdmin:
                 p['precio_venta'] = float(p.get('precio_venta', 0))
                 p['unidades_vendidas'] = int(p.get('unidades_vendidas', 0))
                 p['ingresos_totales_producto'] = float(p.get('ingresos_totales_producto', 0))
+                p['activo'] = int(p.get('activo') if p.get('activo') is not None else 1)
             return productos
         except Exception as ex:
             print(f"Error en get_desglose_productos: {ex}")
@@ -330,33 +334,41 @@ class ModeloAdmin:
             return []
 
     @classmethod
-    def crear_producto(cls, nombre_producto: str, descripcion: str, precio: float, stock: int, id_categoria: int):
+    def crear_producto(cls, nombre_producto: str, descripcion: str, precio: float, stock: int, id_categoria: int, imagen_url: str = None):
         try:
             conn = get_connection()
             cur = conn.cursor()
+            img_val = imagen_url.strip() if imagen_url and imagen_url.strip() else '/static/img/logo.webp'
             cur.execute("""
-                INSERT INTO producto (nombre_producto, descripcion, precio, stock, id_categoria)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (nombre_producto, descripcion, precio, stock, id_categoria))
+                INSERT INTO producto (nombre_producto, descripcion, precio, stock, id_categoria, imagenUrl)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (nombre_producto, descripcion, precio, stock, id_categoria, img_val))
             conn.commit()
             last_id = cur.lastrowid
             cur.close()
             conn.close()
-            return True, f"Producto creado con éxito (ID: {last_id})."
+            return True, f"Producto creado con éxito (ID: #{last_id}).", last_id
         except Exception as ex:
             print(f"Error en crear_producto: {ex}")
-            return False, f"Error al crear producto: {ex}"
+            return False, f"Error al crear producto: {ex}", None
 
     @classmethod
-    def actualizar_producto(cls, id_producto: int, nombre_producto: str, descripcion: str, precio: float, stock: int, id_categoria: int):
+    def actualizar_producto(cls, id_producto: int, nombre_producto: str, descripcion: str, precio: float, stock: int, id_categoria: int, imagen_url: str = None):
         try:
             conn = get_connection()
             cur = conn.cursor()
-            cur.execute("""
-                UPDATE producto 
-                SET nombre_producto = %s, descripcion = %s, precio = %s, stock = %s, id_categoria = %s
-                WHERE id_producto = %s
-            """, (nombre_producto, descripcion, precio, stock, id_categoria, id_producto))
+            if imagen_url and imagen_url.strip():
+                cur.execute("""
+                    UPDATE producto 
+                    SET nombre_producto = %s, descripcion = %s, precio = %s, stock = %s, id_categoria = %s, imagenUrl = %s
+                    WHERE id_producto = %s
+                """, (nombre_producto, descripcion, precio, stock, id_categoria, imagen_url.strip(), id_producto))
+            else:
+                cur.execute("""
+                    UPDATE producto 
+                    SET nombre_producto = %s, descripcion = %s, precio = %s, stock = %s, id_categoria = %s
+                    WHERE id_producto = %s
+                """, (nombre_producto, descripcion, precio, stock, id_categoria, id_producto))
             conn.commit()
             cur.close()
             conn.close()
@@ -381,17 +393,51 @@ class ModeloAdmin:
 
     @classmethod
     def eliminar_producto(cls, id_producto: int):
+        """
+        Elimina físicamente el producto si no tiene compras asociadas.
+        Si tiene compras previas en detalle_pedido, realiza un borrado lógico (activo = 0)
+        para preservar la integridad histórica y contable de los pedidos.
+        """
         try:
             conn = get_connection()
             cur = conn.cursor()
-            cur.execute("DELETE FROM producto WHERE id_producto = %s", (id_producto,))
+            # 1. Comprobar si tiene registros de compras en detalle_pedido
+            cur.execute("SELECT COUNT(*) AS total_pedidos FROM detalle_pedido WHERE id_producto = %s", (id_producto,))
+            res = cur.fetchone()
+            total_pedidos = res['total_pedidos'] if res else 0
+
+            if total_pedidos > 0:
+                # Borrado lógico: desactivar el producto
+                cur.execute("UPDATE producto SET activo = 0 WHERE id_producto = %s", (id_producto,))
+                conn.commit()
+                cur.close()
+                conn.close()
+                return True, f"El producto tiene {total_pedidos} compra(s) asociada(s). Ha sido retirado y archivado del catálogo para proteger el historial de pedidos."
+            else:
+                # Borrado físico completo
+                cur.execute("DELETE FROM producto WHERE id_producto = %s", (id_producto,))
+                conn.commit()
+                cur.close()
+                conn.close()
+                return True, "Producto eliminado exitosamente del catálogo y de la base de datos."
+        except Exception as ex:
+            print(f"Error en eliminar_producto: {ex}")
+            return False, f"Error al procesar la eliminación del producto: {ex}"
+
+    @classmethod
+    def reactivar_producto(cls, id_producto: int):
+        """Reactiva un producto previamente archivado/desactivado."""
+        try:
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute("UPDATE producto SET activo = 1 WHERE id_producto = %s", (id_producto,))
             conn.commit()
             cur.close()
             conn.close()
-            return True, "Producto eliminado exitosamente del catálogo."
+            return True, f"Producto #{id_producto} reactivado exitosamente en el catálogo."
         except Exception as ex:
-            print(f"Error en eliminar_producto: {ex}")
-            return False, f"No se pudo eliminar el producto (puede tener compras/detalles asociados): {ex}"
+            print(f"Error en reactivar_producto: {ex}")
+            return False, f"Error al reactivar el producto: {ex}"
 
     # ==================== GESTIÓN DE VENTAS E INFORMES ====================
 
@@ -461,16 +507,23 @@ class ModeloAdmin:
     @classmethod
     def actualizar_domicilio_pedido(cls, id_pedido: int, origen_despacho: str, lat_origen: float, lng_origen: float,
                                     estado_envio: str, empresa_envio: str, numero_guia: str, mensaje_transportista: str,
-                                    fecha_estimada_entrega: str = None):
+                                    fecha_estimada_entrega: str = None,
+                                    direccion_entrega: str = None, ciudad: str = None,
+                                    lat_entrega: float = None, lng_entrega: float = None):
         try:
             conn = get_connection()
             cur = conn.cursor()
 
             # Verificar si existe registro de domicilio para el pedido
-            cur.execute("SELECT id_domicilio FROM domicilio WHERE id_pedido = %s", (id_pedido,))
+            cur.execute("SELECT id_domicilio, direccion_entrega, ciudad, lat_entrega, lng_entrega FROM domicilio WHERE id_pedido = %s", (id_pedido,))
             domicilio = cur.fetchone()
 
             if domicilio:
+                dir_final = direccion_entrega if direccion_entrega is not None else domicilio.get('direccion_entrega')
+                ciudad_final = ciudad if ciudad is not None else domicilio.get('ciudad')
+                lat_ent_final = lat_entrega if lat_entrega is not None else domicilio.get('lat_entrega')
+                lng_ent_final = lng_entrega if lng_entrega is not None else domicilio.get('lng_entrega')
+
                 cur.execute("""
                     UPDATE domicilio 
                     SET origen_despacho = %s,
@@ -480,15 +533,19 @@ class ModeloAdmin:
                         empresa_envio = %s,
                         numero_guia = %s,
                         mensaje_transportista = %s,
-                        fecha_estimada_entrega = %s
+                        fecha_estimada_entrega = %s,
+                        direccion_entrega = %s,
+                        ciudad = %s,
+                        lat_entrega = %s,
+                        lng_entrega = %s
                     WHERE id_pedido = %s
-                """, (origen_despacho, lat_origen, lng_origen, estado_envio, empresa_envio, numero_guia, mensaje_transportista, fecha_estimada_entrega, id_pedido))
+                """, (origen_despacho, lat_origen, lng_origen, estado_envio, empresa_envio, numero_guia, mensaje_transportista, fecha_estimada_entrega, dir_final, ciudad_final, lat_ent_final, lng_ent_final, id_pedido))
             else:
                 cur.execute("""
                     INSERT INTO domicilio (id_pedido, direccion_entrega, ciudad, telefono_contacto, costo_envio, estado_envio,
-                                           origen_despacho, lat_origen, lng_origen, empresa_envio, numero_guia, mensaje_transportista, fecha_estimada_entrega)
-                    VALUES (%s, 'Dirección principal', 'Colombia', '0000000000', 0.00, %s, %s, %s, %s, %s, %s, %s, %s)
-                """, (id_pedido, estado_envio, origen_despacho, lat_origen, lng_origen, empresa_envio, numero_guia, mensaje_transportista, fecha_estimada_entrega))
+                                           origen_despacho, lat_origen, lng_origen, lat_entrega, lng_entrega, empresa_envio, numero_guia, mensaje_transportista, fecha_estimada_entrega)
+                    VALUES (%s, %s, %s, '0000000000', 0.00, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (id_pedido, direccion_entrega or 'Dirección principal', ciudad or 'Colombia', estado_envio, origen_despacho, lat_origen, lng_origen, lat_entrega, lng_entrega, empresa_envio, numero_guia, mensaje_transportista, fecha_estimada_entrega))
 
             # Si el estado de envío pasa a entregado o cancelado, sincronizar estado del pedido si corresponde
             if estado_envio == 'entregado':

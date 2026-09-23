@@ -6,6 +6,10 @@
 {% block header_subtitle %}Historial de pedidos, configuración de origen de envíos y notas del transportista{% endblock %}
 
 {% block admin_content %}
+<!-- Leaflet Map Resources -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
 <!-- KPI Cards -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-lg-3">
@@ -117,7 +121,9 @@
                                         '{{ v.empresa_envio or 'OilSkin Express Logistics' }}',
                                         '{{ v.numero_guia or ('OS-GUIA-' ~ ('%05d'|format(v.id_pedido))) }}',
                                         '{{ v.mensaje_transportista or 'Pedido confirmado y en proceso de alistamiento en bodega central.' }}',
-                                        '{{ v.fecha_estimada_entrega or '2-4 días hábiles' }}'
+                                        '{{ v.fecha_estimada_entrega or '2-4 días hábiles' }}',
+                                        {{ v.lat_entrega if v.lat_entrega is not none else 'null' }},
+                                        {{ v.lng_entrega if v.lng_entrega is not none else 'null' }}
                                     )">
                                 <i class="fa-solid fa-truck-ramp-box"></i> Gestionar Despacho
                             </button>
@@ -143,97 +149,123 @@
             </button>
         </div>
 
-        <form id="formLogistica" method="POST">
-            <div class="row g-3">
-                
-                <!-- Info resumen cliente -->
-                <div class="col-12 p-3 rounded-3 mb-1" style="background: rgba(255,255,255,0.03); border: 1px solid var(--dark-border);">
-                    <div class="d-flex justify-content-between text-secondary small">
-                        <span><strong>Destinatario:</strong> <span id="modalClienteNombre" class="text-white"></span></span>
-                        <span><strong>Ciudad:</strong> <span id="modalClienteCiudad" class="text-warning"></span></span>
+        <div class="admin-modal-body">
+            <form id="formLogistica" method="POST">
+                <input type="hidden" id="lat_entrega_input" name="lat_entrega" value="">
+                <input type="hidden" id="lng_entrega_input" name="lng_entrega" value="">
+
+                <div class="row g-3">
+                    
+                    <!-- Info y corrección de dirección cliente -->
+                    <div class="col-12 p-3 rounded-3 mb-1" style="background: rgba(255,255,255,0.03); border: 1px solid var(--dark-border);">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-secondary small"><strong>Destinatario:</strong> <span id="modalClienteNombre" class="text-white"></span></span>
+                            <span id="coordBadgeModal" class="badge-dark" style="font-family:monospace; font-size:0.7rem; color:var(--gold);"></span>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-7">
+                                <label class="admin-label" style="font-size:0.72rem; margin-bottom:3px;">Dirección de Entrega (Editable)</label>
+                                <input type="text" id="modal_direccion_entrega" name="direccion_entrega" class="admin-input" style="padding:6px 10px; font-size:0.8rem;" required>
+                            </div>
+                            <div class="col-5">
+                                <label class="admin-label" style="font-size:0.72rem; margin-bottom:3px;">Ciudad de Entrega</label>
+                                <div class="d-flex gap-1">
+                                    <input type="text" id="modal_ciudad_entrega" name="ciudad" class="admin-input" style="padding:6px 10px; font-size:0.8rem;" required>
+                                    <button type="button" onclick="recalcularCoordenadasAdmin()" class="btn-gold" style="padding:6px 10px; font-size:0.75rem;" title="Recalcular coordenadas satelitales">
+                                        <i class="fa-solid fa-satellite"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="text-secondary small mt-1">
-                        <strong>Dirección Destino:</strong> <span id="modalClienteDireccion" class="text-white"></span>
+
+                    <!-- Mapa embebido de Trazabilidad Logística -->
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="admin-label mb-0" style="font-size:0.75rem;"><i class="fa-solid fa-route text-warning me-1"></i> Trazabilidad de Ruta Satelital (Despacho → Entrega)</label>
+                            <span id="admin-map-status" style="font-size:0.7rem; color:var(--gold);">Ruta activa</span>
+                        </div>
+                        <div id="admin-tracking-map" style="height: 180px; width: 100%; border-radius: 10px; border: 1px solid var(--dark-border); background: #0c0c0c; overflow: hidden; position: relative;"></div>
                     </div>
+
+                    <!-- Origen de Despacho (Preset & Custom) -->
+                    <div class="col-12">
+                        <label class="admin-label">Punto / Sede de Origen de Despacho (Admin) *</label>
+                        <select id="presetOrigen" class="admin-select mb-2" onchange="aplicarPresetOrigen(this.value)">
+                            <option value="bogota">Sede Principal: Centro Logístico OilSkin - Bogotá D.C.</option>
+                            <option value="medellin">Bodega Regional Antioquia - Medellín (El Poblado)</option>
+                            <option value="cesar">Planta Extractora de Palma - San Alberto, Cesar</option>
+                            <option value="barranquilla">Centro Logístico Costa Norte - Barranquilla</option>
+                            <option value="cali">Sede Occidente - Cali (Valle del Cauca)</option>
+                            <option value="custom">Otro (Especificar manualmente)</option>
+                        </select>
+                        <input type="text" id="origen_despacho_input" name="origen_despacho" class="admin-input" required placeholder="Nombre descriptivo del origen de despacho">
+                    </div>
+
+                    <!-- Coordenadas Origen -->
+                    <div class="col-6">
+                        <label class="admin-label">Latitud Origen</label>
+                        <input type="number" step="any" id="lat_origen_input" name="lat_origen" class="admin-input" required>
+                    </div>
+                    <div class="col-6">
+                        <label class="admin-label">Longitud Origen</label>
+                        <input type="number" step="any" id="lng_origen_input" name="lng_origen" class="admin-input" required>
+                    </div>
+
+                    <!-- Estado del Envío -->
+                    <div class="col-6">
+                        <label class="admin-label">Estado del Envío *</label>
+                        <select id="estado_envio_input" name="estado_envio" class="admin-select" required>
+                            <option value="pendiente">Pedido Solicitado (Pendiente)</option>
+                            <option value="en camino">Enviado (En camino / En ruta)</option>
+                            <option value="entregado">Entregado al Cliente</option>
+                            <option value="cancelado">Cancelado / Reembolsado</option>
+                        </select>
+                    </div>
+
+                    <!-- Empresa de Mensajería -->
+                    <div class="col-6">
+                        <label class="admin-label">Empresa Transportista / Domicilios</label>
+                        <select id="empresa_envio_input" name="empresa_envio" class="admin-select">
+                            <option value="OilSkin Express Logistics">OilSkin Express Logistics</option>
+                            <option value="Servientrega">Servientrega</option>
+                            <option value="Coordinadora Mercantil">Coordinadora Mercantil</option>
+                            <option value="Envía Colvanes">Envía Colvanes</option>
+                            <option value="Interrapidísimo">Interrapidísimo</option>
+                        </select>
+                    </div>
+
+                    <!-- Número de Guía y Fecha Estimada -->
+                    <div class="col-6">
+                        <label class="admin-label">Número de Guía</label>
+                        <input type="text" id="numero_guia_input" name="numero_guia" class="admin-input">
+                    </div>
+                    <div class="col-6">
+                        <label class="admin-label">Fecha Estimada de Entrega</label>
+                        <input type="text" id="fecha_estimada_entrega_input" name="fecha_estimada_entrega" class="admin-input" placeholder="Ej. Mañana antes de las 5:00 PM">
+                    </div>
+
+                    <!-- Mensaje / Informe del Transportista -->
+                    <div class="col-12">
+                        <label class="admin-label">Informe / Mensaje en Vivo del Transportista (Visible al cliente) *</label>
+                        <textarea id="mensaje_transportista_input" name="mensaje_transportista" class="admin-input" rows="3" required placeholder="Ej. El paquete ha sido recolectado por el transportista y se encuentra en ruta hacia la dirección del cliente."></textarea>
+                        <small style="font-size:0.7rem; color:var(--text-muted); display:block; margin-top:3px;">
+                            Este mensaje aparecerá en tiempo real en la barra y panel de seguimiento del usuario.
+                        </small>
+                    </div>
+
                 </div>
 
-                <!-- Origen de Despacho (Preset & Custom) -->
-                <div class="col-12">
-                    <label class="admin-label">Punto / Sede de Origen de Despacho (Admin) *</label>
-                    <select id="presetOrigen" class="admin-select mb-2" onchange="aplicarPresetOrigen(this.value)">
-                        <option value="bogota">Sede Principal: Centro Logístico OilSkin - Bogotá D.C.</option>
-                        <option value="medellin">Bodega Regional Antioquia - Medellín (El Poblado)</option>
-                        <option value="cesar">Planta Extractora de Palma - San Alberto, Cesar</option>
-                        <option value="barranquilla">Centro Logístico Costa Norte - Barranquilla</option>
-                        <option value="cali">Sede Occidente - Cali (Valle del Cauca)</option>
-                        <option value="custom">Otro (Especificar manualmente)</option>
-                    </select>
-                    <input type="text" id="origen_despacho_input" name="origen_despacho" class="admin-input" required placeholder="Nombre descriptivo del origen de despacho">
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top" style="border-color: var(--dark-border);">
+                    <button type="button" onclick="cerrarModalLogistica()" class="btn-dark-subtle">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn-gold">
+                        <i class="fa-solid fa-floppy-disk"></i> Guardar y Actualizar Tracking
+                    </button>
                 </div>
-
-                <!-- Coordenadas Origen -->
-                <div class="col-6">
-                    <label class="admin-label">Latitud Origen</label>
-                    <input type="number" step="any" id="lat_origen_input" name="lat_origen" class="admin-input" required>
-                </div>
-                <div class="col-6">
-                    <label class="admin-label">Longitud Origen</label>
-                    <input type="number" step="any" id="lng_origen_input" name="lng_origen" class="admin-input" required>
-                </div>
-
-                <!-- Estado del Envío -->
-                <div class="col-6">
-                    <label class="admin-label">Estado del Envío *</label>
-                    <select id="estado_envio_input" name="estado_envio" class="admin-select" required>
-                        <option value="pendiente">Pedido Solicitado (Pendiente)</option>
-                        <option value="en camino">Enviado (En camino / En ruta)</option>
-                        <option value="entregado">Entregado al Cliente</option>
-                        <option value="cancelado">Cancelado / Reembolsado</option>
-                    </select>
-                </div>
-
-                <!-- Empresa de Mensajería -->
-                <div class="col-6">
-                    <label class="admin-label">Empresa Transportista / Domicilios</label>
-                    <select id="empresa_envio_input" name="empresa_envio" class="admin-select">
-                        <option value="OilSkin Express Logistics">OilSkin Express Logistics</option>
-                        <option value="Servientrega">Servientrega</option>
-                        <option value="Coordinadora Mercantil">Coordinadora Mercantil</option>
-                        <option value="Envía Colvanes">Envía Colvanes</option>
-                        <option value="Interrapidísimo">Interrapidísimo</option>
-                    </select>
-                </div>
-
-                <!-- Número de Guía y Fecha Estimada -->
-                <div class="col-6">
-                    <label class="admin-label">Número de Guía</label>
-                    <input type="text" id="numero_guia_input" name="numero_guia" class="admin-input">
-                </div>
-                <div class="col-6">
-                    <label class="admin-label">Fecha Estimada de Entrega</label>
-                    <input type="text" id="fecha_estimada_entrega_input" name="fecha_estimada_entrega" class="admin-input" placeholder="Ej. Mañana antes de las 5:00 PM">
-                </div>
-
-                <!-- Mensaje / Informe del Transportista -->
-                <div class="col-12">
-                    <label class="admin-label">Informe / Mensaje en Vivo del Transportista (Visible al cliente) *</label>
-                    <textarea id="mensaje_transportista_input" name="mensaje_transportista" class="admin-input" rows="3" required placeholder="Ej. El paquete ha sido recolectado por el transportista y se encuentra en ruta hacia la dirección del cliente."></textarea>
-                    <small style="font-size:0.7rem; color:var(--text-muted); display:block; margin-top:3px;">
-                        Este mensaje aparecerá en tiempo real en la barra y panel de seguimiento del usuario.
-                    </small>
-                </div>
-
-            </div>
-
-            <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top" style="border-color: var(--dark-border);">
-                <button type="button" onclick="cerrarModalLogistica()" class="btn-dark-subtle">
-                    Cancelar
-                </button>
-                <button type="submit" class="btn-gold">
-                    <i class="fa-solid fa-floppy-disk"></i> Guardar y Actualizar Tracking
-                </button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -246,23 +278,38 @@ const sedesPresets = {
     cali: { nombre: 'Sede Occidente - Cali (Valle del Cauca)', lat: 3.4516, lng: -76.5320 }
 };
 
+let adminMap = null;
+let adminOriginMarker = null;
+let adminDestMarker = null;
+let adminPolyline = null;
+
 function aplicarPresetOrigen(key) {
     if (sedesPresets[key]) {
         document.getElementById('origen_despacho_input').value = sedesPresets[key].nombre;
         document.getElementById('lat_origen_input').value = sedesPresets[key].lat;
         document.getElementById('lng_origen_input').value = sedesPresets[key].lng;
+        actualizarMapaAdmin();
     }
 }
 
-function abrirModalLogistica(idPedido, cliente, direccion, ciudad, origen, latOrigen, lngOrigen, estadoEnvio, empresa, guia, mensaje, fechaEst) {
+function abrirModalLogistica(idPedido, cliente, direccion, ciudad, origen, latOrigen, lngOrigen, estadoEnvio, empresa, guia, mensaje, fechaEst, latEntrega, lngEntrega) {
     document.getElementById('modalTitulo').innerText = `Logística del Pedido #OS-${String(idPedido).padStart(5, '0')}`;
     document.getElementById('modalClienteNombre').innerText = cliente || 'Cliente General';
-    document.getElementById('modalClienteDireccion').innerText = direccion || 'Sin dirección';
-    document.getElementById('modalClienteCiudad').innerText = ciudad || 'Colombia';
+    document.getElementById('modal_direccion_entrega').value = direccion || '';
+    document.getElementById('modal_ciudad_entrega').value = ciudad || 'Bogotá';
 
     document.getElementById('origen_despacho_input').value = origen;
     document.getElementById('lat_origen_input').value = latOrigen;
     document.getElementById('lng_origen_input').value = lngOrigen;
+
+    // Defaults para entrega si eran nulos
+    const finalLatEntrega = (latEntrega !== null && !isNaN(latEntrega)) ? latEntrega : 4.6097;
+    const finalLngEntrega = (lngEntrega !== null && !isNaN(lngEntrega)) ? lngEntrega : -74.0817;
+
+    document.getElementById('lat_entrega_input').value = finalLatEntrega;
+    document.getElementById('lng_entrega_input').value = finalLngEntrega;
+    document.getElementById('coordBadgeModal').innerText = `${finalLatEntrega.toFixed(4)}, ${finalLngEntrega.toFixed(4)}`;
+
     document.getElementById('estado_envio_input').value = estadoEnvio;
     document.getElementById('empresa_envio_input').value = empresa;
     document.getElementById('numero_guia_input').value = guia;
@@ -273,10 +320,131 @@ function abrirModalLogistica(idPedido, cliente, direccion, ciudad, origen, latOr
     document.getElementById('formLogistica').action = `/admin/ventas/${idPedido}/domicilio`;
 
     document.getElementById('modalLogistica').style.display = 'flex';
+
+    // Inicializar o refrescar mapa después de mostrar modal
+    setTimeout(() => {
+        initAdminModalMap(latOrigen, lngOrigen, finalLatEntrega, finalLngEntrega, origen, direccion, estadoEnvio, fechaEst);
+    }, 150);
 }
 
 function cerrarModalLogistica() {
     document.getElementById('modalLogistica').style.display = 'none';
+}
+
+function initAdminModalMap(latOrig, lngOrig, latDest, lngDest, nombreOrig, nombreDest, estadoEnvio, fechaEst) {
+    if (typeof L === 'undefined') return;
+    const container = document.getElementById('admin-tracking-map');
+    if (!container) return;
+
+    if (!adminMap) {
+        adminMap = L.map('admin-tracking-map', {
+            zoomControl: false,
+            attributionControl: false
+        });
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            maxZoom: 19
+        }).addTo(adminMap);
+    }
+
+    actualizarCapaMapaAdmin(latOrig, lngOrig, latDest, lngDest, nombreOrig, nombreDest, estadoEnvio, fechaEst);
+}
+
+function actualizarCapaMapaAdmin(latOrig, lngOrig, latDest, lngDest, nombreOrig, nombreDest, estadoEnvio, fechaEst) {
+    if (!adminMap) return;
+
+    if (adminOriginMarker) adminMap.removeLayer(adminOriginMarker);
+    if (adminDestMarker) adminMap.removeLayer(adminDestMarker);
+    if (adminPolyline) adminMap.removeLayer(adminPolyline);
+
+    // Icono Origen (Dorado)
+    const iconOrigen = L.divIcon({
+        className: 'custom-admin-marker-origin',
+        html: `<div style="width:26px; height:26px; border-radius:50%; background:#CEB06E; color:#0c0a09; display:flex; align-items:center; justify-content:center; box-shadow:0 0 10px rgba(206,176,110,0.8); border:2px solid #fff; font-size:11px;"><i class="fa-solid fa-warehouse"></i></div>`,
+        iconSize: [26, 26],
+        iconAnchor: [13, 13]
+    });
+
+    // Icono Destino (Esmeralda)
+    const iconDest = L.divIcon({
+        className: 'custom-admin-marker-dest',
+        html: `<div style="width:26px; height:26px; border-radius:50%; background:#10B981; color:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 0 10px rgba(16,185,129,0.8); border:2px solid #fff; font-size:11px;"><i class="fa-solid fa-house"></i></div>`,
+        iconSize: [26, 26],
+        iconAnchor: [13, 13]
+    });
+
+    adminOriginMarker = L.marker([latOrig, lngOrig], { icon: iconOrigen }).addTo(adminMap)
+        .bindPopup(`<b style="color:#000;">🏭 Origen:</b><br><span style="font-size:11px; color:#333;">${nombreOrig}</span>`);
+
+    adminDestMarker = L.marker([latDest, lngDest], { icon: iconDest, draggable: true }).addTo(adminMap)
+        .bindPopup(`<b style="color:#000;">📍 Entrega:</b><br><span style="font-size:11px; color:#333;">${nombreDest || 'Cliente'}</span><br><span style="font-size:10px; color:#CEB06E;">Estado: ${estadoEnvio} • Entrega: ${fechaEst}</span>`);
+
+    adminDestMarker.on('dragend', function(e) {
+        const pos = e.target.getLatLng();
+        document.getElementById('lat_entrega_input').value = pos.lat.toFixed(6);
+        document.getElementById('lng_entrega_input').value = pos.lng.toFixed(6);
+        document.getElementById('coordBadgeModal').innerText = `${pos.lat.toFixed(4)}, ${pos.lng.toFixed(4)}`;
+        if (adminPolyline) {
+            adminPolyline.setLatLngs([[latOrig, lngOrig], [pos.lat, pos.lng]]);
+        }
+    });
+
+    adminPolyline = L.polyline([[latOrig, lngOrig], [latDest, lngDest]], {
+        color: '#CEB06E',
+        weight: 3,
+        dashArray: '6, 6',
+        opacity: 0.85
+    }).addTo(adminMap);
+
+    const bounds = L.latLngBounds([[latOrig, lngOrig], [latDest, lngDest]]);
+    adminMap.fitBounds(bounds, { padding: [35, 35] });
+    adminMap.invalidateSize();
+    document.getElementById('admin-map-status').innerText = `Ruta trazada ✓`;
+}
+
+function actualizarMapaAdmin() {
+    const latOrig = parseFloat(document.getElementById('lat_origen_input').value);
+    const lngOrig = parseFloat(document.getElementById('lng_origen_input').value);
+    const latDest = parseFloat(document.getElementById('lat_entrega_input').value);
+    const lngDest = parseFloat(document.getElementById('lng_entrega_input').value);
+    const nombreOrig = document.getElementById('origen_despacho_input').value;
+    const nombreDest = document.getElementById('modal_direccion_entrega').value;
+    const estadoEnv = document.getElementById('estado_envio_input').value;
+    const fechaEst = document.getElementById('fecha_estimada_entrega_input').value;
+
+    if (!isNaN(latOrig) && !isNaN(lngOrig) && !isNaN(latDest) && !isNaN(lngDest)) {
+        actualizarCapaMapaAdmin(latOrig, lngOrig, latDest, lngDest, nombreOrig, nombreDest, estadoEnv, fechaEst);
+    }
+}
+
+async function recalcularCoordenadasAdmin() {
+    const dir = document.getElementById('modal_direccion_entrega').value.trim();
+    const ciudad = document.getElementById('modal_ciudad_entrega').value.trim() || 'Bogotá';
+    const statusLabel = document.getElementById('admin-map-status');
+
+    if (!dir) {
+        alert("Por favor ingresa una dirección de entrega válida.");
+        return;
+    }
+
+    statusLabel.innerText = "Geocodificando satelitalmente...";
+    try {
+        const res = await fetch(`/api/geocodificar/autocompletar?q=${encodeURIComponent(dir)}&ciudad=${encodeURIComponent(ciudad)}`);
+        const sugerencias = await res.json();
+        if (sugerencias && sugerencias.length > 0 && sugerencias[0].lat && sugerencias[0].lng) {
+            const item = sugerencias[0];
+            document.getElementById('lat_entrega_input').value = item.lat;
+            document.getElementById('lng_entrega_input').value = item.lng;
+            document.getElementById('coordBadgeModal').innerText = `${item.lat.toFixed(4)}, ${item.lng.toFixed(4)}`;
+            statusLabel.innerText = "Coordenadas actualizadas ✓";
+            actualizarMapaAdmin();
+        } else {
+            statusLabel.innerText = "Mueve el pin de entrega directamente en el mapa";
+        }
+    } catch (e) {
+        console.warn("Error recalculando coordenadas:", e);
+        statusLabel.innerText = "Ajusta el pin directamente en el mapa";
+    }
 }
 </script>
 {% endblock %}

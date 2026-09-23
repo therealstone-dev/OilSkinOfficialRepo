@@ -67,7 +67,7 @@ CREATE TABLE detalle_factura (
 CREATE TABLE domicilio (
   id_domicilio INT PRIMARY KEY AUTO_INCREMENT,
   id_pedido INT NOT NULL,
-  direccion_entrega VARCHAR(50) NOT NULL,
+  direccion_entrega VARCHAR(255) NOT NULL,
   ciudad VARCHAR(50) NOT NULL,
   telefono_contacto VARCHAR(15) NOT NULL,
   costo_envio DECIMAL(10,2) NOT NULL DEFAULT 0.00,

@@ -386,36 +386,66 @@
         .admin-modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.75);
-            backdrop-filter: blur(6px);
-            z-index: 100;
+            background: rgba(0,0,0,0.80);
+            backdrop-filter: blur(8px);
+            z-index: 1050;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 16px;
+            overflow-y: auto;
         }
         .admin-modal {
             background: var(--dark-card);
             border: 1px solid var(--dark-border-gold);
             border-radius: 18px;
-            max-width: 500px;
+            max-width: 560px;
             width: 100%;
-            padding: 28px;
-            box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+            max-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
+            padding: 26px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.75);
+            margin: auto;
+            position: relative;
         }
         .admin-modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 16px;
+            padding-bottom: 14px;
             border-bottom: 1px solid var(--dark-border);
-            margin-bottom: 20px;
+            margin-bottom: 18px;
+            flex-shrink: 0;
         }
         .admin-modal-header h3 {
             font-weight: 800;
             font-size: 1.05rem;
             color: var(--text-primary);
             margin: 0;
+        }
+        .admin-modal-body {
+            overflow-y: auto;
+            flex: 1;
+            padding-right: 4px;
+        }
+        .admin-modal-body::-webkit-scrollbar,
+        .admin-modal::-webkit-scrollbar {
+            width: 6px;
+        }
+        .admin-modal-body::-webkit-scrollbar-track,
+        .admin-modal::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
+        }
+        .admin-modal-body::-webkit-scrollbar-thumb,
+        .admin-modal::-webkit-scrollbar-thumb {
+            background: rgba(206,176,110,0.3);
+            border-radius: 4px;
+        }
+        .admin-modal-body::-webkit-scrollbar-thumb:hover,
+        .admin-modal::-webkit-scrollbar-thumb:hover {
+            background: var(--gold);
         }
 
         /* ---- Status indicator ---- */
@@ -430,9 +460,22 @@
             50% { opacity: 0.4; }
         }
 
+        /* ---- Mobile Sidebar Backdrop ---- */
+        .admin-sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(4px);
+            z-index: 35;
+        }
+        .admin-sidebar-backdrop.show {
+            display: block;
+        }
+
         /* ---- Responsive ---- */
         @media (max-width: 768px) {
-            .admin-sidebar { transform: translateX(-100%); }
+            .admin-sidebar { transform: translateX(-100%); z-index: 45; }
             .admin-sidebar.show { transform: translateX(0); }
             .admin-main { margin-left: 0; }
             .admin-content { padding: 20px 16px; }
@@ -441,6 +484,9 @@
     </style>
 </head>
 <body>
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div class="admin-sidebar-backdrop" id="sidebarBackdrop"></div>
 
     <!-- Sidebar -->
     <aside class="admin-sidebar" id="adminSidebar">
@@ -461,6 +507,9 @@
         </a>
         <a href="{{ url_for('admin_blueprint.usuarios') }}" class="nav-link-admin {% if active_page == 'usuarios' %}active{% endif %}">
             <i class="fa-solid fa-users"></i> Usuarios
+        </a>
+        <a href="{{ url_for('admin_blueprint.categorias') }}" class="nav-link-admin {% if active_page == 'categorias' %}active{% endif %}">
+            <i class="fa-solid fa-tags"></i> Categorías
         </a>
         <a href="{{ url_for('admin_blueprint.inventario') }}" class="nav-link-admin {% if active_page == 'inventario' %}active{% endif %}">
             <i class="fa-solid fa-boxes-stacked"></i> Inventario
@@ -496,7 +545,7 @@
         <!-- Top Bar -->
         <div class="admin-topbar">
             <div class="d-flex align-items-center gap-3">
-                <button class="d-md-none btn btn-sm text-white border-0" id="sidebarToggle">
+                <button class="d-md-none btn btn-sm text-white border-0" id="sidebarToggle" aria-label="Abrir Menú">
                     <i class="fa-solid fa-bars"></i>
                 </button>
                 <div>
@@ -536,8 +585,18 @@
     <script>
         const toggle = document.getElementById('sidebarToggle');
         const sidebar = document.getElementById('adminSidebar');
+        const backdrop = document.getElementById('sidebarBackdrop');
         if (toggle && sidebar) {
-            toggle.addEventListener('click', () => sidebar.classList.toggle('show'));
+            toggle.addEventListener('click', () => {
+                sidebar.classList.toggle('show');
+                if (backdrop) backdrop.classList.toggle('show');
+            });
+        }
+        if (backdrop && sidebar) {
+            backdrop.addEventListener('click', () => {
+                sidebar.classList.remove('show');
+                backdrop.classList.remove('show');
+            });
         }
     </script>
     {% block admin_scripts %}{% endblock %}

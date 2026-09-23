@@ -1,10 +1,128 @@
 from io import StringIO
+import os
+import uuid
 import csv
-from flask import Blueprint, render_template, session, redirect, url_for, flash, request, Response
+import base64
+import re
+from flask import Blueprint, render_template, session, redirect, url_for, flash, request, Response, jsonify, current_app
 from pathlib import Path
 from src.utils.nav_helper import get_nav_data
 from src.utils.auth_utils import require_admin
 from src.models.ModeloAdmin import ModeloAdmin
+from src.models.ModeloCategoria import ModeloCategoria
+from src.models.ModeloProductos import ModeloProducto
+from src.services.geolocalizacion_service import (
+    geocodificar_direccion,
+    validar_coordenadas,
+    normalizar_direccion
+)
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'jfif', 'pjpeg', 'pjp', 'svg', 'avif', 'bmp', 'ico'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def procesar_subida_imagen_producto(req):
+    """
+    Procesa la subida de un archivo de imagen o retorna la URL provista.
+    Soporta:
+    - Archivos subidos (.png, .jpg, .jpeg, .webp, .gif, .jfif, .avif, .svg, etc.)
+    - URLs directas (http://, https://, /static/...)
+    - Cadenas Base64 (data:image/...) guardándolas directamente como archivos en disco
+    """
+    upload_folder = os.path.join(current_app.static_folder, 'uploads', 'productos')
+    os.makedirs(upload_folder, exist_ok=True)
+
+    # 1. Archivo enviado mediante input type="file"
+    if 'imagen_file' in req.files:
+        file = req.files['imagen_file']
+        if file and file.filename != '':
+            if allowed_file(file.filename):
+                ext = file.filename.rsplit('.', 1)[1].lower()
+                if ext in ('jfif', 'pjpeg', 'pjp'):
+                    ext = 'jpg'
+                filename = f"prod_{uuid.uuid4().hex[:10]}.{ext}"
+                file.save(os.path.join(upload_folder, filename))
+                return f"/static/uploads/productos/{filename}"
+            else:
+                flash(f"El formato del archivo '{file.filename}' no es compatible. Usa formatos comunes (JPG, PNG, WEBP, GIF, JFIF, AVIF, SVG).", "warning")
+
+    # 2. URL o Base64 ingresado manualmente
+    url_val = req.form.get('imagen_url', '').strip() or req.form.get('imagenUrl', '').strip()
+    if url_val:
+        # Detectar si es una cadena Base64 (data:image/...)
+        if url_val.startswith('data:image/'):
+            try:
+                match = re.match(r'^data:image/(\w+);base64,(.+)$', url_val, re.DOTALL)
+                if match:
+                    ext = match.group(1).lower()
+                    if ext in ('jpeg', 'pjpeg', 'jfif'):
+                        ext = 'jpg'
+                    b64_data = match.group(2)
+                    filename = f"prod_{uuid.uuid4().hex[:10]}.{ext}"
+                    filepath = os.path.join(upload_folder, filename)
+                    with open(filepath, 'wb') as f:
+                        f.write(base64.b64decode(b64_data))
+                    return f"/static/uploads/productos/{filename}"
+            except Exception as b64_err:
+                print(f"Error decodificando imagen base64: {b64_err}")
+                flash("No se pudo procesar la imagen en formato Base64.", "warning")
+
+        # Normalizar rutas relativas locales si no tienen slash inicial
+        if not url_val.startswith(('http://', 'https://', '/')):
+            if url_val.startswith('static/'):
+                url_val = '/' + url_val
+            elif url_val.startswith('img/'):
+                url_val = '/static/' + url_val
+            else:
+                posible = os.path.join(current_app.static_folder, 'img', url_val)
+                if os.path.exists(posible):
+                    url_val = f"/static/img/{url_val}"
+
+        return url_val
+
+    return None
+
+def extraer_atributos_desde_form(form):
+    """Extrae atributos configurables de la ficha de producto desde el formulario"""
+    atributos = []
+    # Badges
+    badges_raw = form.get('atributos_badges', '').strip()
+    if badges_raw:
+        for b in [x.strip() for x in badges_raw.split(',') if x.strip()]:
+            atributos.append({'tipo': 'badge', 'titulo': 'Badge', 'contenido': b, 'orden': 0})
+
+    # Beneficios
+    beneficios_titulos = form.getlist('beneficio_titulo[]')
+    beneficios_desc = form.getlist('beneficio_desc[]')
+    for i, desc in enumerate(beneficios_desc):
+        if desc.strip():
+            tit = beneficios_titulos[i].strip() if i < len(beneficios_titulos) else ''
+            atributos.append({'tipo': 'beneficio', 'titulo': tit, 'contenido': desc.strip(), 'orden': i + 1})
+
+    beneficio_texto = form.get('atributo_beneficio_general', '').strip()
+    if beneficio_texto and not beneficios_desc:
+        atributos.append({'tipo': 'beneficio', 'titulo': 'Beneficio Principal', 'contenido': beneficio_texto, 'orden': 1})
+
+    # Modo de Uso
+    uso_pasos = form.getlist('modo_uso_paso[]')
+    uso_desc = form.getlist('modo_uso_desc[]')
+    for i, desc in enumerate(uso_desc):
+        if desc.strip():
+            tit = uso_pasos[i].strip() if i < len(uso_pasos) else f"Paso {i+1}"
+            atributos.append({'tipo': 'modo_uso', 'titulo': tit, 'contenido': desc.strip(), 'orden': i + 1})
+
+    uso_texto = form.get('atributo_modo_uso_general', '').strip()
+    if uso_texto and not uso_desc:
+        atributos.append({'tipo': 'modo_uso', 'titulo': 'Rutina Recomendada', 'contenido': uso_texto, 'orden': 1})
+
+    # Ingredientes
+    ingredientes_texto = form.get('atributo_ingredientes', '').strip()
+    if ingredientes_texto:
+        atributos.append({'tipo': 'ingrediente', 'titulo': 'Fórmula e Ingredientes', 'contenido': ingredientes_texto, 'orden': 1})
+
+    return atributos
+
 
 template_dir = Path(__file__).parent.parent / 'templates' / 'admin'
 admin = Blueprint('admin_blueprint', __name__, url_prefix='/admin', template_folder=str(template_dir))
@@ -73,7 +191,54 @@ def reactivar_usuario(id_usuario):
     flash(mensaje, 'success' if exito else 'danger')
     return redirect(url_for('admin_blueprint.usuarios'))
 
+# ==================== RUTAS DE GESTIÓN DE CATEGORÍAS ====================
+
+@admin.route('/categorias')
+@require_admin
+def categorias():
+    categorias_con_conteo = ModeloCategoria.get_categorias_con_conteo()
+    return render_template('dashboard_categorias.html', categorias_lista=categorias_con_conteo, categorias=get_nav_data())
+
+@admin.route('/categorias/crear', methods=['POST'])
+@require_admin
+def crear_categoria():
+    nombre = request.form.get('nombre_categoria', '').strip()
+    descripcion = request.form.get('descripcion', '').strip()
+    if not nombre:
+        flash('El nombre de la categoría es obligatorio.', 'danger')
+        return redirect(url_for('admin_blueprint.categorias'))
+
+    exito, mensaje = ModeloCategoria.crear_categoria(nombre, descripcion)
+    flash(mensaje, 'success' if exito else 'danger')
+    return redirect(url_for('admin_blueprint.categorias'))
+
+@admin.route('/categorias/<int:id_categoria>/editar', methods=['POST'])
+@require_admin
+def editar_categoria(id_categoria):
+    nombre = request.form.get('nombre_categoria', '').strip()
+    descripcion = request.form.get('descripcion', '').strip()
+    if not nombre:
+        flash('El nombre de la categoría es obligatorio.', 'danger')
+        return redirect(url_for('admin_blueprint.categorias'))
+
+    exito, mensaje = ModeloCategoria.actualizar_categoria(id_categoria, nombre, descripcion)
+    flash(mensaje, 'success' if exito else 'danger')
+    return redirect(url_for('admin_blueprint.categorias'))
+
+@admin.route('/categorias/<int:id_categoria>/eliminar', methods=['POST'])
+@require_admin
+def eliminar_categoria(id_categoria):
+    exito, mensaje = ModeloCategoria.eliminar_categoria(id_categoria)
+    flash(mensaje, 'success' if exito else 'danger')
+    return redirect(url_for('admin_blueprint.categorias'))
+
 # ==================== RUTAS DE GESTIÓN DE INVENTARIO ====================
+
+@admin.route('/inventario/<int:id_producto>/atributos', methods=['GET'])
+@require_admin
+def obtener_atributos_producto(id_producto):
+    atributos = ModeloProducto.get_atributos(id_producto)
+    return jsonify(atributos)
 
 @admin.route('/inventario/crear', methods=['POST'])
 @require_admin
@@ -83,12 +248,18 @@ def crear_producto():
     precio = request.form.get('precio', type=float)
     stock = request.form.get('stock', type=int)
     id_categoria = request.form.get('id_categoria', type=int)
+    imagen_url = procesar_subida_imagen_producto(request)
 
     if not nombre or precio is None or stock is None or not id_categoria:
         flash('Por favor completa todos los campos obligatorios del producto.', 'danger')
         return redirect(url_for('admin_blueprint.inventario'))
 
-    exito, mensaje = ModeloAdmin.crear_producto(nombre, descripcion, precio, stock, id_categoria)
+    exito, mensaje, nuevo_id = ModeloAdmin.crear_producto(nombre, descripcion, precio, stock, id_categoria, imagen_url)
+    if exito and nuevo_id:
+        atributos = extraer_atributos_desde_form(request.form)
+        if atributos:
+            ModeloProducto.guardar_atributos(nuevo_id, atributos)
+
     flash(mensaje, 'success' if exito else 'danger')
     return redirect(url_for('admin_blueprint.inventario'))
 
@@ -100,12 +271,17 @@ def editar_producto(id_producto):
     precio = request.form.get('precio', type=float)
     stock = request.form.get('stock', type=int)
     id_categoria = request.form.get('id_categoria', type=int)
+    imagen_url = procesar_subida_imagen_producto(request)
 
     if not nombre or precio is None or stock is None or not id_categoria:
         flash('Por favor completa todos los campos para actualizar el producto.', 'danger')
         return redirect(url_for('admin_blueprint.inventario'))
 
-    exito, mensaje = ModeloAdmin.actualizar_producto(id_producto, nombre, descripcion, precio, stock, id_categoria)
+    exito, mensaje = ModeloAdmin.actualizar_producto(id_producto, nombre, descripcion, precio, stock, id_categoria, imagen_url)
+    if exito:
+        atributos = extraer_atributos_desde_form(request.form)
+        ModeloProducto.guardar_atributos(id_producto, atributos)
+
     flash(mensaje, 'success' if exito else 'danger')
     return redirect(url_for('admin_blueprint.inventario'))
 
@@ -125,6 +301,13 @@ def ajustar_stock(id_producto):
 @require_admin
 def eliminar_producto(id_producto):
     exito, mensaje = ModeloAdmin.eliminar_producto(id_producto)
+    flash(mensaje, 'success' if exito else 'danger')
+    return redirect(url_for('admin_blueprint.inventario'))
+
+@admin.route('/inventario/<int:id_producto>/reactivar', methods=['POST'])
+@require_admin
+def reactivar_producto(id_producto):
+    exito, mensaje = ModeloAdmin.reactivar_producto(id_producto)
     flash(mensaje, 'success' if exito else 'danger')
     return redirect(url_for('admin_blueprint.inventario'))
 
@@ -154,6 +337,19 @@ def actualizar_domicilio_pedido(id_pedido):
     mensaje_transportista = request.form.get('mensaje_transportista', '').strip() or 'Pedido en proceso de despacho.'
     fecha_estimada_entrega = request.form.get('fecha_estimada_entrega', '2-4 días hábiles').strip()
 
+    direccion_entrega = request.form.get('direccion_entrega', '').strip()
+    ciudad = request.form.get('ciudad', '').strip()
+    lat_entrega = request.form.get('lat_entrega', type=float)
+    lng_entrega = request.form.get('lng_entrega', type=float)
+
+    if direccion_entrega:
+        direccion_entrega = normalizar_direccion(direccion_entrega)
+        # Si las coordenadas de entrega no son válidas o el admin modificó la dirección, recalcular
+        if not validar_coordenadas(lat_entrega, lng_entrega, ciudad):
+            geo = geocodificar_direccion(direccion_entrega, ciudad=ciudad or 'Bogotá')
+            lat_entrega = geo['lat']
+            lng_entrega = geo['lng']
+
     exito, mensaje = ModeloAdmin.actualizar_domicilio_pedido(
         id_pedido=id_pedido,
         origen_despacho=origen_despacho,
@@ -163,7 +359,11 @@ def actualizar_domicilio_pedido(id_pedido):
         empresa_envio=empresa_envio,
         numero_guia=numero_guia,
         mensaje_transportista=mensaje_transportista,
-        fecha_estimada_entrega=fecha_estimada_entrega
+        fecha_estimada_entrega=fecha_estimada_entrega,
+        direccion_entrega=direccion_entrega or None,
+        ciudad=ciudad or None,
+        lat_entrega=lat_entrega,
+        lng_entrega=lng_entrega
     )
     flash(mensaje, 'success' if exito else 'danger')
     return redirect(url_for('admin_blueprint.ventas'))
