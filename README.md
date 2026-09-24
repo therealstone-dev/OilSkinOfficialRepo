@@ -84,7 +84,7 @@ npm run watch
    CREATE DATABASE oilskin_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
    USE oilskin_db;
    ```
-3. Ejecuta los scripts SQL ubicados en la carpeta [`database/`](file:///c:/Users/The%20Tilin%27t/Desktop/OilSkin%20-%20Official%20Repo/database):
+3. Ejecuta los scripts SQL ubicados en la carpeta [`database/`](database/):
    - **`database/defiv.sql`**: Crea las tablas principales (`rol`, `usuario`, `producto`, `categoria`, `pedido`, `factura`, `domicilio`, etc.).
    - **`database/vistas.sql`**: Genera las vistas para el catálogo y clientes.
    - **`database/vistas_admin.sql`**: Genera las vistas para reportes administrativos y métricas.
@@ -93,7 +93,7 @@ npm run watch
 
 ### 6. Configurar las Variables de Entorno
 
-Copia el archivo [`.env.example`](file:///c:/Users/The%20Tilin%27t/Desktop/OilSkin%20-%20Official%20Repo/.env.example) y crea un nuevo archivo llamado `.env` en la raíz del proyecto:
+Copia el archivo [`.env.example`](.env.example) y crea un nuevo archivo llamado `.env` en la raíz del proyecto:
 
 ```bash
 # En Windows (PowerShell):
@@ -137,9 +137,38 @@ gunicorn wsgi:app --bind 0.0.0.0:5000 --workers 3
 
 ---
 
+## 📊 Modelos del Sistema y Base de Datos
+
+### 🗄️ Modelo Entidad-Relación (MER)
+Representación conceptual de las entidades y relaciones del negocio (Usuarios, Roles, Productos, Categorías, Pedidos, Domicilios y Facturación):
+
+<p align="center">
+  <img src="diagrama_mer_oilskin.png" alt="Diagrama Entidad-Relación (MER) OilSkin" width="850">
+</p>
+
+---
+
+### 🗃️ Modelo Relacional
+Esquema lógico de las tablas en MySQL con especificación de llaves primarias (PK), foráneas (FK), tipos de datos y cardinalidades:
+
+<p align="center">
+  <img src="modelo_relacional_oilskin.png" alt="Modelo Relacional OilSkin" width="850">
+</p>
+
+---
+
+### 🏛️ Diagrama de Clases (UML)
+Diseño orientado a objetos que estructura la capa de acceso a datos y lógica del negocio (`src/models/`):
+
+<p align="center">
+  <img src="diagrama_clases_oilskin.png" alt="Diagrama de Clases OilSkin" width="850">
+</p>
+
+---
+
 ## 📂 Documentación del Proyecto
 
-- Para consultar el análisis arquitectónico completo, la descripción de módulos y el mapa de rutas, revisa [`ESTRUCTURA_CODIGO.md`](file:///c:/Users/The%20Tilin%27t/Desktop/OilSkin%20-%20Official%20Repo/ESTRUCTURA_CODIGO.md).
+- Para consultar el análisis arquitectónico completo, la descripción de módulos y el mapa de rutas, revisa [`ESTRUCTURA_CODIGO.md`](ESTRUCTURA_CODIGO.md).
 
 ---
 
