@@ -13,13 +13,13 @@
                 <a href="#" class="d-block text-secondary mb-2 footer-link">
                     <i class="fa-solid fa-house me-2"></i> Inicio
                 </a>
-                <a href="#" class="d-block text-secondary mb-2 footer-link">
+                <a href="{{ url_for('main_blueprint.about') }}" class="d-block text-secondary mb-2 footer-link">
                     <i class="fa-solid fa-circle-info me-2"></i> Sobre Nosotros
                 </a>
-                <a href="#" class="d-block text-secondary mb-2 footer-link">
-                    <i class="fa-solid fa-shield-halved me-2"></i> Política de Privacidad
+                <a href="{{ url_for('main_blueprint.politica_privacidad') }}" class="d-block text-secondary mb-2 footer-link">
+                    <i class="fa-solid fa-shield-halved me-2"></i> Política de Privacidad y GDPR/CCPA
                 </a>
-                <a href="#" class="d-block text-secondary footer-link">
+                <a href="{{ url_for('main_blueprint.terminos_condiciones') }}" class="d-block text-secondary footer-link">
                     <i class="fa-solid fa-file-contract me-2"></i> Términos y Condiciones
                 </a>
             </div>

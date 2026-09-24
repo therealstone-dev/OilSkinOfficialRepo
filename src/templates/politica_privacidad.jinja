@@ -1,0 +1,269 @@
+{% extends 'components/tailwind/layout.jinja' %}
+
+{% block title %}Política de Privacidad y GDPR/CCPA - OilSkin Cosmética Natural{% endblock %}
+
+{% block content %}
+<main class="min-h-screen py-12 md:py-16 text-neutral-300" style="background: linear-gradient(rgba(0,0,0,0.88), rgba(0,0,0,0.88)), url('{{ url_for('static', filename='img/fondo_2.webp') }}') center/cover no-repeat fixed;">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+        
+        <!-- Header Principal de la Página -->
+        <div class="text-center space-y-3 pb-8 border-b border-neutral-800">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/10 border border-gold/30 text-gold text-xs font-bold uppercase tracking-widest">
+                <i class="fa-solid fa-user-shield"></i> Protección Global de Datos
+            </div>
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+                Política de <span class="text-gold">Privacidad y GDPR/CCPA</span>
+            </h1>
+            <p class="text-xs sm:text-sm text-neutral-400 max-w-2xl mx-auto">
+                En <strong>OILSKIN S.A.S.</strong> salvaguardamos tu información personal bajo los más altos estándares internacionales: Ley 1581 de 2012 (Colombia), GDPR (Unión Europea) y CCPA/CPRA (California, EE.UU.).
+            </p>
+        </div>
+
+        <!-- Acceso Rápido al Gestor de Cookies -->
+        <div class="bg-gradient-to-r from-neutral-900/90 via-neutral-900/80 to-neutral-900/90 border border-gold/30 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+            <div class="space-y-1 text-center md:text-left">
+                <span class="text-gold text-xs uppercase tracking-wider font-bold flex items-center justify-center md:justify-start gap-1.5">
+                    <i class="fa-solid fa-cookie-bite"></i> Control Granular de Tu Navegación
+                </span>
+                <h2 class="text-white font-bold text-base sm:text-lg">Centro de Preferencias de Cookies</h2>
+                <p class="text-xs text-neutral-400 max-w-xl">
+                    Puedes modificar o revocar tu consentimiento en cualquier momento sobre el uso de cookies analíticas y de marketing.
+                </p>
+            </div>
+            <button type="button" 
+                    onclick="if(window.openCookiePreferences) window.openCookiePreferences();" 
+                    class="px-6 py-3 rounded-2xl bg-gold hover:bg-gold-light text-neutral-950 font-bold text-xs shadow-lg shadow-gold/20 transition-all transform hover:-translate-y-0.5 shrink-0 flex items-center gap-2">
+                <i class="fa-solid fa-sliders"></i>
+                <span>Configurar Cookies Ahora</span>
+            </button>
+        </div>
+
+        <!-- Secciones Detalladas de la Política -->
+        <div class="space-y-8 text-neutral-300 text-sm leading-relaxed">
+
+            <!-- 1. Responsable del Tratamiento -->
+            <section class="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800/80 rounded-3xl p-6 sm:p-8 space-y-3">
+                <h3 class="text-white font-bold text-lg flex items-center gap-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-gold/10 text-gold flex items-center justify-center text-xs font-black">1</span>
+                    Responsable del Tratamiento de Datos
+                </h3>
+                <p>
+                    El responsable del tratamiento de tus datos personales es <strong>OILSKIN S.A.S.</strong>, sociedad legalmente constituida en Colombia con NIT 901.654.321-8 y domicilio en la Cra. 6 # 18A - 20 Sur (Colegio Técnico José Félix Restrepo), Bogotá D.C., Colombia.
+                </p>
+                <div class="p-4 rounded-2xl bg-neutral-950/60 border border-neutral-800 text-xs text-neutral-400 space-y-1">
+                    <p><strong class="text-white">Correo del Oficial de Privacidad (DPO / Habeas Data):</strong> <a href="mailto:privacidad@oilskin.com" class="text-gold hover:underline">privacidad@oilskin.com</a></p>
+                    <p><strong class="text-white">Teléfono de Atención y Soporte:</strong> +57 320 353 8863</p>
+                </div>
+            </section>
+
+            <!-- 2. Datos que Recopilamos -->
+            <section class="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800/80 rounded-3xl p-6 sm:p-8 space-y-3">
+                <h3 class="text-white font-bold text-lg flex items-center gap-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-gold/10 text-gold flex items-center justify-center text-xs font-black">2</span>
+                    Datos Personales que Recopilamos y Procesamos
+                </h3>
+                <p>
+                    Recopilamos únicamente la información necesaria para brindarte una experiencia de compra transparente y segura:
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                    <div class="p-4 rounded-2xl bg-neutral-950/60 border border-neutral-800 space-y-1.5">
+                        <div class="text-gold font-bold text-xs uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-id-card"></i> Datos de Registro y Cuenta
+                        </div>
+                        <p class="text-xs text-neutral-400">
+                            Nombre completo, correo electrónico, contraseña cifrada mediante algoritmos irreversibles (Bcrypt), avatar y teléfono móvil de contacto.
+                        </p>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-neutral-950/60 border border-neutral-800 space-y-1.5">
+                        <div class="text-gold font-bold text-xs uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-map-location-dot"></i> Geolocalización y Despacho
+                        </div>
+                        <p class="text-xs text-neutral-400">
+                            Dirección física de entrega, coordenadas geográficas (latitud/longitud) para precisión logística en ruta satelital y notas de entrega.
+                        </p>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-neutral-950/60 border border-neutral-800 space-y-1.5">
+                        <div class="text-gold font-bold text-xs uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-receipt"></i> Facturación y Transacciones
+                        </div>
+                        <p class="text-xs text-neutral-400">
+                            Número de identificación fiscal (Cédula/NIT), historial de órdenes de compra, totales pagados y comprobantes electrónicos DIAN.
+                        </p>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-neutral-950/60 border border-neutral-800 space-y-1.5">
+                        <div class="text-gold font-bold text-xs uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-network-wired"></i> Datos Técnicos y Navegación
+                        </div>
+                        <p class="text-xs text-neutral-400">
+                            Dirección IP anonimizada, identificadores de sesión, cookies técnicas esenciales y registros de seguridad para prevenir fraudes.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. Finalidades del Tratamiento -->
+            <section class="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800/80 rounded-3xl p-6 sm:p-8 space-y-3">
+                <h3 class="text-white font-bold text-lg flex items-center gap-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-gold/10 text-gold flex items-center justify-center text-xs font-black">3</span>
+                    Finalidades del Tratamiento de Información
+                </h3>
+                <p>Tus datos son procesados bajo las siguientes finalidades legítimas:</p>
+                <ul class="list-disc list-inside text-neutral-400 space-y-1.5 pl-2 text-xs sm:text-sm">
+                    <li>Gestionar tu registro de usuario, autenticación y acceso seguro a la plataforma.</li>
+                    <li>Procesar pedidos, coordinar el despacho satelital y generar facturación electrónica oficial DIAN.</li>
+                    <li>Notificar el estado de tus compras, comprobantes y enlaces de recuperación de contraseña por correo.</li>
+                    <li>Atender solicitudes, peticiones, quejas o reclamos (PQR) y consultas de soporte al cliente.</li>
+                    <li>Garantizar la seguridad e integridad del sitio web, previniendo ciberataques, fraudes y abusos.</li>
+                </ul>
+            </section>
+
+            <!-- 4. SECCIÓN GDPR (Unión Europea) -->
+            <section class="bg-gradient-to-b from-neutral-900/90 to-neutral-900/60 border-2 border-gold/40 rounded-3xl p-6 sm:p-8 space-y-5 shadow-2xl">
+                <div class="flex items-center gap-3 pb-3 border-b border-neutral-800">
+                    <div class="w-10 h-10 rounded-2xl bg-gold/10 text-gold border border-gold/30 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-flag-checkered"></i>
+                    </div>
+                    <div>
+                        <span class="text-gold text-xs font-bold uppercase tracking-widest">Cumplimiento Internacional</span>
+                        <h3 class="text-white font-extrabold text-lg sm:text-xl">Sección GDPR (Reglamento General de Protección de Datos de la UE)</h3>
+                    </div>
+                </div>
+
+                <p class="text-neutral-300">
+                    Si te encuentras dentro del Espacio Económico Europeo (EEE), tus datos están resguardados bajo el Reglamento (UE) 2016/679 (GDPR). Conforme a este marco normativo, te garantizamos los siguientes derechos:
+                </p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+                    <div class="p-3.5 rounded-xl bg-neutral-950/80 border border-neutral-800">
+                        <strong class="text-white block mb-1">🔍 Derecho de Acceso (Art. 15):</strong>
+                        Conocer qué datos personales tuyos poseemos y solicitar una copia completa de los mismos.
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-neutral-950/80 border border-neutral-800">
+                        <strong class="text-white block mb-1">✏️ Derecho de Rectificación (Art. 16):</strong>
+                        Actualizar o corregir datos incompletos o inexactos desde tu perfil o contactando a soporte.
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-neutral-950/80 border border-neutral-800">
+                        <strong class="text-white block mb-1">🗑️ Derecho de Supresión / "Al Olvido" (Art. 17):</strong>
+                        Solicitar la eliminación total de tus datos personales cuando ya no sean requeridos para fines legales o fiscales.
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-neutral-950/80 border border-neutral-800">
+                        <strong class="text-white block mb-1">📦 Derecho a la Portabilidad (Art. 20):</strong>
+                        Recibir tus datos en un formato estructurado, común y legible por máquina (JSON/CSV).
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-neutral-950/80 border border-neutral-800">
+                        <strong class="text-white block mb-1">✋ Derecho de Oposición y Limitación (Arts. 18 y 21):</strong>
+                        Limitar u oponerte al tratamiento de tus datos para análisis o mercadeo directo.
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-neutral-950/80 border border-neutral-800">
+                        <strong class="text-white block mb-1">⚖️ Bases Jurídicas (Art. 6):</strong>
+                        El tratamiento se fundamenta en tu consentimiento explícito y en la ejecución del contrato de compraventa.
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. SECCIÓN CCPA / CPRA (California, USA) -->
+            <section class="bg-gradient-to-b from-neutral-900/90 to-neutral-900/60 border-2 border-gold/40 rounded-3xl p-6 sm:p-8 space-y-5 shadow-2xl">
+                <div class="flex items-center gap-3 pb-3 border-b border-neutral-800">
+                    <div class="w-10 h-10 rounded-2xl bg-gold/10 text-gold border border-gold/30 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <span class="text-gold text-xs font-bold uppercase tracking-widest">Derechos de California</span>
+                        <h3 class="text-white font-extrabold text-lg sm:text-xl">Sección CCPA / CPRA (California Consumer Privacy Act)</h3>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-gold/10 border border-gold/40 text-xs text-neutral-200 flex items-start gap-3">
+                    <i class="fa-solid fa-hand-holding-hand text-gold text-lg shrink-0 mt-0.5"></i>
+                    <div>
+                        <strong class="text-white font-bold block mb-0.5">Declaración Expresa: No Vendemos Tu Información Personal</strong>
+                        <span>OilSkin no vende, comercializa, alquila ni comparte la información personal de sus clientes con terceros para beneficio monetario alguno ("Do Not Sell or Share My Personal Information").</span>
+                    </div>
+                </div>
+
+                <p class="text-neutral-300 text-xs sm:text-sm">
+                    Para los residentes del estado de California, la CCPA/CPRA otorga los siguientes derechos específicos:
+                </p>
+
+                <ul class="list-disc list-inside text-neutral-400 space-y-1.5 pl-2 text-xs sm:text-sm">
+                    <li><strong>Derecho a Conocer (Right to Know):</strong> Puedes solicitar el desglose de las categorías de información personal recopiladas en los últimos 12 meses.</li>
+                    <li><strong>Derecho a Eliminar (Right to Delete):</strong> Solicitar el borrado de información recopilada sujeta a las excepciones tributarias aplicables.</li>
+                    <li><strong>Derecho a Corregir (Right to Correct):</strong> Rectificar datos inexactos o desactualizados.</li>
+                    <li><strong>Derecho a la No Discriminación:</strong> No serás objeto de trato discriminatorio, cargos adicionales ni denegación de servicios por ejercer cualquiera de tus derechos de privacidad.</li>
+                </ul>
+            </section>
+
+            <!-- 6. Política Detallada de Cookies -->
+            <section class="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800/80 rounded-3xl p-6 sm:p-8 space-y-3">
+                <h3 class="text-white font-bold text-lg flex items-center gap-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-gold/10 text-gold flex items-center justify-center text-xs font-black">6</span>
+                    Política de Cookies y Tecnologías Similares
+                </h3>
+                <p>
+                    Las cookies son pequeños ficheros que se alojan en tu navegador para recordar tus preferencias y mantener segura tu sesión. Clasificamos nuestras cookies en:
+                </p>
+                <div class="space-y-3 pt-2 text-xs">
+                    <div class="p-3.5 rounded-xl bg-neutral-950/60 border border-neutral-800">
+                        <strong class="text-white block mb-0.5">1. Cookies Estrictamente Necesarias:</strong>
+                        Permiten la navegación entre páginas, la seguridad contra ataques CSRF, y la persistencia de los productos añadidos a tu carrito de compras.
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-neutral-950/60 border border-neutral-800">
+                        <strong class="text-white block mb-0.5">2. Cookies Analíticas (Opcionales):</strong>
+                        Recopilan métricas de navegación anónimas para evaluar la velocidad de carga de la página y detectar incidencias técnicas.
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-neutral-950/60 border border-neutral-800">
+                        <strong class="text-white block mb-0.5">3. Cookies de Preferencia y Marketing (Opcionales):</strong>
+                        Permiten recordar tus configuraciones favoritas y mostrar recomendaciones de cosmética natural acordes a tus intereses.
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7. Seguridad y Cifrado -->
+            <section class="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800/80 rounded-3xl p-6 sm:p-8 space-y-3">
+                <h3 class="text-white font-bold text-lg flex items-center gap-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-gold/10 text-gold flex items-center justify-center text-xs font-black">7</span>
+                    Medidas de Seguridad y Cifrado Técnico
+                </h3>
+                <p>
+                    Implementamos salvaguardas técnicas y administrativas de vanguardia:
+                </p>
+                <ul class="list-disc list-inside text-neutral-400 space-y-1.5 pl-2 text-xs sm:text-sm">
+                    <li>Toda la navegación y transferencia de datos viaja bajo cifrado SSL/TLS de 256 bits (HTTPS).</li>
+                    <li>Las contraseñas se almacenan mediante el algoritmo criptográfico <code>bcrypt</code> con salteado individual.</li>
+                    <li>Las sesiones de usuario utilizan cookies protegidas con directivas <code>HttpOnly</code> y <code>SameSite=Lax</code> para neutralizar ataques XSS y CSRF.</li>
+                </ul>
+            </section>
+
+            <!-- 8. Canales de Ejercicio de Derechos -->
+            <section class="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800/80 rounded-3xl p-6 sm:p-8 space-y-4">
+                <h3 class="text-white font-bold text-lg flex items-center gap-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-gold/10 text-gold flex items-center justify-center text-xs font-black">8</span>
+                    Canales para Ejercer tus Derechos ARCO / GDPR / CCPA
+                </h3>
+                <p>
+                    Para ejercer cualquiera de tus derechos de acceso, rectificación, cancelación, oposición o supresión de datos, puedes remitir tu solicitud formal a través de cualquiera de los siguientes medios:
+                </p>
+                <div class="p-5 rounded-2xl bg-neutral-950/80 border border-gold/30 text-xs space-y-2">
+                    <p><strong class="text-gold">Correo Electrónico Dedicado:</strong> <a href="mailto:privacidad@oilskin.com" class="text-white hover:underline">privacidad@oilskin.com</a></p>
+                    <p><strong class="text-gold">Asunto del Correo:</strong> <em>"Ejercicio de Derechos de Privacidad - [Tu Nombre Completo]"</em></p>
+                    <p><strong class="text-gold">Tiempo Máximo de Respuesta:</strong> Conforme al GDPR y a la Ley 1581 de 2012, responderemos a tu solicitud en un plazo máximo de diez (10) a quince (15) días hábiles.</p>
+                </div>
+
+                <div class="pt-4 border-t border-neutral-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-400">
+                    <a href="{{ url_for('main_blueprint.terminos_condiciones') }}" class="text-gold hover:underline">
+                        &larr; Consultar Términos y Condiciones
+                    </a>
+                    <a href="{{ url_for('main_blueprint.index') }}" class="text-white hover:text-gold transition font-semibold">
+                        Ir al Catálogo de Productos &rarr;
+                    </a>
+                </div>
+            </section>
+
+        </div>
+
+    </div>
+</main>
+{% endblock %}

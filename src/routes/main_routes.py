@@ -44,6 +44,14 @@ def index():
 @main.route('/sobre_nosotros')
 def about():
     return _render_with_cart('sobre_nosotros.jinja')
+
+@main.route('/terminos-y-condiciones')
+def terminos_condiciones():
+    return _render_with_cart('terminos_condiciones.jinja')
+
+@main.route('/politica-de-privacidad')
+def politica_privacidad():
+    return _render_with_cart('politica_privacidad.jinja')
 # Ruta dinámica con el id de un producto, requiere un cambio al campo de nombre_producto
 
 @main.route('/producto/<int:id>')

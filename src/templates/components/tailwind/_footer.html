@@ -195,10 +195,22 @@
 
         </div>
 
-        <!-- Barra Inferior de Derechos y Créditos -->
-        <div class="pt-6 border-t border-neutral-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-500 text-center sm:text-left">
-            <div>
-                &copy; 2026 <strong class="text-neutral-300 font-semibold">OilSkin</strong>. Todos los derechos reservados. Desarrollado por <span>SilverStack</span>.
+        <!-- Barra de Enlaces Legales y Cumplimiento -->
+        <div class="pt-6 border-t border-neutral-800/80 flex flex-wrap items-center justify-between gap-4 text-xs text-neutral-400">
+            <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
+                <a href="{{ url_for('main_blueprint.terminos_condiciones') }}" class="hover:text-gold transition">
+                    Términos y Condiciones
+                </a>
+                <span class="text-neutral-700 hidden sm:inline">•</span>
+                <a href="{{ url_for('main_blueprint.politica_privacidad') }}" class="hover:text-gold transition">
+                    Política de Privacidad y GDPR/CCPA
+                </a>
+                <span class="text-neutral-700 hidden sm:inline">•</span>
+                <button type="button" 
+                        onclick="if(window.openCookiePreferences) window.openCookiePreferences();" 
+                        class="hover:text-gold transition inline-flex items-center gap-1.5 cursor-pointer text-neutral-400">
+                    <i class="fa-solid fa-cookie-bite text-gold text-[11px]"></i> Preferencias de Cookies
+                </button>
             </div>
 
             <!-- Medios de Pago Aceptados -->
@@ -208,6 +220,16 @@
                 <i class="fa-brands fa-cc-mastercard hover:text-white transition" title="Mastercard"></i>
                 <i class="fa-solid fa-money-bill-transfer hover:text-white transition" title="PSE / Transferencia"></i>
                 <i class="fa-solid fa-hand-holding-dollar hover:text-white transition" title="Contra Entrega"></i>
+            </div>
+        </div>
+
+        <!-- Barra Inferior de Derechos y Créditos -->
+        <div class="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-neutral-500 text-center sm:text-left">
+            <div>
+                &copy; 2026 <strong class="text-neutral-300 font-semibold">OilSkin S.A.S.</strong> Todos los derechos reservados. Desarrollado por <span>SilverStack</span>.
+            </div>
+            <div class="text-[10px] text-neutral-500">
+                Cumplimiento normativo Ley 1581/2012 (CO) • GDPR (UE) • CCPA (EE.UU.)
             </div>
         </div>
 

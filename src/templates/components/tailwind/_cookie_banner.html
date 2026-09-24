@@ -1,0 +1,323 @@
+<!-- ==========================================
+     BANNER Y MODAL DE CONSENTIMIENTO DE COOKIES
+     Cumplimiento GDPR / CCPA / Ley 1581 de 2012
+     ========================================== -->
+
+<!-- Banner Flotante Inferior -->
+<div id="oilskinCookieBanner" 
+     class="fixed bottom-0 inset-x-0 z-50 p-4 sm:p-6 transition-all duration-500 transform translate-y-full opacity-0 pointer-events-none"
+     role="region" 
+     aria-label="Aviso de cookies y privacidad">
+    <div class="max-w-5xl mx-auto bg-neutral-950/95 backdrop-blur-xl border border-neutral-800/90 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.8)] text-neutral-300">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+            
+            <!-- Texto Informativo -->
+            <div class="space-y-2 max-w-3xl">
+                <div class="flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-xl bg-gold/10 text-gold border border-gold/30 flex items-center justify-center text-sm shrink-0">
+                        <i class="fa-solid fa-cookie-bite"></i>
+                    </span>
+                    <h3 class="text-white font-bold text-sm sm:text-base">Tu Privacidad y Uso de Cookies en OilSkin</h3>
+                </div>
+                <p class="text-xs sm:text-sm text-neutral-400 leading-relaxed">
+                    Utilizamos cookies técnicas necesarias para el funcionamiento del carrito y tu sesión, además de cookies analíticas y de personalización opcionales para mejorar tu experiencia botánica. Cumplimos con el <strong>GDPR</strong>, la <strong>CCPA</strong> y la normativa colombiana de Habeas Data. Puedes aceptar todas, rechazar las opcionales o personalizar tus preferencias.
+                </p>
+                <div class="flex items-center gap-4 text-xs pt-1">
+                    <a href="{{ url_for('main_blueprint.politica_privacidad') }}" class="text-gold hover:text-gold-light underline underline-offset-2 transition font-medium">
+                        Política de Privacidad y GDPR/CCPA
+                    </a>
+                    <span class="text-neutral-700">•</span>
+                    <a href="{{ url_for('main_blueprint.terminos_condiciones') }}" class="text-neutral-400 hover:text-white underline underline-offset-2 transition">
+                        Términos y Condiciones
+                    </a>
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 lg:shrink-0">
+                <button type="button" 
+                        id="btnRejectCookies" 
+                        class="px-4 py-2.5 rounded-xl border border-neutral-700/80 bg-neutral-900/80 hover:bg-neutral-800 text-neutral-300 hover:text-white text-xs font-semibold transition text-center">
+                    Solo Necesarias
+                </button>
+                <button type="button" 
+                        id="btnOpenCookieModal" 
+                        class="px-4 py-2.5 rounded-xl border border-gold/30 bg-gold/10 hover:bg-gold/20 text-gold text-xs font-semibold transition text-center">
+                    Configurar
+                </button>
+                <button type="button" 
+                        id="btnAcceptAllCookies" 
+                        class="px-6 py-2.5 rounded-xl bg-gold hover:bg-gold-light text-neutral-950 font-bold text-xs shadow-lg shadow-gold/20 transition text-center">
+                    Aceptar Todas
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Configuración Granular de Cookies -->
+<div id="cookiePreferencesModal" 
+     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="cookieModalTitle">
+    
+    <div class="bg-neutral-950 border border-neutral-800 rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300" id="cookieModalContainer">
+        
+        <!-- Header del Modal -->
+        <div class="p-6 border-b border-neutral-800 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-gold/10 text-gold border border-gold/30 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-sliders"></i>
+                </div>
+                <div>
+                    <h3 id="cookieModalTitle" class="text-white font-bold text-base sm:text-lg">Centro de Preferencias de Privacidad</h3>
+                    <p class="text-xs text-neutral-400">Gestiona tus preferencias de consentimiento conforme a GDPR y CCPA</p>
+                </div>
+            </div>
+            <button type="button" 
+                    id="btnCloseCookieModal" 
+                    class="w-9 h-9 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white flex items-center justify-center transition"
+                    aria-label="Cerrar modal">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+
+        <!-- Contenido con Scroll -->
+        <div class="p-6 overflow-y-auto space-y-5 text-sm text-neutral-300">
+            <p class="text-xs text-neutral-400 leading-relaxed">
+                En <strong>OilSkin</strong> valoramos tu derecho a la autodeterminación informativa. A continuación puedes decidir qué categorías de cookies deseas habilitar. Tus preferencias se guardarán localmente y podrás cambiarlas cuando gustes desde el pie de página.
+            </p>
+
+            <!-- Categoría 1: Necesarias -->
+            <div class="p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 space-y-2">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-shield-halved text-gold text-sm"></i>
+                        <span class="text-white font-bold text-sm">Cookies Técnicas y Esenciales</span>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-bold uppercase tracking-wider">
+                        Siempre Activas
+                    </span>
+                </div>
+                <p class="text-xs text-neutral-400 leading-relaxed">
+                    Indispensables para la navegación, autenticación de usuario, persistencia del carrito de compras, seguridad de tokens CSRF y procesamiento seguro de pedidos. No pueden ser desactivadas.
+                </p>
+            </div>
+
+            <!-- Categoría 2: Analíticas -->
+            <div class="p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 space-y-2">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-chart-line text-gold text-sm"></i>
+                        <span class="text-white font-bold text-sm">Cookies Analíticas y de Rendimiento</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="chkAnalyticsCookies" class="sr-only peer">
+                        <div class="w-11 h-6 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold"></div>
+                    </label>
+                </div>
+                <p class="text-xs text-neutral-400 leading-relaxed">
+                    Nos permiten cuantificar visitas, fuentes de tráfico anónimas y tiempos de respuesta de la plataforma para optimizar el rendimiento técnico y la usabilidad de la tienda.
+                </p>
+            </div>
+
+            <!-- Categoría 3: Marketing y Personalización -->
+            <div class="p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 space-y-2">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-bullhorn text-gold text-sm"></i>
+                        <span class="text-white font-bold text-sm">Cookies de Personalización & Marketing</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="chkMarketingCookies" class="sr-only peer">
+                        <div class="w-11 h-6 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold"></div>
+                    </label>
+                </div>
+                <p class="text-xs text-neutral-400 leading-relaxed">
+                    Permiten recordar tus preferencias botánicas (tipos de piel, categorías frecuentes) y recomendarte novedades y promociones exclusivas adaptadas a tus intereses.
+                </p>
+            </div>
+
+            <!-- Cláusula CCPA Do Not Sell -->
+            <div class="p-3.5 rounded-xl bg-neutral-900/30 border border-neutral-800/50 flex items-start gap-3 text-xs text-neutral-400">
+                <i class="fa-solid fa-lock text-gold mt-0.5 shrink-0"></i>
+                <p>
+                    <strong>Aviso CCPA:</strong> En OilSkin <em>no vendemos ni transferimos con fines comerciales</em> tu información personal a terceros bajo ninguna circunstancia.
+                </p>
+            </div>
+        </div>
+
+        <!-- Footer del Modal con Acciones -->
+        <div class="p-5 border-t border-neutral-800 bg-neutral-950/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <a href="{{ url_for('main_blueprint.politica_privacidad') }}" class="text-xs text-neutral-400 hover:text-gold transition">
+                Consultar texto completo de Privacidad &rarr;
+            </a>
+            <div class="flex items-center gap-2.5 w-full sm:w-auto">
+                <button type="button" 
+                        id="btnSaveCookiePreferences" 
+                        class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl border border-neutral-700 bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-xs transition text-center">
+                    Guardar Preferencias
+                </button>
+                <button type="button" 
+                        id="btnModalAcceptAll" 
+                        class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-gold hover:bg-gold-light text-neutral-950 font-bold text-xs shadow-lg shadow-gold/20 transition text-center">
+                    Aceptar Todas
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Lógica JavaScript para Gestión y Persistencia del Consentimiento -->
+<script>
+(function() {
+    const COOKIE_STORAGE_KEY = 'oilskin_cookie_consent_v1';
+    const banner = document.getElementById('oilskinCookieBanner');
+    const modal = document.getElementById('cookiePreferencesModal');
+    const modalContainer = document.getElementById('cookieModalContainer');
+    const chkAnalytics = document.getElementById('chkAnalyticsCookies');
+    const chkMarketing = document.getElementById('chkMarketingCookies');
+
+    function getConsent() {
+        try {
+            const raw = localStorage.getItem(COOKIE_STORAGE_KEY);
+            return raw ? JSON.parse(raw) : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function saveConsent(preferences) {
+        const consentData = {
+            necessary: true,
+            analytics: !!preferences.analytics,
+            marketing: !!preferences.marketing,
+            timestamp: new Date().toISOString()
+        };
+        try {
+            localStorage.setItem(COOKIE_STORAGE_KEY, JSON.stringify(consentData));
+        } catch (e) {
+            console.warn('No se pudo guardar el consentimiento en localStorage:', e);
+        }
+
+        // Disparar evento para scripts analíticos o de terceros
+        window.dispatchEvent(new CustomEvent('oilskin_cookies_updated', { detail: consentData }));
+        hideBanner();
+        closeModal();
+    }
+
+    function showBanner() {
+        if (!banner) return;
+        banner.classList.remove('pointer-events-none', 'translate-y-full', 'opacity-0');
+        banner.classList.add('translate-y-0', 'opacity-100');
+    }
+
+    function hideBanner() {
+        if (!banner) return;
+        banner.classList.add('translate-y-full', 'opacity-0', 'pointer-events-none');
+        banner.classList.remove('translate-y-0', 'opacity-100');
+    }
+
+    function openModal() {
+        if (!modal) return;
+        const current = getConsent() || { analytics: false, marketing: false };
+        if (chkAnalytics) chkAnalytics.checked = !!current.analytics;
+        if (chkMarketing) chkMarketing.checked = !!current.marketing;
+
+        modal.classList.remove('pointer-events-none', 'opacity-0');
+        modal.classList.add('opacity-100');
+        if (modalContainer) {
+            modalContainer.classList.remove('scale-95');
+            modalContainer.classList.add('scale-100');
+        }
+    }
+
+    function closeModal() {
+        if (!modal) return;
+        modal.classList.add('pointer-events-none', 'opacity-0');
+        modal.classList.remove('opacity-100');
+        if (modalContainer) {
+            modalContainer.classList.add('scale-95');
+            modalContainer.classList.remove('scale-100');
+        }
+    }
+
+    // Exponer función global para abrir el modal desde el footer u otros enlaces
+    window.openCookiePreferences = function() {
+        openModal();
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const existingConsent = getConsent();
+        
+        // Si el usuario aún no ha configurado sus cookies, mostrar el banner tras un breve retardo
+        if (!existingConsent) {
+            setTimeout(showBanner, 600);
+        }
+
+        // Acciones del Banner
+        const btnAcceptAll = document.getElementById('btnAcceptAllCookies');
+        if (btnAcceptAll) {
+            btnAcceptAll.addEventListener('click', function() {
+                saveConsent({ analytics: true, marketing: true });
+            });
+        }
+
+        const btnReject = document.getElementById('btnRejectCookies');
+        if (btnReject) {
+            btnReject.addEventListener('click', function() {
+                saveConsent({ analytics: false, marketing: false });
+            });
+        }
+
+        const btnOpenModal = document.getElementById('btnOpenCookieModal');
+        if (btnOpenModal) {
+            btnOpenModal.addEventListener('click', function() {
+                openModal();
+            });
+        }
+
+        // Acciones del Modal
+        const btnCloseModal = document.getElementById('btnCloseCookieModal');
+        if (btnCloseModal) {
+            btnCloseModal.addEventListener('click', closeModal);
+        }
+
+        const btnSavePreferences = document.getElementById('btnSaveCookiePreferences');
+        if (btnSavePreferences) {
+            btnSavePreferences.addEventListener('click', function() {
+                saveConsent({
+                    analytics: chkAnalytics ? chkAnalytics.checked : false,
+                    marketing: chkMarketing ? chkMarketing.checked : false
+                });
+            });
+        }
+
+        const btnModalAcceptAll = document.getElementById('btnModalAcceptAll');
+        if (btnModalAcceptAll) {
+            btnModalAcceptAll.addEventListener('click', function() {
+                saveConsent({ analytics: true, marketing: true });
+            });
+        }
+
+        // Cerrar modal al hacer clic en el fondo oscuro
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+        }
+
+        // Cerrar con tecla Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal && !modal.classList.contains('opacity-0')) {
+                closeModal();
+            }
+        });
+    });
+})();
+</script>

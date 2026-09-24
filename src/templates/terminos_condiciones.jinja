@@ -1,0 +1,191 @@
+{% extends 'components/tailwind/layout.jinja' %}
+
+{% block title %}Términos y Condiciones - OilSkin Cosmética Natural{% endblock %}
+
+{% block content %}
+<main class="min-h-screen py-12 md:py-16 text-neutral-300" style="background: linear-gradient(rgba(0,0,0,0.88), rgba(0,0,0,0.88)), url('{{ url_for('static', filename='img/fondo_2.webp') }}') center/cover no-repeat fixed;">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+        
+        <!-- Header Principal de la Página -->
+        <div class="text-center space-y-3 pb-8 border-b border-neutral-800">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/10 border border-gold/30 text-gold text-xs font-bold uppercase tracking-widest">
+                <i class="fa-solid fa-scale-balanced"></i> Marco Legal y Comercial
+            </div>
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+                Términos y <span class="text-gold">Condiciones de Uso</span>
+            </h1>
+            <p class="text-xs sm:text-sm text-neutral-400 max-w-2xl mx-auto">
+                Última actualización: Septiembre de 2026 • Rige las operaciones comerciales de <strong>OILSKIN S.A.S.</strong> en Colombia y el mundo.
+            </p>
+        </div>
+
+        <!-- Navegación Rápida / Resumen -->
+        <div class="bg-neutral-900/70 backdrop-blur-md border border-neutral-800 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl">
+            <h2 class="text-white font-bold text-base sm:text-lg flex items-center gap-2">
+                <i class="fa-solid fa-book-bookmark text-gold"></i> Índice de Contenido
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 text-xs text-neutral-400">
+                <a href="#sec1" class="hover:text-gold transition flex items-center gap-1.5"><i class="fa-solid fa-chevron-right text-[10px] text-gold"></i> 1. Información General</a>
+                <a href="#sec2" class="hover:text-gold transition flex items-center gap-1.5"><i class="fa-solid fa-chevron-right text-[10px] text-gold"></i> 2. Capacidad y Cuenta</a>
+                <a href="#sec3" class="hover:text-gold transition flex items-center gap-1.5"><i class="fa-solid fa-chevron-right text-[10px] text-gold"></i> 3. Catálogo y Precios</a>
+                <a href="#sec4" class="hover:text-gold transition flex items-center gap-1.5"><i class="fa-solid fa-chevron-right text-[10px] text-gold"></i> 4. Pagos y Cifrado</a>
+                <a href="#sec5" class="hover:text-gold transition flex items-center gap-1.5"><i class="fa-solid fa-chevron-right text-[10px] text-gold"></i> 5. Facturación DIAN</a>
+                <a href="#sec6" class="hover:text-gold transition flex items-center gap-1.5"><i class="fa-solid fa-chevron-right text-[10px] text-gold"></i> 6. Envíos y Trazabilidad</a>
+                <a href="#sec7" class="hover:text-gold transition flex items-center gap-1.5"><i class="fa-solid fa-chevron-right text-[10px] text-gold"></i> 7. Retracto y Devoluciones</a>
+                <a href="#sec8" class="hover:text-gold transition flex items-center gap-1.5"><i class="fa-solid fa-chevron-right text-[10px] text-gold"></i> 8. Propiedad Intelectual</a>
+                <a href="#sec9" class="hover:text-gold transition flex items-center gap-1.5"><i class="fa-solid fa-chevron-right text-[10px] text-gold"></i> 9. Ley Aplicable</a>
+            </div>
+        </div>
+
+        <!-- Secciones Detalladas -->
+        <div class="space-y-8 text-neutral-300 text-sm leading-relaxed">
+
+            <!-- 1. Información General -->
+            <section id="sec1" class="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800/80 rounded-3xl p-6 sm:p-8 space-y-3">
+                <h3 class="text-white font-bold text-lg flex items-center gap-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-gold/10 text-gold flex items-center justify-center text-xs font-black">1</span>
+                    Información General y Objeto
+                </h3>
+                <p>
+                    El presente acuerdo rige los términos y condiciones de acceso y uso del sitio web oficial de <strong>OILSKIN S.A.S.</strong> (NIT: 901.654.321-8), con domicilio principal en Bogotá D.C., Colombia (Colegio Técnico José Félix Restrepo, Cra. 6 # 18A - 20 Sur).
+                </p>
+                <p class="text-neutral-400">
+                    Al navegar por este portal, registrar una cuenta o efectuar una orden de compra, el usuario declara haber leído, comprendido y aceptado en su totalidad estos Términos, de conformidad con la Ley 527 de 1999 (Comercio Electrónico y Firmas Digitales) y la Ley 1480 de 2011 (Estatuto del Consumidor en Colombia).
+                </p>
+            </section>
+
+            <!-- 2. Capacidad y Cuenta -->
+            <section id="sec2" class="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800/80 rounded-3xl p-6 sm:p-8 space-y-3">
+                <h3 class="text-white font-bold text-lg flex items-center gap-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-gold/10 text-gold flex items-center justify-center text-xs font-black">2</span>
+                    Capacidad Legal y Seguridad de la Cuenta
+                </h3>
+                <p>
+                    Nuestros servicios y productos están dirigidos exclusivamente a personas con capacidad legal para contratar. Los menores de edad deberán contar con la supervisión y autorización expresa de sus padres o tutores legales.
+                </p>
+                <p class="text-neutral-400">
+                    El usuario es el único responsable de salvaguardar la confidencialidad de su contraseña y datos de acceso. En caso de detectar cualquier uso no autorizado o vulneración a la seguridad de su cuenta, deberá notificar de inmediato al equipo de soporte de OilSkin.
+                </p>
+            </section>
+
+            <!-- 3. Catálogo y Precios -->
+            <section id="sec3" class="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800/80 rounded-3xl p-6 sm:p-8 space-y-3">
+                <h3 class="text-white font-bold text-lg flex items-center gap-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-gold/10 text-gold flex items-center justify-center text-xs font-black">3</span>
+                    Catálogo de Productos, Disponibilidad y Precios
+                </h3>
+                <p>
+                    Todos los productos exhibidos en nuestro catálogo corresponden a cosmética botánica natural formulada con altos estándares de calidad. Las fotografías e ilustraciones son de carácter referencial y fiel al producto original.
+                </p>
+                <ul class="list-disc list-inside text-neutral-400 space-y-1.5 pl-2">
+                    <li>Los precios se publican en Pesos Colombianos (COP) e incluyen los impuestos aplicables de ley (IVA).</li>
+                    <li>OilSkin se reserva el derecho de modificar precios, promociones o descontinuar productos en cualquier momento sin previo aviso.</li>
+                    <li>La disponibilidad del inventario se actualiza en tiempo real; no obstante, si por causas de fuerza mayor un producto se agotara tras confirmada la orden, se reembolsará el 100% del valor pagado o se coordinará una sustitución equivalente a elección del cliente.</li>
+                </ul>
+            </section>
+
+            <!-- 4. Pagos y Cifrado -->
+            <section id="sec4" class="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800/80 rounded-3xl p-6 sm:p-8 space-y-3">
+                <h3 class="text-white font-bold text-lg flex items-center gap-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-gold/10 text-gold flex items-center justify-center text-xs font-black">4</span>
+                    Procesamiento de Pagos y Seguridad Cifrada
+                </h3>
+                <p>
+                    Ofrecemos diversas alternativas de pago para tu comodidad y protección: tarjetas de crédito/débito (Visa, Mastercard), transferencias bancarias electrónicas (PSE) y modalidad contra entrega para áreas seleccionadas.
+                </p>
+                <div class="p-4 rounded-2xl bg-neutral-950/80 border border-gold/30 text-xs text-neutral-300 space-y-1">
+                    <p class="font-bold text-gold flex items-center gap-1.5">
+                        <i class="fa-solid fa-lock"></i> Seguridad SSL/TLS y Cero Almacenamiento de Tarjetas
+                    </p>
+                    <p class="text-neutral-400">
+                        Todas las transacciones se realizan mediante conexiones cifradas HTTPS con protocolos TLS modernos. OilSkin <strong>nunca almacena</strong> números completos de tarjetas de crédito, códigos CVV ni datos bancarios sensibles en sus servidores.
+                    </p>
+                </div>
+            </section>
+
+            <!-- 5. Facturación DIAN -->
+            <section id="sec5" class="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800/80 rounded-3xl p-6 sm:p-8 space-y-3">
+                <h3 class="text-white font-bold text-lg flex items-center gap-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-gold/10 text-gold flex items-center justify-center text-xs font-black">5</span>
+                    Facturación Electrónica y Validación Digital
+                </h3>
+                <p>
+                    Cada compra realizada genera una factura electrónica oficial con número de folio consecutivo, código CUFE/QR de verificación y desglose tributario conforme a los requerimientos de la Dirección de Impuestos y Aduanas Nacionales (DIAN) de Colombia.
+                </p>
+                <p class="text-neutral-400">
+                    El comprador puede descargar o imprimir su comprobante fiscal en cualquier momento desde su panel de perfil o mediante el código QR impreso en el documento.
+                </p>
+            </section>
+
+            <!-- 6. Envíos y Trazabilidad -->
+            <section id="sec6" class="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800/80 rounded-3xl p-6 sm:p-8 space-y-3">
+                <h3 class="text-white font-bold text-lg flex items-center gap-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-gold/10 text-gold flex items-center justify-center text-xs font-black">6</span>
+                    Trazabilidad Satelital y Tiempos de Entrega
+                </h3>
+                <p>
+                    Los envíos se procesan desde nuestro centro de distribución en Bogotá. Gracias a nuestro sistema de geolocalización satelital (OpenStreetMap / Leaflet), el cliente puede validar la ruta y coordenadas exactas de su destino.
+                </p>
+                <ul class="list-disc list-inside text-neutral-400 space-y-1.5 pl-2">
+                    <li><strong>Bogotá y Sabana:</strong> Entrega estimada de 1 a 2 días hábiles.</li>
+                    <li><strong>Principales Ciudades Nacionales:</strong> Entrega estimada de 2 a 4 días hábiles.</li>
+                    <li><strong>Zonas Especiales / Trayectos Especiales:</strong> Entrega estimada de 4 a 7 días hábiles.</li>
+                </ul>
+            </section>
+
+            <!-- 7. Retracto y Devoluciones -->
+            <section id="sec7" class="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800/80 rounded-3xl p-6 sm:p-8 space-y-3">
+                <h3 class="text-white font-bold text-lg flex items-center gap-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-gold/10 text-gold flex items-center justify-center text-xs font-black">7</span>
+                    Derecho de Retracto, Garantías y Reembolsos
+                </h3>
+                <p>
+                    De acuerdo con el artículo 47 de la <strong>Ley 1480 de 2011 (Estatuto del Consumidor)</strong>, el comprador tiene derecho a retractarse de la compra dentro de los <strong>cinco (5) días hábiles</strong> siguientes a la entrega del producto.
+                </p>
+                <div class="p-4 rounded-2xl bg-neutral-950/60 border border-neutral-800 space-y-2 text-xs">
+                    <h4 class="font-bold text-white">Condiciones para Retracto y Garantía en Cosméticos:</h4>
+                    <p class="text-neutral-400 leading-relaxed">
+                        Por razones de bioseguridad, salubridad y protección del consumidor, los productos cosméticos y óleos corporales <strong>deben conservar su sello de seguridad intacto, sin uso, sin abrir y en su empaque original</strong> para hacer efectivo el retracto comercial.
+                    </p>
+                    <p class="text-neutral-400 leading-relaxed">
+                        En caso de defectos de fábrica o averías durante el transporte, OilSkin cubrirá la totalidad de los costos de recolección y enviará una unidad nueva o reembolsará el monto correspondiente en un plazo máximo de 15 días calendario.
+                    </p>
+                </div>
+            </section>
+
+            <!-- 8. Propiedad Intelectual -->
+            <section id="sec8" class="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800/80 rounded-3xl p-6 sm:p-8 space-y-3">
+                <h3 class="text-white font-bold text-lg flex items-center gap-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-gold/10 text-gold flex items-center justify-center text-xs font-black">8</span>
+                    Propiedad Intelectual y Marcas
+                </h3>
+                <p>
+                    Todos los signos distintivos, marcas registradas, logotipos, nombres comerciales, fórmulas botánicas, textos, fotografías, código fuente y diseños de interfaz del portal son propiedad exclusiva de <strong>OILSKIN S.A.S.</strong> y están protegidos por las leyes de propiedad intelectual de Colombia y tratados internacionales.
+                </p>
+                <p class="text-neutral-400">
+                    Queda estrictamente prohibida su copia, distribución, reproducción parcial o total sin consentimiento previo y por escrito de la titular.
+                </p>
+            </section>
+
+            <!-- 9. Ley Aplicable -->
+            <section id="sec9" class="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800/80 rounded-3xl p-6 sm:p-8 space-y-3">
+                <h3 class="text-white font-bold text-lg flex items-center gap-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-gold/10 text-gold flex items-center justify-center text-xs font-black">9</span>
+                    Ley Aplicable y Resolución de Controversias
+                </h3>
+                <p>
+                    Los presentes términos se regirán e interpretarán de acuerdo con las leyes de la República de Colombia. Cualquier discrepancia o reclamación que no pueda resolverse de mutuo acuerdo será sometida a la jurisdicción ordinaria de los tribunales de la ciudad de Bogotá D.C., Colombia, sin perjuicio de los mecanismos de protección ante la Superintendencia de Industria y Comercio (SIC).
+                </p>
+                <div class="pt-4 border-t border-neutral-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-400">
+                    <span>¿Dudas sobre estos términos? Escríbenos a: <a href="mailto:legal@oilskin.com" class="text-gold hover:underline">legal@oilskin.com</a></span>
+                    <a href="{{ url_for('main_blueprint.index') }}" class="text-white hover:text-gold transition font-semibold">
+                        &larr; Volver a la Tienda
+                    </a>
+                </div>
+            </section>
+
+        </div>
+
+    </div>
+</main>
+{% endblock %}
