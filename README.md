@@ -142,27 +142,21 @@ gunicorn wsgi:app --bind 0.0.0.0:5000 --workers 3
 ### 🗄️ Modelo Entidad-Relación (MER)
 Representación conceptual de las entidades y relaciones del negocio (Usuarios, Roles, Productos, Categorías, Pedidos, Domicilios y Facturación):
 
-<p align="center">
-  <img src="diagrama_mer_oilskin.png" alt="Diagrama Entidad-Relación (MER) OilSkin" width="850">
-</p>
+![Diagrama Entidad-Relación (MER) OilSkin](./diagrama_mer_oilskin.png)
 
 ---
 
 ### 🗃️ Modelo Relacional
 Esquema lógico de las tablas en MySQL con especificación de llaves primarias (PK), foráneas (FK), tipos de datos y cardinalidades:
 
-<p align="center">
-  <img src="modelo_relacional_oilskin.png" alt="Modelo Relacional OilSkin" width="850">
-</p>
+![Modelo Relacional OilSkin](./modelo_relacional_oilskin.png)
 
 ---
 
 ### 🏛️ Diagrama de Clases (UML)
 Diseño orientado a objetos que estructura la capa de acceso a datos y lógica del negocio (`src/models/`):
 
-<p align="center">
-  <img src="diagrama_clases_oilskin.png" alt="Diagrama de Clases OilSkin" width="850">
-</p>
+![Diagrama de Clases OilSkin](./diagrama_clases_oilskin.png)
 
 ---
 
