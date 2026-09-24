@@ -43,6 +43,36 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </noscript>
 
+<!-- Sitemap & SEO Discovery -->
+<link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+
 <style>
   * { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+
+  /* Accesibilidad y Navegabilidad 100% por Teclado (WCAG 2.1 Focus Visible) */
+  :focus-visible {
+    outline: 2px solid #CEB06E !important;
+    outline-offset: 3px !important;
+    box-shadow: 0 0 0 4px rgba(206, 176, 110, 0.3) !important;
+  }
+
+  /* Enlace directo para saltar al contenido principal (Skip Link) */
+  .skip-to-content {
+    position: fixed;
+    top: -120px;
+    left: 1rem;
+    z-index: 99999;
+    background-color: #CEB06E;
+    color: #0c0c0c;
+    font-weight: 700;
+    font-size: 0.875rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(206, 176, 110, 0.4);
+    transition: top 0.25s cubic-bezier(0, 0, 0.2, 1);
+    text-decoration: none;
+  }
+  .skip-to-content:focus {
+    top: 1rem;
+  }
 </style>

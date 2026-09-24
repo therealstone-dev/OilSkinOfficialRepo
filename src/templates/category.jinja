@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<main class="min-h-screen w-full py-12 md:py-16"
+<main id="mainContent" tabindex="-1" class="min-h-screen w-full py-12 md:py-16 focus:outline-none"
       style="background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('{{ url_for('static', filename='img/fondo_2.webp') }}') center/cover no-repeat fixed;">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -49,7 +49,7 @@
                         <img src="{{ p.imagenUrl or url_for('static', filename='img/logo.webp') }}"
                              onerror="this.src='{{ url_for('static', filename='img/logo.webp') }}'"
                              class="relative w-28 h-28 rounded-full object-cover border-2 border-gold/50 shadow-md mx-auto bg-neutral-950"
-                             alt="{{ p.nombre_producto }}">
+                             alt="Fotografía del producto {{ p.nombre_producto }} - Colección {{ category_name }}">
                     </div>
 
                     <div>
@@ -75,9 +75,10 @@
                     </div>
 
                     <a href="{{ url_for('main_blueprint.get_product', id=p.id_producto) }}"
+                       aria-label="Ver detalles del producto {{ p.nombre_producto }}"
                        class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-neutral-950 bg-gold hover:bg-gold-light rounded-xl transition-all shadow-md shadow-gold/20">
                         <span>Ver Detalle</span>
-                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        <i class="fa-solid fa-arrow-right text-[10px]" aria-hidden="true"></i>
                     </a>
                 </div>
 

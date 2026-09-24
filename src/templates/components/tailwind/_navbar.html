@@ -7,9 +7,11 @@
 
             <!-- Logo & Brand Identity -->
             <div class="flex items-center justify-start shrink-0">
-                <a href="{{ url_for('main_blueprint.index') }}" class="group flex items-center gap-3 transition">
+                <a href="{{ url_for('main_blueprint.index') }}" 
+                   aria-label="OilSkin Cosmética Natural - Ir a la página de inicio"
+                   class="group flex items-center gap-3 transition">
                     <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-gold via-[#dfc98e] to-[#a8903b] flex items-center justify-center text-neutral-950 shadow-lg shadow-gold/20 group-hover:scale-105 group-hover:shadow-gold/30 transition-all duration-300">
-                        <i class="fa-solid fa-droplet text-lg"></i>
+                        <i class="fa-solid fa-droplet text-lg" aria-hidden="true"></i>
                     </div>
                     <div class="flex flex-col">
                         <span class="text-xl font-black tracking-wider text-white group-hover:text-gold transition-colors leading-none">
@@ -21,7 +23,7 @@
             </div>
 
             <!-- Desktop Navigation Links -->
-            <nav class="hidden lg:flex items-center justify-center gap-1 xl:gap-2">
+            <nav class="hidden lg:flex items-center justify-center gap-1 xl:gap-2" aria-label="Navegación principal">
                 <a href="{{ url_for('main_blueprint.index') }}" 
                    class="px-3.5 py-2 rounded-xl text-sm font-semibold text-neutral-300 hover:text-gold hover:bg-neutral-900/60 transition-all duration-200">
                     Inicio
@@ -35,30 +37,38 @@
                 <!-- Dropdown de Categorías -->
                 <div class="relative group" id="categoriesDropdownContainer">
                     <button id="dropdownButton" type="button"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-controls="dropdownMenu"
+                            aria-label="Menú de categorías botánicas"
                             class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold text-neutral-300 hover:text-gold hover:bg-neutral-900/60 transition-all duration-200 focus:outline-none">
                         <span>Categorías</span>
-                        <i class="fa-solid fa-chevron-down text-xs transition-transform duration-300 group-hover:rotate-180 text-neutral-400 group-hover:text-gold"></i>
+                        <i class="fa-solid fa-chevron-down text-xs transition-transform duration-300 group-hover:rotate-180 group-focus-within:rotate-180 text-neutral-400 group-hover:text-gold" aria-hidden="true"></i>
                     </button>
 
                     <div id="dropdownMenu" 
-                         class="hidden group-hover:block absolute left-0 top-full pt-2 w-64 z-[110] transition-all duration-200">
+                         role="region"
+                         aria-label="Submenú de categorías botánicas"
+                         class="hidden group-hover:block group-focus-within:block focus-within:block absolute left-0 top-full pt-2 w-64 z-[110] transition-all duration-200">
                         <div class="rounded-2xl shadow-2xl bg-neutral-950/95 border border-neutral-800/90 backdrop-blur-xl p-2.5 space-y-2">
                             <!-- Buscador Rápido de Categorías -->
                             <div class="relative px-1">
-                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 text-[10px]"></i>
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 text-[10px]" aria-hidden="true"></i>
                                 <input type="text" id="navCategorySearch" placeholder="Buscar categoría..." 
+                                       aria-label="Filtrar categorías por nombre"
                                        class="w-full bg-neutral-900/90 border border-neutral-800 rounded-xl pl-7 pr-2.5 py-1.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition">
                             </div>
 
                             <!-- Lista con scroll interno -->
-                            <div class="py-1 space-y-0.5 max-h-56 overflow-y-auto pr-1" id="navCategoriesList">
+                            <div class="py-1 space-y-0.5 max-h-56 overflow-y-auto pr-1" id="navCategoriesList" role="list">
                                 {% if categorias %}
                                     {% for categoria in categorias %}
                                     <a href="{{ url_for('main_blueprint.show_category', category_name=categoria.nombre_categoria) }}"
+                                       role="listitem"
                                        class="nav-cat-item flex items-center justify-between px-3 py-2 text-xs font-semibold text-neutral-300 hover:text-gold hover:bg-neutral-900/80 rounded-xl transition-all group/item"
                                        data-name="{{ categoria.nombre_categoria|lower }}">
                                         <span class="truncate">{{ categoria.nombre_categoria }}</span>
-                                        <i class="fa-solid fa-angle-right text-[10px] text-neutral-600 group-hover/item:text-gold group-hover/item:translate-x-0.5 transition-all"></i>
+                                        <i class="fa-solid fa-angle-right text-[10px] text-neutral-600 group-hover/item:text-gold group-hover/item:translate-x-0.5 transition-all" aria-hidden="true"></i>
                                     </a>
                                     {% endfor %}
                                 {% else %}
@@ -69,7 +79,7 @@
                             <!-- Footer del dropdown -->
                             <div class="pt-2 border-t border-neutral-800/60">
                                 <a href="{{ url_for('main_blueprint.index') }}" class="flex items-center justify-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-gold hover:bg-gold/10 rounded-xl transition-all">
-                                    <i class="fa-solid fa-boxes-stacked text-[10px]"></i> Ver todo el catálogo
+                                    <i class="fa-solid fa-boxes-stacked text-[10px]" aria-hidden="true"></i> Ver todo el catálogo
                                 </a>
                             </div>
                         </div>
@@ -90,9 +100,10 @@
                 
                 <!-- Botón Carrito con Contador Dinámico -->
                 <a href="{{ url_for('main_blueprint.carrito') }}" 
+                   aria-label="Ver carrito de compras ({{ cart_count }} artículos)"
                    class="relative flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-neutral-900/80 border border-neutral-800 text-neutral-200 hover:text-gold hover:border-gold/50 hover:bg-neutral-900 transition-all duration-200 shadow-sm group">
                     <div class="relative flex items-center justify-center">
-                        <i class="fa-solid fa-cart-shopping text-gold text-base group-hover:scale-110 transition-transform"></i>
+                        <i class="fa-solid fa-cart-shopping text-gold text-base group-hover:scale-110 transition-transform" aria-hidden="true"></i>
                         {% if cart_count > 0 %}
                         <span class="absolute -top-2.5 -right-2.5 min-w-[18px] h-[18px] px-1 rounded-full bg-gold text-neutral-950 font-black text-[10px] flex items-center justify-center shadow-md shadow-gold/30 ring-2 ring-neutral-950">
                             {{ cart_count }}
@@ -107,7 +118,7 @@
                     {% if session.get('id_rol') == 2 %}
                     <a href="{{ url_for('admin_blueprint.dashboard') }}"
                        class="px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500 hover:text-neutral-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm">
-                        <i class="fa-solid fa-shield-halved"></i>
+                        <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
                         <span>Admin</span>
                     </a>
                     {% endif %}
@@ -116,8 +127,9 @@
                     <div class="flex items-center gap-2 pl-2 border-l border-neutral-800">
                         <a href="{{ url_for('user_blueprint.profile') }}" 
                            class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-900/60 border border-neutral-800 hover:border-gold/50 hover:bg-neutral-900 text-neutral-200 hover:text-gold transition-all duration-200"
+                           aria-label="Ver perfil de usuario: {{ session.get('user_name', 'Mi Cuenta') }}"
                            title="Ver mi perfil">
-                            <div class="w-6 h-6 rounded-lg bg-gold/20 text-gold flex items-center justify-center text-xs font-bold">
+                            <div class="w-6 h-6 rounded-lg bg-gold/20 text-gold flex items-center justify-center text-xs font-bold" aria-hidden="true">
                                 {{ (session.get('user_name', 'U')[0]) | upper }}
                             </div>
                             <span class="text-xs font-semibold max-w-[110px] truncate">{{ session.get('user_name', 'Mi Cuenta') }}</span>
@@ -125,8 +137,9 @@
 
                         <a href="{{ url_for('auth_blueprint.logout') }}" 
                            class="w-8 h-8 rounded-xl bg-neutral-900/60 border border-neutral-800 hover:border-red-500/50 hover:bg-red-950/40 text-neutral-400 hover:text-red-400 flex items-center justify-center transition-all duration-200"
+                           aria-label="Cerrar sesión de usuario"
                            title="Cerrar Sesión">
-                            <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+                            <i class="fa-solid fa-arrow-right-from-bracket text-xs" aria-hidden="true"></i>
                         </a>
                     </div>
                 {% else %}
@@ -146,8 +159,10 @@
 
             <!-- Mobile Hamburger Button -->
             <div class="flex lg:hidden items-center gap-2">
-                <a href="{{ url_for('main_blueprint.carrito') }}" class="relative p-2 text-neutral-300 hover:text-gold">
-                    <i class="fa-solid fa-cart-shopping text-lg text-gold"></i>
+                <a href="{{ url_for('main_blueprint.carrito') }}" 
+                   aria-label="Ver carrito de compras ({{ cart_count }} artículos)"
+                   class="relative p-2 text-neutral-300 hover:text-gold">
+                    <i class="fa-solid fa-cart-shopping text-lg text-gold" aria-hidden="true"></i>
                     {% if cart_count > 0 %}
                     <span class="absolute top-0 right-0 min-w-[16px] h-[16px] px-0.5 rounded-full bg-gold text-neutral-950 font-black text-[9px] flex items-center justify-center">
                         {{ cart_count }}
@@ -156,8 +171,11 @@
                 </a>
 
                 <button id="mobileMenuButton" type="button" 
+                        aria-expanded="false"
+                        aria-controls="mobileMenu"
+                        aria-label="Abrir menú de navegación móvil"
                         class="p-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-gold hover:border-gold/50 focus:outline-none transition">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                 </button>
@@ -167,7 +185,8 @@
     </div>
 
     <!-- Mobile Menu Drawer / Dropdown -->
-    <div id="mobileMenu"
+    <nav id="mobileMenu"
+         aria-label="Navegación móvil"
          class="hidden w-full bg-neutral-950/95 border-b border-neutral-800 backdrop-blur-xl px-5 py-6 flex-col gap-4 text-white lg:hidden">
         
         <!-- Enlaces Principales -->
@@ -259,40 +278,91 @@
             </div>
             {% endif %}
         </div>
-    </div>
+    </nav>
 </header>
 
 <script>
-    // Lógica para abrir/cerrar menú móvil
+    // Lógica para abrir/cerrar menú móvil con soporte ARIA y teclado (Escape)
     const mobileBtn = document.getElementById('mobileMenuButton');
     const mobileMenu = document.getElementById('mobileMenu');
 
     if (mobileBtn && mobileMenu) {
-        mobileBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-            mobileMenu.classList.toggle('flex');
+        function toggleMobileMenu(forceState) {
+            const isOpen = forceState !== undefined ? forceState : mobileMenu.classList.contains('hidden');
+            if (isOpen) {
+                mobileMenu.classList.remove('hidden');
+                mobileMenu.classList.add('flex');
+                mobileBtn.setAttribute('aria-expanded', 'true');
+                mobileBtn.setAttribute('aria-label', 'Cerrar menú de navegación móvil');
+            } else {
+                mobileMenu.classList.add('hidden');
+                mobileMenu.classList.remove('flex');
+                mobileBtn.setAttribute('aria-expanded', 'false');
+                mobileBtn.setAttribute('aria-label', 'Abrir menú de navegación móvil');
+            }
+        }
+
+        mobileBtn.addEventListener('click', () => toggleMobileMenu());
+
+        // Cerrar menú móvil al presionar Escape
+        mobileMenu.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                toggleMobileMenu(false);
+                mobileBtn.focus();
+            }
         });
     }
 
-    // Toggle dropdown con click en táctil / mobile
+    // Toggle dropdown con click y teclado (Enter, Space, ArrowDown, Escape)
     const dropdownBtn = document.getElementById('dropdownButton');
     const dropdownMenu = document.getElementById('dropdownMenu');
+    const catSearch = document.getElementById('navCategorySearch');
 
     if (dropdownBtn && dropdownMenu) {
+        function setDropdownOpen(open) {
+            if (open) {
+                dropdownMenu.classList.remove('hidden');
+                dropdownBtn.setAttribute('aria-expanded', 'true');
+            } else {
+                dropdownMenu.classList.add('hidden');
+                dropdownBtn.setAttribute('aria-expanded', 'false');
+            }
+        }
+
         dropdownBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            dropdownMenu.classList.toggle('hidden');
+            const isCurrentlyHidden = dropdownMenu.classList.contains('hidden');
+            setDropdownOpen(isCurrentlyHidden);
         });
+
+        // Soporte de navegación por teclado para el botón de dropdown
+        dropdownBtn.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setDropdownOpen(true);
+                if (catSearch) catSearch.focus();
+            }
+        });
+
+        // Cerrar dropdown al presionar Escape dentro del contenedor
+        const dropdownContainer = document.getElementById('categoriesDropdownContainer');
+        if (dropdownContainer) {
+            dropdownContainer.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    setDropdownOpen(false);
+                    dropdownBtn.focus();
+                }
+            });
+        }
 
         document.addEventListener('click', (e) => {
             if (!dropdownBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
-                dropdownMenu.classList.add('hidden');
+                setDropdownOpen(false);
             }
         });
     }
 
     // Buscador en tiempo real de categorías en navbar
-    const catSearch = document.getElementById('navCategorySearch');
     if (catSearch) {
         catSearch.addEventListener('input', function(e) {
             const query = e.target.value.toLowerCase().trim();

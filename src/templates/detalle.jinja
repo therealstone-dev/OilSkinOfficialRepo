@@ -2,7 +2,7 @@
 {% block title %}{{ producto.nombre_producto }} - Cosmética Natural OilSkin{% endblock %}
 
 {% block content %}
-<main class="min-h-screen py-10" style="background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('{{ url_for('static', filename='img/fondo_2.webp') }}') center/cover no-repeat fixed;">
+<main id="mainContent" tabindex="-1" class="min-h-screen py-10 focus:outline-none" style="background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('{{ url_for('static', filename='img/fondo_2.webp') }}') center/cover no-repeat fixed;">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <!-- Breadcrumbs (Flowbite styled) -->
@@ -87,7 +87,7 @@
                     <div class="my-8 py-4 relative flex justify-center">
                         <div class="relative w-56 h-56 sm:w-64 sm:h-64 rounded-3xl overflow-hidden flex items-center justify-center border-2 border-gold shadow-[0_0_50px_rgba(206,176,110,0.25)] bg-gradient-to-tr from-gold/20 via-neutral-900/80 to-black group">
                             <img src="{{ producto.imagenUrl or url_for('static', filename='img/logo.webp') }}" 
-                                 alt="{{ producto.nombre_producto }}"
+                                 alt="Fotografía oficial del producto {{ producto.nombre_producto }} - Cosmética Natural OilSkin"
                                  onerror="this.src='{{ url_for('static', filename='img/logo.webp') }}'"
                                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                         </div>

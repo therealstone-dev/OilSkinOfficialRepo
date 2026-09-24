@@ -2,7 +2,7 @@
 {% block title %}Mi Carrito de Compras - OilSkin Cosmética Natural{% endblock %}
 
 {% block content %}
-<main class="min-h-screen py-12" style="background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('{{ url_for('static', filename='img/fondo_2.webp') }}') center/cover no-repeat fixed;">
+<main id="mainContent" tabindex="-1" class="min-h-screen py-12 focus:outline-none" style="background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('{{ url_for('static', filename='img/fondo_2.webp') }}') center/cover no-repeat fixed;">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Header -->
@@ -81,9 +81,9 @@
                                 <form action="{{ url_for('main_blueprint.actualizar_carrito') }}" method="post" class="flex items-center">
                                     <input type="hidden" name="producto_id" value="{{ item.id_producto }}">
                                     <div class="flex items-center rounded-xl bg-black border border-neutral-700 overflow-hidden shadow-inner">
-                                        <button type="submit" name="cantidad" value="{{ item.cantidad - 1 }}" class="px-3 py-1.5 text-gold hover:bg-neutral-800 transition font-bold text-sm" title="Disminuir">-</button>
-                                        <input type="text" readonly class="w-12 text-center bg-transparent text-white border-0 text-xs font-bold focus:ring-0" value="{{ item.cantidad }}">
-                                        <button type="submit" name="cantidad" value="{{ item.cantidad + 1 }}" class="px-3 py-1.5 text-gold hover:bg-neutral-800 transition font-bold text-sm" title="Aumentar">+</button>
+                                        <button type="submit" name="cantidad" value="{{ item.cantidad - 1 }}" aria-label="Disminuir una unidad de {{ item.nombre_producto }}" class="px-3 py-1.5 text-gold hover:bg-neutral-800 transition font-bold text-sm" title="Disminuir">-</button>
+                                        <input type="text" readonly aria-label="Cantidad actual de {{ item.nombre_producto }}" class="w-12 text-center bg-transparent text-white border-0 text-xs font-bold focus:ring-0" value="{{ item.cantidad }}">
+                                        <button type="submit" name="cantidad" value="{{ item.cantidad + 1 }}" aria-label="Aumentar una unidad de {{ item.nombre_producto }}" class="px-3 py-1.5 text-gold hover:bg-neutral-800 transition font-bold text-sm" title="Aumentar">+</button>
                                     </div>
                                 </form>
 
@@ -98,9 +98,10 @@
                                 <!-- Eliminar -->
                                 <a href="{{ url_for('main_blueprint.eliminar_del_carrito', id_producto=item.id_producto) }}" 
                                    class="w-9 h-9 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition flex items-center justify-center text-sm shrink-0" 
+                                   aria-label="Eliminar {{ item.nombre_producto }} del carrito de compras"
                                    title="Eliminar del carrito"
                                    onclick="return confirm('¿Deseas retirar este producto de tu carrito?');">
-                                    <i class="fa-solid fa-trash-can"></i>
+                                    <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
                                 </a>
                             </div>
 

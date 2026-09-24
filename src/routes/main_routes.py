@@ -52,6 +52,76 @@ def terminos_condiciones():
 @main.route('/politica-de-privacidad')
 def politica_privacidad():
     return _render_with_cart('politica_privacidad.jinja')
+
+@main.route('/robots.txt')
+def robots():
+    host_url = request.url_root.rstrip('/')
+    content = f"""User-agent: *
+Allow: /
+Allow: /static/
+Disallow: /admin/
+Disallow: /auth/
+Disallow: /usuario/
+Disallow: /api/
+
+Sitemap: {host_url}/sitemap.xml
+"""
+    return Response(content, mimetype='text/plain')
+
+@main.route('/sitemap.xml')
+def sitemap():
+    host_url = request.url_root.rstrip('/')
+    now_date = datetime.utcnow().strftime('%Y-%m-%d')
+    
+    # Páginas estáticas principales
+    pages = [
+        {'loc': f"{host_url}/", 'changefreq': 'daily', 'priority': '1.0'},
+        {'loc': f"{host_url}/sobre_nosotros", 'changefreq': 'monthly', 'priority': '0.8'},
+        {'loc': f"{host_url}/terminos-y-condiciones", 'changefreq': 'monthly', 'priority': '0.5'},
+        {'loc': f"{host_url}/politica-de-privacidad", 'changefreq': 'monthly', 'priority': '0.5'},
+    ]
+    
+    # Categorías dinámicas desde la base de datos
+    try:
+        categorias = ModeloCategoria.get_all_categories() or []
+        for cat in categorias:
+            cat_name = cat.get('nombre_categoria')
+            if cat_name:
+                pages.append({
+                    'loc': f"{host_url}/categoria/{cat_name}",
+                    'changefreq': 'weekly',
+                    'priority': '0.8'
+                })
+    except Exception as e:
+        print(f"Aviso sitemap al obtener categorías: {e}")
+        
+    # Productos activos dinámicos desde la base de datos
+    try:
+        productos = ModeloProducto.get_all(solo_activos=True) or []
+        for prod in productos:
+            prod_id = prod.get('id_producto')
+            if prod_id:
+                pages.append({
+                    'loc': f"{host_url}/producto/{prod_id}",
+                    'changefreq': 'weekly',
+                    'priority': '0.9'
+                })
+    except Exception as e:
+        print(f"Aviso sitemap al obtener productos: {e}")
+
+    xml = ['<?xml version="1.0" encoding="UTF-8"?>']
+    xml.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
+    for page in pages:
+        xml.append('  <url>')
+        xml.append(f'    <loc>{page["loc"]}</loc>')
+        xml.append(f'    <lastmod>{now_date}</lastmod>')
+        xml.append(f'    <changefreq>{page["changefreq"]}</changefreq>')
+        xml.append(f'    <priority>{page["priority"]}</priority>')
+        xml.append('  </url>')
+    xml.append('</urlset>')
+    
+    return Response('\n'.join(xml), mimetype='application/xml')
+
 # Ruta dinámica con el id de un producto, requiere un cambio al campo de nombre_producto
 
 @main.route('/producto/<int:id>')
