@@ -8,6 +8,65 @@ from email.mime.text import MIMEText
 from decouple import config
 
 
+def _send_via_brevo(to_email: str, subject: str, text_content: str, html_content: str, api_key: str, sender_raw: str) -> tuple[bool, str]:
+    """
+    Envía correo a través de la API REST HTTPS de Brevo/Sendinblue (Puerto 443).
+    Permite enviar a cualquier destinatario sin necesidad de verificar dominio propio.
+    """
+    try:
+        url = "https://api.brevo.com/v3/smtp/email"
+        
+        # Extraer nombre y correo del remitente
+        sender_email = sender_raw
+        sender_name = "OilSkin"
+        if "<" in sender_raw and ">" in sender_raw:
+            parts = sender_raw.split("<")
+            sender_name = parts[0].strip() or "OilSkin"
+            sender_email = parts[1].replace(">", "").strip()
+        
+        payload = {
+            "sender": {
+                "name": sender_name,
+                "email": sender_email
+            },
+            "to": [
+                {
+                    "email": to_email
+                }
+            ],
+            "subject": subject,
+            "htmlContent": html_content,
+            "textContent": text_content
+        }
+        data = json.dumps(payload).encode('utf-8')
+        req = urllib.request.Request(
+            url,
+            data=data,
+            headers={
+                "api-key": api_key.strip(),
+                "accept": "application/json",
+                "content-type": "application/json",
+                "User-Agent": "OilSkin-App/1.0"
+            },
+            method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            if resp.status in (200, 201, 202):
+                return True, f"Correo enviado exitosamente a {to_email}"
+            else:
+                return False, f"Brevo API respondió con código {resp.status}"
+    except urllib.error.HTTPError as he:
+        try:
+            err_body = he.read().decode('utf-8')
+            err_json = json.loads(err_body)
+            msg = err_json.get('message', err_body)
+        except Exception:
+            msg = str(he)
+        return False, f"Error en Brevo API ({he.code}): {msg}"
+    except Exception as ex:
+        return False, f"Error de conexión con Brevo: {str(ex)}"
+
+
 def _send_via_resend(to_email: str, subject: str, text_content: str, html_content: str, api_key: str, sender: str) -> tuple[bool, str]:
     """
     Envía correo a través de la API REST HTTPS de Resend (Puerto 443).
@@ -71,7 +130,7 @@ def _send_via_smtp(to_email: str, subject: str, text_content: str, html_content:
     mail_use_ssl = config('MAIL_USE_SSL', default=False, cast=bool)
 
     if not mail_username or not mail_password:
-        return False, "Las credenciales de correo (RESEND_API_KEY o MAIL_USERNAME/MAIL_PASSWORD) no están configuradas en el archivo .env"
+        return False, "Las credenciales de correo (BREVO_API_KEY, RESEND_API_KEY o MAIL_USERNAME/MAIL_PASSWORD) no están configuradas en el archivo .env"
 
     try:
         msg = MIMEMultipart('alternative')
@@ -107,9 +166,15 @@ def _send_via_smtp(to_email: str, subject: str, text_content: str, html_content:
 def _dispatch_email(to_email: str, subject: str, text_content: str, html_content: str) -> tuple[bool, str]:
     """
     Enrutador inteligente de envío de correos:
-    1. Si existe RESEND_API_KEY en variables de entorno, envía vía HTTPS (compatible con Render/Producción).
-    2. De lo contrario, intenta por SMTP tradicional (Desarrollo local).
+    1. Si existe BREVO_API_KEY, envía vía Brevo HTTPS (permite enviar a cualquier correo sin dominio propio).
+    2. Si existe RESEND_API_KEY, envía vía Resend HTTPS.
+    3. De lo contrario, intenta por SMTP tradicional (Desarrollo local).
     """
+    brevo_api_key = config('BREVO_API_KEY', default='').strip()
+    if brevo_api_key:
+        mail_sender = config('MAIL_DEFAULT_SENDER', default='tu_correo@gmail.com')
+        return _send_via_brevo(to_email, subject, text_content, html_content, brevo_api_key, mail_sender)
+
     resend_api_key = config('RESEND_API_KEY', default='').strip()
     if resend_api_key:
         mail_sender = config('MAIL_DEFAULT_SENDER', default='OilSkin <onboarding@resend.dev>')
