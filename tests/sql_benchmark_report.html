@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Benchmark de Velocidad SQL - OilSkin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --accent-blue: #38bdf8;
+      --accent-emerald: #34d399;
+      --accent-amber: #fbbf24;
+      --accent-rose: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      padding: 32px 24px;
+      line-height: 1.5;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+    header {
+      margin-bottom: 32px;
+      border-b: 1px solid var(--card-border);
+      padding-bottom: 20px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 9999px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-blue);
+      margin-bottom: 12px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    h1 { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+    p.subtitle { color: var(--text-muted); font-size: 14px; }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+      margin-bottom: 32px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+    }
+    .card-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .card-value {
+      font-size: 32px;
+      font-weight: 800;
+      margin: 8px 0 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .card-desc { font-size: 13px; color: var(--text-muted); }
+    .val-rose { color: var(--accent-rose); }
+    .val-amber { color: var(--accent-amber); }
+    .val-emerald { color: var(--accent-emerald); }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 28px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      margin-bottom: 32px;
+    }
+    th, td {
+      padding: 14px 18px;
+      text-align: left;
+      font-size: 14px;
+    }
+    th {
+      background: rgba(15, 23, 42, 0.6);
+      color: var(--text-muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    tr:not(:last-child) td {
+      border-bottom: 1px solid var(--card-border);
+    }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    .bar-container {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+      height: 10px;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+    }
+
+    .alert-box {
+      background: rgba(244, 63, 94, 0.1);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+    }
+    .alert-box h4 {
+      color: var(--accent-rose);
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .alert-box p {
+      color: #cbd5e1;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="badge">Diagnóstico de Rendimiento</span>
+      <h1>Prueba de Velocidad de Consultas SQL (Aiven MySQL)</h1>
+      <p class="subtitle">Base de datos en la nube Aiven con SSL/TLS &bull; Medición realizada en tiempo real</p>
+    </header>
+
+    <div class="alert-box">
+      <h4>🚨 Hallazgo Crítico de Rendimiento</h4>
+      <p>
+        El <strong>85% del tiempo total</strong> de cada petición SQL no se gasta en la consulta en sí (~200 ms), sino en la <strong>creación y negociación TLS/SSL de la conexión remota</strong> (~1,620 ms) porque cada método abre y cierra una nueva conexión individualmente sin Connection Pooling.
+      </p>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-label">Apertura Conexión (SSL)</div>
+        <div class="card-value val-rose">1,620 ms</div>
+        <div class="card-desc">Handshake TCP + TLS a servidor cloud remoto</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Consulta SQL Pura (Media)</div>
+        <div class="card-value val-emerald">222 ms</div>
+        <div class="card-desc">Tiempo de ejecución con conexión abierta</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Ciclo Completo Actual</div>
+        <div class="card-value val-amber">1,905 ms</div>
+        <div class="card-desc">Conectar + Ejecutar + Desconectar por petición</div>
+      </div>
+    </div>
+
+    <h2 class="section-title">📊 Desglose de Consultas sobre Conexión Activa</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Consulta / Operación</th>
+          <th>Filas</th>
+          <th>Promedio</th>
+          <th>Mínimo</th>
+          <th>Máximo</th>
+          <th style="width: 220px;">Visualización Relativa</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Ping / SELECT 1</strong><br><span style="font-size: 11px; color: var(--text-muted)">Round-trip de red básico</span></td>
+          <td class="mono">1</td>
+          <td class="mono" style="color: var(--accent-emerald)">181.42 ms</td>
+          <td class="mono">150.11 ms</td>
+          <td class="mono">212.75 ms</td>
+          <td>
+            <div class="bar-container">
+              <div class="bar-fill" style="width: 29%; background: var(--accent-emerald);"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Listar Categorías</strong><br><span style="font-size: 11px; color: var(--text-muted)">SELECT * FROM categoria</span></td>
+          <td class="mono">3</td>
+          <td class="mono" style="color: var(--accent-amber)">283.04 ms</td>
+          <td class="mono">160.89 ms</td>
+          <td class="mono">615.76 ms</td>
+          <td>
+            <div class="bar-container">
+              <div class="bar-fill" style="width: 46%; background: var(--accent-amber);"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Listar Productos Activos</strong><br><span style="font-size: 11px; color: var(--text-muted)">SELECT ... FROM producto WHERE activo = 1</span></td>
+          <td class="mono">10</td>
+          <td class="mono" style="color: var(--accent-emerald)">246.26 ms</td>
+          <td class="mono">168.28 ms</td>
+          <td class="mono">415.11 ms</td>
+          <td>
+            <div class="bar-container">
+              <div class="bar-fill" style="width: 40%; background: var(--accent-emerald);"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Obtener Producto por ID</strong><br><span style="font-size: 11px; color: var(--text-muted)">SELECT * FROM producto LIMIT 1</span></td>
+          <td class="mono">1</td>
+          <td class="mono" style="color: var(--accent-emerald)">190.01 ms</td>
+          <td class="mono">160.45 ms</td>
+          <td class="mono">227.93 ms</td>
+          <td>
+            <div class="bar-container">
+              <div class="bar-fill" style="width: 31%; background: var(--accent-emerald);"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Contar Usuarios Registrados</strong><br><span style="font-size: 11px; color: var(--text-muted)">SELECT COUNT(*) FROM usuario</span></td>
+          <td class="mono">1</td>
+          <td class="mono" style="color: var(--accent-emerald)">251.07 ms</td>
+          <td class="mono">167.33 ms</td>
+          <td class="mono">379.86 ms</td>
+          <td>
+            <div class="bar-container">
+              <div class="bar-fill" style="width: 41%; background: var(--accent-emerald);"></div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Últimos Pedidos</strong><br><span style="font-size: 11px; color: var(--text-muted)">SELECT * FROM pedido ORDER BY id_pedido DESC LIMIT 5</span></td>
+          <td class="mono">5</td>
+          <td class="mono" style="color: var(--accent-emerald)">183.58 ms</td>
+          <td class="mono">165.88 ms</td>
+          <td class="mono">226.74 ms</td>
+          <td>
+            <div class="bar-container">
+              <div class="bar-fill" style="width: 30%; background: var(--accent-emerald);"></div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 class="section-title">⏱ Comparativa: Conexión Reutilizada vs Apertura por Consulta</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Modo</th>
+          <th>Tiempo Estimado</th>
+          <th>Impacto en Experiencia de Usuario</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong style="color: var(--accent-rose)">Patrón Actual (Apertura + Cierre por llamada)</strong></td>
+          <td class="mono" style="color: var(--accent-rose)">~1,900 ms (1.9 seg)</td>
+          <td>Sensación lenta al cargar catálogos y login (1 a 2 segundos por vista).</td>
+        </tr>
+        <tr>
+          <td><strong style="color: var(--accent-emerald)">Con Pool de Conexiones Activo (Reutilización)</strong></td>
+          <td class="mono" style="color: var(--accent-emerald)">~180 - 250 ms</td>
+          <td>Hasta <strong>8x a 10x más rápido</strong>, respuesta casi instantánea.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
