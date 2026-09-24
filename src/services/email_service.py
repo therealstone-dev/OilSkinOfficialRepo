@@ -1,13 +1,66 @@
 import smtplib
 import os
+import json
+import urllib.request
+import urllib.error
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from decouple import config
 
-def send_password_reset_email(to_email: str, reset_url: str, user_name: str = "Usuario") -> tuple[bool, str]:
+
+def _send_via_resend(to_email: str, subject: str, text_content: str, html_content: str, api_key: str, sender: str) -> tuple[bool, str]:
     """
-    Envía un correo electrónico con diseño HTML responsivo para el restablecimiento de contraseña.
-    Lee la configuración SMTP desde variables de entorno (.env).
+    Envía correo a través de la API REST HTTPS de Resend (Puerto 443).
+    No requiere puertos SMTP y funciona en Render, AWS, Vercel, etc.
+    """
+    try:
+        url = "https://api.resend.com/emails"
+        
+        # Formatear remitente válido
+        formatted_sender = sender
+        if "@" not in formatted_sender:
+            formatted_sender = "OilSkin <onboarding@resend.dev>"
+        elif "<" not in formatted_sender:
+            formatted_sender = f"OilSkin <{formatted_sender}>"
+
+        payload = {
+            "from": formatted_sender,
+            "to": [to_email],
+            "subject": subject,
+            "html": html_content,
+            "text": text_content
+        }
+        data = json.dumps(payload).encode('utf-8')
+        req = urllib.request.Request(
+            url,
+            data=data,
+            headers={
+                "Authorization": f"Bearer {api_key.strip()}",
+                "Content-Type": "application/json",
+                "User-Agent": "OilSkin-App/1.0"
+            },
+            method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            if resp.status in (200, 201):
+                return True, f"Correo enviado exitosamente a {to_email}"
+            else:
+                return False, f"Resend API respondió con código {resp.status}"
+    except urllib.error.HTTPError as he:
+        try:
+            err_body = he.read().decode('utf-8')
+            err_json = json.loads(err_body)
+            msg = err_json.get('message', err_body)
+        except Exception:
+            msg = str(he)
+        return False, f"Error en Resend API ({he.code}): {msg}"
+    except Exception as ex:
+        return False, f"Error de conexión con Resend: {str(ex)}"
+
+
+def _send_via_smtp(to_email: str, subject: str, text_content: str, html_content: str) -> tuple[bool, str]:
+    """
+    Envía correo a través de conexión SMTP tradicional (para desarrollo local).
     """
     mail_server = config('MAIL_SERVER', default='smtp.gmail.com')
     mail_port = config('MAIL_PORT', default=587, cast=int)
@@ -18,11 +71,59 @@ def send_password_reset_email(to_email: str, reset_url: str, user_name: str = "U
     mail_use_ssl = config('MAIL_USE_SSL', default=False, cast=bool)
 
     if not mail_username or not mail_password:
-        return False, "Las credenciales de correo (MAIL_USERNAME / MAIL_PASSWORD) no están configuradas en el archivo .env"
+        return False, "Las credenciales de correo (RESEND_API_KEY o MAIL_USERNAME/MAIL_PASSWORD) no están configuradas en el archivo .env"
 
+    try:
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = subject
+        msg['From'] = mail_sender
+        msg['To'] = to_email
+
+        part1 = MIMEText(text_content, 'plain', 'utf-8')
+        part2 = MIMEText(html_content, 'html', 'utf-8')
+
+        msg.attach(part1)
+        msg.attach(part2)
+
+        if mail_use_ssl:
+            with smtplib.SMTP_SSL(mail_server, mail_port, timeout=15) as server:
+                server.login(mail_username, mail_password)
+                server.sendmail(mail_sender, [to_email], msg.as_string())
+        else:
+            with smtplib.SMTP(mail_server, mail_port, timeout=15) as server:
+                if mail_use_tls:
+                    server.starttls()
+                server.login(mail_username, mail_password)
+                server.sendmail(mail_sender, [to_email], msg.as_string())
+
+        return True, f"Correo enviado exitosamente a {to_email}"
+
+    except smtplib.SMTPAuthenticationError:
+        return False, "Error de autenticación SMTP: Verifica tu usuario y contraseña (o contraseña de aplicación si usas Gmail) en el archivo .env"
+    except Exception as ex:
+        return False, f"Error al enviar el correo: {str(ex)}"
+
+
+def _dispatch_email(to_email: str, subject: str, text_content: str, html_content: str) -> tuple[bool, str]:
+    """
+    Enrutador inteligente de envío de correos:
+    1. Si existe RESEND_API_KEY en variables de entorno, envía vía HTTPS (compatible con Render/Producción).
+    2. De lo contrario, intenta por SMTP tradicional (Desarrollo local).
+    """
+    resend_api_key = config('RESEND_API_KEY', default='').strip()
+    if resend_api_key:
+        mail_sender = config('MAIL_DEFAULT_SENDER', default='OilSkin <onboarding@resend.dev>')
+        return _send_via_resend(to_email, subject, text_content, html_content, resend_api_key, mail_sender)
+    
+    return _send_via_smtp(to_email, subject, text_content, html_content)
+
+
+def send_password_reset_email(to_email: str, reset_url: str, user_name: str = "Usuario") -> tuple[bool, str]:
+    """
+    Envía un correo electrónico con diseño HTML responsivo para el restablecimiento de contraseña.
+    """
     subject = "Restablece tu contraseña - OilSkin Cosmética Natural"
 
-    # Cuerpo en texto plano (fallback)
     text_content = f"""Hola {user_name},
 
 Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en OilSkin.
@@ -36,7 +137,6 @@ Atentamente,
 El equipo de OilSkin Cosmética Natural
 """
 
-    # Cuerpo en HTML con diseño profesional y responsivo
     html_content = f"""<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -119,35 +219,7 @@ El equipo de OilSkin Cosmética Natural
 </html>
 """
 
-    try:
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = subject
-        msg['From'] = mail_sender
-        msg['To'] = to_email
-
-        part1 = MIMEText(text_content, 'plain', 'utf-8')
-        part2 = MIMEText(html_content, 'html', 'utf-8')
-
-        msg.attach(part1)
-        msg.attach(part2)
-
-        if mail_use_ssl:
-            with smtplib.SMTP_SSL(mail_server, mail_port, timeout=15) as server:
-                server.login(mail_username, mail_password)
-                server.sendmail(mail_sender, [to_email], msg.as_string())
-        else:
-            with smtplib.SMTP(mail_server, mail_port, timeout=15) as server:
-                if mail_use_tls:
-                    server.starttls()
-                server.login(mail_username, mail_password)
-                server.sendmail(mail_sender, [to_email], msg.as_string())
-
-        return True, f"Correo de restablecimiento enviado exitosamente a {to_email}"
-
-    except smtplib.SMTPAuthenticationError:
-        return False, "Error de autenticación SMTP: Verifica tu usuario y contraseña (o contraseña de aplicación si usas Gmail) en el archivo .env"
-    except Exception as ex:
-        return False, f"Error al enviar el correo: {str(ex)}"
+    return _dispatch_email(to_email, subject, text_content, html_content)
 
 
 def send_password_reset_otp(to_email: str, otp_code: str, user_name: str = "Cliente") -> tuple[bool, str]:
@@ -155,17 +227,6 @@ def send_password_reset_otp(to_email: str, otp_code: str, user_name: str = "Clie
     Envía un correo electrónico con un código numérico OTP de 6 dígitos para recuperación de contraseña.
     Diseñado con estética premium OilSkin (Dark Mode + Acentos Dorados).
     """
-    mail_server = config('MAIL_SERVER', default='smtp.gmail.com')
-    mail_port = config('MAIL_PORT', default=587, cast=int)
-    mail_username = config('MAIL_USERNAME', default='')
-    mail_password = config('MAIL_PASSWORD', default='')
-    mail_sender = config('MAIL_DEFAULT_SENDER', default=mail_username if mail_username else 'no-reply@oilskin.com')
-    mail_use_tls = config('MAIL_USE_TLS', default=True, cast=bool)
-    mail_use_ssl = config('MAIL_USE_SSL', default=False, cast=bool)
-
-    if not mail_username or not mail_password:
-        return False, "Las credenciales de correo (MAIL_USERNAME / MAIL_PASSWORD) no están configuradas en el archivo .env"
-
     subject = f"{otp_code} es tu código de recuperación - OilSkin"
 
     text_content = f"""Hola {user_name},
@@ -256,32 +317,5 @@ El equipo de OilSkin Cosmética Natural
 </html>
 """
 
-    try:
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = subject
-        msg['From'] = mail_sender
-        msg['To'] = to_email
+    return _dispatch_email(to_email, subject, text_content, html_content)
 
-        part1 = MIMEText(text_content, 'plain', 'utf-8')
-        part2 = MIMEText(html_content, 'html', 'utf-8')
-
-        msg.attach(part1)
-        msg.attach(part2)
-
-        if mail_use_ssl:
-            with smtplib.SMTP_SSL(mail_server, mail_port, timeout=15) as server:
-                server.login(mail_username, mail_password)
-                server.sendmail(mail_sender, [to_email], msg.as_string())
-        else:
-            with smtplib.SMTP(mail_server, mail_port, timeout=15) as server:
-                if mail_use_tls:
-                    server.starttls()
-                server.login(mail_username, mail_password)
-                server.sendmail(mail_sender, [to_email], msg.as_string())
-
-        return True, f"Código de verificación enviado exitosamente a {to_email}"
-
-    except smtplib.SMTPAuthenticationError:
-        return False, "Error de autenticación SMTP: Verifica tu usuario y contraseña de aplicación en el archivo .env"
-    except Exception as ex:
-        return False, f"Error al enviar el correo: {str(ex)}"
